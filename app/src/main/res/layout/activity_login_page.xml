@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.LoginPage">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/line1"
+        android:padding="18dp"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/login_pop_btn"
+            android:layout_width="match_parent"
+            android:layout_marginTop="100dp"
+            app:cardCornerRadius="20dp"
+            style="@style/Widget.Material3.CardView.Filled"
+            android:layout_marginStart="16dp"
+            android:focusable="true"
+            android:clickable="true"
+            app:cardBackgroundColor="#CE4285F4"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            android:layout_weight="1"
+            android:layout_height="380dp">
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="bottom|center"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <com.airbnb.lottie.LottieAnimationView
+
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/hello" />
+                <TextView
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineLarge"
+                    android:text="Login"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="Welcome Back"
+                    android:layout_margin="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+
+
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/signin_pop_btn"
+            android:layout_width="match_parent"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="20dp"
+            android:layout_marginStart="8dp"
+            android:focusable="true"
+            android:clickable="true"
+            android:layout_marginEnd="16dp"
+            app:cardBackgroundColor="#CEDB4437"
+            android:layout_marginBottom="16dp"
+            android:layout_weight="1"
+            android:layout_height="380dp">
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="bottom|center"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_height="match_parent">
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/imgload"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/newanim" />
+                <TextView
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineLarge"
+                    android:text="Sign In"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="Create new account."
+                    android:layout_margin="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_above="@id/line1"
+        android:visibility="invisible"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_icon" />
+
+    <TextView
+        android:id="@+id/b"
+     android:layout_below="@id/line1"
+        android:text="Manage Spendings together with roomies"
+        android:layout_width="match_parent"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:layout_height="wrap_content"/>
+
+
+</RelativeLayout>

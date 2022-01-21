@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?attr/actionBarSize">
+
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tablayout"
+            android:layout_width="match_parent"
+            android:background="#00000000"
+            android:layout_height="wrap_content"
+            android:hapticFeedbackEnabled="true"
+            style="@style/Widget.Material3.TabLayout"
+            app:shapeAppearance="?attr/shapeAppearanceSmallComponent"
+            app:tabGravity="start"
+            app:tabIndicatorAnimationMode="elastic"
+            app:tabMode="scrollable">
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/mdc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tablayout"
+            android:minHeight="50dp"
+            style="@style/Widget.Material3.CardView.Outlined"
+            android:layout_marginTop="2dp"
+            app:strokeColor="@color/colorPrimary"
+            app:strokeWidth="2dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#2A4285F4">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/alert_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="3dp"
+                    android:layout_weight="3"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorPrimary" />
+
+                <Button
+                    android:id="@+id/alert_cancel"
+                    style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    app:icon="@drawable/ic_outline_close" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/id_text"
+            android:layout_below="@id/mdc" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/id_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:contextClickable="true"
+            android:textIsSelectable="true"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/line1"
+        android:layout_width="match_parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:layout_marginStart="8dp"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            app:boxCornerRadiusBottomStart="30dp"
+            app:boxCornerRadiusBottomEnd="30dp"
+            app:boxCornerRadiusTopEnd="30dp"
+            app:boxCornerRadiusTopStart="30dp"
+            app:shapeAppearance="@style/ShapeAppearance.Material3.SmallComponent"
+            android:layout_weight="4"
+            android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/msg_t"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/send_b"
+            app:icon="@drawable/ic_baseline_send"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_margin="8dp"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottombar"
+        style="@style/Widget.Material3.BottomAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:fabAlignmentMode="end"
+
+        app:fabAnimationMode="slide"
+        app:menu="@menu/bottomappbar"
+        app:navigationContentDescription="Logout"
+        app:shapeAppearance="?attr/shapeAppearanceSmallComponent"
+
+        />
+
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingbtn"
+        style="@style/Widget.Material3.FloatingActionButton.Tertiary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:src="@drawable/ic_outline_add"
+
+        app:layout_anchor="@id/bottombar" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

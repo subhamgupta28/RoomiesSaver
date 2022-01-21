@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.RoomDetails">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/detail_recycler"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="match_parent"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:text="Roomies"
+        android:layout_margin="12dp"
+        android:id="@+id/text"
+        android:layout_alignParentTop="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_height="wrap_content"/>
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chips"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_below="@id/text"
+        style="@style/Widget.Material3.Chip.Filter.Elevated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="12dp"
+        android:id="@+id/m"
+        style="@style/Widget.Material3.CardView.Filled"
+        android:layout_below="@id/chips"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_margin="8dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/r_name"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/r_id"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/c_date"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/limit"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:layout_width="match_parent"
+                    android:layout_weight="5"
+                    android:layout_gravity="center"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/limit_btn"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/ic_create"
+                    style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:text="leave room"
+                android:id="@+id/leaveroom"
+                android:layout_gravity="end"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:id="@+id/shareid"
+        android:layout_below="@id/m"
+        android:text="Share Rood Id"
+        app:icon="@drawable/ic_baseline_share"
+        style="@style/Widget.Material3.Button"
+        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:layout_below="@id/shareid"
+        android:layout_marginTop="12dp"
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:layout_width="match_parent"
+            android:text="Dark Mode"
+            android:id="@+id/dark_mode_switch"
+            android:layout_height="wrap_content"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:layout_width="match_parent"
+            android:text="Show this month data"
+            android:id="@+id/this_month_data"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</RelativeLayout>

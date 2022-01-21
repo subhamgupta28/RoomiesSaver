@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.RationFragment">
+
+    <Button
+        android:id="@+id/new_ration"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        style="@style/Widget.Material3.Button"
+        android:layout_marginEnd="12dp"
+        android:text="Add Ration" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/emptytext"
+        android:layout_centerInParent="true"
+        android:layout_height="wrap_content">
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleX="1.4"
+            android:scaleY="1.4"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/emptybox" />
+        <TextView
+            android:layout_marginTop="22dp"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+
+            android:text="Empty! Add ration by clicking on + button"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_marginTop="12dp"
+        android:layout_below="@id/new_ration"
+        android:id="@+id/ration_swipe"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/ration_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+
+
+</RelativeLayout>

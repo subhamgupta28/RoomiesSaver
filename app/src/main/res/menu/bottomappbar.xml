@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_vertical|start"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Logout"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_person_search"
+        android:title="Search"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/info"
+        android:icon="@drawable/ic_outline_info"
+        android:title="Info"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/issue"
+        android:icon="@drawable/ic_outline_back_hand"
+        android:title="Info"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/alert"
+        android:icon="@drawable/ic_outline_alert"
+        android:title="Announcement"
+        app:showAsAction="always" />
+
+
+</menu>
