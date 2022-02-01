@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.HomeFragment">
 
     <RelativeLayout
@@ -11,134 +11,145 @@
         android:layout_height="match_parent">
 
 
-    <androidx.cardview.widget.CardView
-        android:orientation="vertical"
-        android:id="@+id/line1"
-        android:layout_margin="14dp"
-        android:padding="8dp"
-        app:cardCornerRadius="20dp"
-        style="@style/Widget.Material3.CardView.Filled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/line1"
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="14dp"
             android:orientation="vertical"
-            android:layout_height="wrap_content">
+            android:padding="8dp"
+            app:cardCornerRadius="16dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:text="This Month's Spendings"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <TextView
-                        android:id="@+id/total_spends"
-                        android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
-                        android:textColor="#0F9D58"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <TextView
-                        android:id="@+id/updated_on"
-                        android:text="Updated on x"
-                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-                <app.futured.donut.DonutProgressView
-                    android:id="@+id/donut_view"
-                    android:layout_width="100dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:donut_animateChanges="true"
-                    app:donut_gapWidth="100"
-                    app:donut_strokeWidth="12dp"/>
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="This Month's Spendings"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                        <TextView
+                            android:id="@+id/total_spends"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+                            android:textColor="#0F9D58" />
+
+                        <TextView
+                            android:id="@+id/updated_on"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Updated on x"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+                    </LinearLayout>
+
+                    <app.futured.donut.DonutProgressView
+                        android:id="@+id/donut_view"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        app:donut_animateChanges="true"
+                        app:donut_gapWidth="100"
+                        app:donut_strokeWidth="12dp" />
+
+                </LinearLayout>
+
+                <com.majorik.sparklinelibrary.SparkLineLayout
+                    android:id="@+id/spark"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_margin="8dp"
+                    android:visibility="gone"
+                    app:s_gradient_line="true"
+                    app:s_line_color="#fed32c"
+                    app:s_line_second_color="@color/colorPrimary"
+                    app:s_line_thickness="4dp"
+                    app:s_marker_background_color="#fed32c"
+                    app:s_marker_width="8dp" />
+
 
             </LinearLayout>
 
-            <com.majorik.sparklinelibrary.SparkLineLayout
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:id="@+id/spark"
-                android:visibility="gone"
-                android:layout_margin="8dp"
-                app:s_line_color="#fed32c"
-                android:layout_alignParentBottom="true"
-                app:s_line_thickness="4dp"
-                app:s_line_second_color="@color/colorPrimary"
-                app:s_gradient_line="true"
-                app:s_marker_background_color="#fed32c"
-                app:s_marker_width="8dp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/k"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/line1"
+            android:layout_marginStart="12dp"
+            android:text="All Person"
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/p_recycle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/k"
+            android:padding="4dp" />
+
+        <LinearLayout
+            android:id="@+id/kt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/p_recycle"
+            android:orientation="horizontal">
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:text="Today's Purchase"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+            <TextView
+                android:id="@+id/today_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="18dp"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textColor="#0F9D58" />
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_recycle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/kt"
+            android:layout_alignParentBottom="true"
+            android:padding="4dp" />
 
-    <TextView
-        android:id="@+id/k"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/line1"
-        android:layout_marginStart="12dp"
-        android:text="All Person"
-        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/p_recycle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-     android:layout_below="@id/k"
-        android:padding="4dp" />
-
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:id="@+id/kt"
-       android:orientation="horizontal"
-       android:layout_below="@id/p_recycle"
-       android:layout_height="wrap_content"
-       >
-       <TextView
-
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_marginStart="12dp"
-           android:layout_weight="1"
-           android:text="Today's Purchase"
-           android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
-       <TextView
-            android:id="@+id/today_amount"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-
-           android:layout_marginEnd="18dp"
-           android:textColor="#0F9D58"
-           android:layout_marginStart="12dp"
-           android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
-   </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/item_recycle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/kt"
-        android:layout_alignParentBottom="true"
-        android:padding="4dp" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:textAlignment="center"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/no_text"
-        android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:text="No new purchase this month"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/no_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+          android:layout_centerInParent="true"
+            android:layout_marginBottom="12dp"
+            android:text="No new purchase this month"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:visibility="gone" />
     </RelativeLayout>
+
 </androidx.core.widget.NestedScrollView>

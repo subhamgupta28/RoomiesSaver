@@ -87,14 +87,6 @@
             </androidx.recyclerview.widget.RecyclerView>
         </LinearLayout>
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/animationView"
-            android:layout_width="wrap_content"
-            android:visibility="gone"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/empty_cart" />
+
     </RelativeLayout>
 </androidx.core.widget.NestedScrollView>

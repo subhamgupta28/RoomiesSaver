@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.gms.tasks.Task
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
@@ -28,9 +29,7 @@ import com.subhamgupta.roomiessaver.adapters.SummaryAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.ZoneOffset
+import java.time.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.HashMap
@@ -114,10 +113,15 @@ class Summary : Fragment() {
 
     private fun setData(ifMonth: Boolean) {
         data = ArrayList()
-        var count = 0
         val sumMap = HashMap<String, Int>()
         val query: Query = db.collection(key)
-        query.orderBy("DATE", Query.Direction.DESCENDING)
+        var sdom = 0L
+        if (ifMonth){
+            sdom = LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault())
+                .toInstant().epochSecond
+        }
+        query.whereGreaterThanOrEqualTo("TIME_STAMP", sdom*1000)
+            .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
                 val sum = AtomicLong()
                 data.clear()
@@ -126,44 +130,22 @@ class Summary : Fragment() {
                     emptyBox.visibility = View.INVISIBLE
                     try {
                         for (qds in value) {
-                            val k: MutableMap<String, Any?> = HashMap()
-                            k["ITEM_BOUGHT"] = qds["ITEM_BOUGHT"]
-                            k["DATE"] = qds["DATE"]
-
-                            k["TIME"] = qds["TIME"]
-                            fun sMap() {
-                                val by = qds["BOUGHT_BY"].toString()
-                                if (sumMap.containsKey(by))
-                                    sumMap[by] =
-                                        sumMap[by]!! + qds["AMOUNT_PAID"].toString().toInt()
-                                else
-                                    sumMap[by] = qds["AMOUNT_PAID"].toString().toInt()
-                            }
-                            k["AMOUNT_PAID"] = qds["AMOUNT_PAID"]
-                            k["BOUGHT_BY"] = qds["BOUGHT_BY"]
-                            if (ifMonth) {
-                                if (isCurrentMonth(qds["DATE"].toString())) {
-                                    sMap()
-                                    count++
-                                    sum.addAndGet((qds["AMOUNT_PAID"] as Long?)!!)
-                                    data.add(k)
-                                }
-                            } else {
-                                sMap()
-                                sum.addAndGet((qds["AMOUNT_PAID"] as Long?)!!)
-                                data.add(k)
-                            }
-
+                            val k = qds.data as MutableMap<String, Any>
+                            val by = qds["BOUGHT_BY"].toString()
+                            if (sumMap.containsKey(by))
+                                sumMap[by] =
+                                    sumMap[by]!! + qds["AMOUNT_PAID"].toString().toInt()
+                            else
+                                sumMap[by] = qds["AMOUNT_PAID"].toString().toInt()
+                            sum.addAndGet((qds["AMOUNT_PAID"] as Long?)!!)
+                            data.add(k)
                         }
-                        Log.e("COUNT", "$count ${data.size}")
                         val json = JSONObject(sumMap.toMap()).toString()
                         SettingsStorage(requireContext()).json = json
                         "Total Spendings ₹$sum".also { total_spend.text = it }
-                        val g =
-                            data.sortedWith(compareBy { it?.get("DATE").toString() }) as MutableList
-                        g.reverse()
-                        testAdapter = SummaryAdapter(g, requireContext())
+                        testAdapter = SummaryAdapter( requireContext())
                         recyclerView.adapter = testAdapter
+                        testAdapter.setDataTo(data)
                     } catch (e: Exception) {
                         Log.e("ERROR", e.message + "")
                     }
@@ -172,14 +154,6 @@ class Summary : Fragment() {
             }
     }
 
-    private fun isCurrentMonth(date: String): Boolean {
-
-        val gDate = SimpleDateFormat(Contenst.DATE_STRING, Locale.getDefault()).parse(date)
-        val timeZone = ZoneOffset.UTC
-        val localDate = LocalDateTime.ofInstant(gDate.toInstant(), timeZone)
-        val currentMonth = YearMonth.now(timeZone)
-        return currentMonth.equals(YearMonth.from(localDate))
-    }
 
 
 }

@@ -18,47 +18,37 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.ItemsAdapter.ItemsHolder
 import com.subhamgupta.roomiessaver.models.Detail
-import com.subhamgupta.roomiessaver.onClickPerson
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import com.subhamgupta.roomiessaver.utility.TimeAgo
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.ZoneOffset
 import java.util.*
 
 
 class ItemsAdapter(
     options: FirestoreRecyclerOptions<Detail?>,
     var context: Context,
-    onClickPerson: onClickPerson,
-    var sumMap: MutableMap<Int, Int>,
-    var pos: Int
+    var ref: CollectionReference,
 ) : FirestoreRecyclerAdapter<Detail, ItemsHolder>(options) {
-    var timeAgo: TimeAgo
     var settingsStorage: SettingsStorage
-    var onClickPerson: onClickPerson
-    var sum: Long = 0
-    var ref: FirebaseFirestore
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemsHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.items, parent, false)
-        sum = 0L
         return ItemsHolder(view)
     }
 
     override fun onBindViewHolder(holder: ItemsHolder, position: Int, model: Detail) {
-
-        if (isCurrentMonth(model.DATE.toString())) {
             holder.itemView.visibility = View.VISIBLE
-
             holder.item_name.text = model.ITEM_BOUGHT
             ("₹${model.AMOUNT_PAID}").also { holder.amount_paid.text = it }
+            holder.itemView.setOnClickListener {
+                infoCard(holder.edit.context, model)
+            }
             try {
                 val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
                 var t = ""
@@ -79,8 +69,7 @@ class ItemsAdapter(
                 var tim = 0L
                 if (ch.isNotEmpty() && (ch[0] in '0'..'9'))
                     tim = (ch[0] + "" + ch[1]).replace(" ", "").toLong()
-                val timestamp =
-                    Timestamp(SimpleDateFormat(DATE_STRING, Locale.getDefault()).parse(model.DATE).time)
+                val timestamp =  Timestamp(model.TIME_STAMP!!)
                 if (ch[2] == 'h' || ch[3] == 'h')
                     tim = 10
                 val uid = settingsStorage.uuid
@@ -119,25 +108,24 @@ class ItemsAdapter(
             } catch (e: Exception) {
 
             }
-            sum += model.AMOUNT_PAID
-            if (sumMap[pos] != null)
-                sumMap[pos] = sumMap[pos]!!.plus(sum.toInt())
-            else
-                sumMap[pos] = sum.toInt()
-            onClickPerson.sendSumMap(sumMap)
-        } else
-            holder.itemView.visibility = View.GONE
+
     }
 
-    fun isCurrentMonth(date: String): Boolean {
-
-        val gDate = SimpleDateFormat(DATE_STRING, Locale.getDefault()).parse(date)
-        val timeZone = ZoneOffset.UTC
-        val localDate = LocalDateTime.ofInstant(gDate.toInstant(), timeZone)
-        val currentMonth = YearMonth.now(timeZone)
-        return currentMonth.equals(YearMonth.from(localDate))
+    private fun infoCard(context: Context, model: Detail){
+        val mcard = MaterialAlertDialogBuilder(context)
+        val view = LayoutInflater.from(context).inflate(R.layout.item_info, null)
+        val boughtBy = view.findViewById(R.id.ii_bought_by) as TextView
+        val item = view.findViewById(R.id.ii_item_name) as TextView
+        val price = view.findViewById(R.id.ii_price) as TextView
+        val date = view.findViewById(R.id.ii_date) as TextView
+        boughtBy.text = model.BOUGHT_BY
+        item.text = model.ITEM_BOUGHT
+        price.text = model.AMOUNT_PAID.toString()
+        date.text = model.TIME
+        mcard.setView(view)
+        mcard.background = ColorDrawable(Color.TRANSPARENT)
+        mcard.show()
     }
-
     private fun editPopup(context: Context, model: Detail) {
         val mcard = MaterialAlertDialogBuilder(context)
         val view = LayoutInflater.from(context).inflate(R.layout.popup, null)
@@ -152,6 +140,8 @@ class ItemsAdapter(
             var item_name = item.text.toString()
             var amount_paid = amount.text.toString()
 //            Log.e("MSG","${model.UUID}")
+            ref.document(model.TIME_STAMP.toString()).update("ITEM_BOUGHT", item_name)
+            ref.document(model.TIME_STAMP.toString()).update("AMOUNT_PAID", amount_paid.toInt())
             Toast.makeText(context, "Saved", Toast.LENGTH_LONG).show()
         }
         mcard.setView(view)
@@ -181,9 +171,6 @@ class ItemsAdapter(
     }
 
     init {
-        timeAgo = TimeAgo()
         settingsStorage = SettingsStorage(context)
-        this.onClickPerson = onClickPerson
-        ref = FirebaseFirestore.getInstance()
     }
 }

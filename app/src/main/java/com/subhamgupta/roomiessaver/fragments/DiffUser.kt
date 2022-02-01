@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.PersonAdapter
 import com.subhamgupta.roomiessaver.adapters.RoomAdapter
+import com.subhamgupta.roomiessaver.models.PersonModel
 import com.subhamgupta.roomiessaver.models.RoomModel
 import com.subhamgupta.roomiessaver.onClickPerson
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
@@ -41,7 +42,6 @@ import kotlin.math.abs
 class DiffUser : Fragment(), onClickPerson {
     lateinit var ref: DatabaseReference
     lateinit var user_ref: DatabaseReference
-    lateinit var personAdapter: PersonAdapter
     lateinit private var viewPager2: ViewPager2
     lateinit var list: List<String>
     lateinit var issue_name: TextInputEditText
@@ -99,75 +99,31 @@ class DiffUser : Fragment(), onClickPerson {
                 for (ds in task.result?.children!!) map[ds.key] = ds.value.toString()
                 key = map["ROOM_ID"].toString()
                 user_name = map["USER_NAME"].toString()
-                setData()
+                setTestData()
                 showPerson()
             }
         }
     }
+    fun setTestData(){
+        val query = ref.child("ROOM").child(key).child("ROOM_MATES").limitToFirst(100)
+        val options = FirebaseRecyclerOptions.Builder<PersonModel>()
+            .setQuery(query, PersonModel::class.java)
+            .build()
 
-    fun setData() {
-        room_mates = ArrayList()
-        ref.child("ROOM").child(key).child("ROOM_MATES")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    try {
-                        user_key = HashMap()
-                        for (ds in snapshot.children) {
-                            user_key[(ds.key)!!.toInt()] =
-                                (ds.value as Map<String?, Any?>?)!!["USER_NAME"]
-                        }
-                        val list = snapshot.value as List<Map<String, Any>>?
-                        val uid: MutableList<Map<String, String>> = ArrayList()
-                        for (i in list!!.indices) {
-                            val g: MutableMap<String, String> = HashMap()
-                            g["UUID"] = list[i]["UUID"].toString()
-                            g["USER_NAME"] = list[i]["USER_NAME"].toString()
-                            room_mates.add(list[i]["USER_NAME"].toString())
-                            uid.add(g)
-                        }
-                        if (uid.size != 0) {
-                            personAdapter = PersonAdapter(
-                                uid,
-                                activity!!.applicationContext,
-                                db,
-                                ref,
-                                key,
-                                this@DiffUser
-                            )
-                            viewPager2.adapter = personAdapter
-                            viewPager2.clipToPadding = false
-                            viewPager2.clipChildren = false
-                            viewPager2.offscreenPageLimit = 10
-                            val transformer = CompositePageTransformer()
-                            transformer.addTransformer { page: View, position: Float ->
-                                val a = 1 - abs(position)
-                                page.scaleY = 0.85f + a * 0.15f
-                            }
-                            viewPager2.setPageTransformer(transformer)
-                            Handler().postDelayed({
-                                var t = 0
-                                for (i in 0 until user_key.size) {
-                                    val g = user_key.get(i).toString()
-                                    if (g == user_name) {
-                                        t = i
-                                        break
-                                    }
-                                }
-                                viewPager2.currentItem = t
-                            }, 200)
-                            indicator()
-
-                        }
-                    } catch (e: Exception) {
-
-                    }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) {}
-            })
+        val personTest = PersonAdapter(options, requireContext(), reference, key)
+        viewPager2.adapter = personTest
+        personTest.startListening()
+        viewPager2.clipToPadding = false
+        viewPager2.clipChildren = false
+        viewPager2.offscreenPageLimit = 10
+        val transformer = CompositePageTransformer()
+        transformer.addTransformer { page: View, position: Float ->
+            val a = 1 - abs(position)
+            page.scaleY = 0.85f + a * 0.15f
+        }
+        viewPager2.setPageTransformer(transformer)
+        indicator()
     }
-
     fun recP(position: Int, boolean: Boolean){
         val temp = recyclerView[position].findViewById<MaterialCardView>(R.id.materialcard)
         if (boolean){
@@ -233,18 +189,18 @@ class DiffUser : Fragment(), onClickPerson {
     }
 
     override fun onIssue() {
-        materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
-        val contactPopupView = layoutInflater.inflate(R.layout.issue_popup, null)
-        issue_name = contactPopupView.findViewById(R.id.issue)
-        issue_person = contactPopupView.findViewById(R.id.issue_person)
-        issue_btn = contactPopupView.findViewById(R.id.issue_btn)
-        issue_btn.setOnClickListener { createIssue() }
-        val adapter =
-            activity?.let { ArrayAdapter(requireContext(), R.layout.list_popup_item, room_mates) }
-        issue_person.setAdapter(adapter)
-        materialAlertDialogBuilder.setView(contactPopupView)
-        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-        materialAlertDialogBuilder.show()
+//        materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
+//        val contactPopupView = layoutInflater.inflate(R.layout.issue_popup, null)
+//        issue_name = contactPopupView.findViewById(R.id.issue)
+//        issue_person = contactPopupView.findViewById(R.id.issue_person)
+//        issue_btn = contactPopupView.findViewById(R.id.issue_btn)
+//        issue_btn.setOnClickListener { createIssue() }
+//        val adapter =
+//            activity?.let { ArrayAdapter(requireContext(), R.layout.list_popup_item, room_mates) }
+//        issue_person.setAdapter(adapter)
+//        materialAlertDialogBuilder.setView(contactPopupView)
+//        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+//        materialAlertDialogBuilder.show()
     }
 
     override fun sendSumMap(sumMap: MutableMap<Int, Int>) {
@@ -253,23 +209,7 @@ class DiffUser : Fragment(), onClickPerson {
 
     override fun sendSum(sum: Int) {}
     override fun openEdit() {
-        editPopup()
-    }
-
-    fun editPopup() {
-        var mcard = MaterialAlertDialogBuilder(requireContext())
-        var view = View.inflate(context, R.layout.popup, null)
-        var item = view.findViewById(R.id.item_bought) as TextInputEditText
-        var amount = view.findViewById(R.id.amount_paid) as TextInputEditText
-        val save = view.findViewById(R.id.save_btn) as Button
-        var item_name = item.text.toString()
-        var amount_paid = amount.text.toString().toInt()
-        save.setOnClickListener {
-
-        }
-        mcard.setView(view)
-        mcard.background = ColorDrawable(Color.TRANSPARENT)
-        mcard.show()
+       // editPopup()
     }
 
     fun createIssue() {

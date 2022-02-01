@@ -1,82 +1,77 @@
 package com.subhamgupta.roomiessaver.adapters
 
 import android.content.Context
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.airbnb.lottie.LottieAnimationView
+import com.firebase.ui.database.FirebaseRecyclerAdapter
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.android.gms.tasks.Task
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseReference
+import com.google.android.material.card.MaterialCardView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.subhamgupta.roomiessaver.Contenst
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.adapters.PersonAdapter.PersonHolder
+import com.subhamgupta.roomiessaver.adapters.ItemsAdapter
 import com.subhamgupta.roomiessaver.models.Detail
-import com.subhamgupta.roomiessaver.onClickPerson
-import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.HashMap
+import com.subhamgupta.roomiessaver.models.PersonModel
+import java.time.LocalDate
+import java.time.ZoneId
 
 class PersonAdapter(
-    var uuids: List<Map<String, String>>,
+    options: FirebaseRecyclerOptions<PersonModel>,
     var context: Context,
     var reference: FirebaseFirestore,
-    var ref: DatabaseReference,
-    var key: String,
-    var onClickPerson: onClickPerson
-) : RecyclerView.Adapter<PersonHolder>(), onClickPerson {
-    var sum = 0
+    var key: String
+): FirebaseRecyclerAdapter<PersonModel, PersonAdapter.PersonHolder>(options) {
     var itemsAdapter: ItemsAdapter? = null
+    lateinit var options: FirestoreRecyclerOptions<Detail?>
+    inner class RoomHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var label: TextView
 
+        var materialCardView: MaterialCardView
 
-    @Volatile
-    var sumMap: MutableMap<Int, Int>
+        init {
+            label = itemView.findViewById(R.id.labeled)
+            materialCardView = itemView.findViewById(R.id.materialcard)
+
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonHolder {
+
         val view = LayoutInflater.from(parent.context).inflate(R.layout.person_items, parent, false)
         return PersonHolder(view)
     }
-
-    override fun onBindViewHolder(holder: PersonHolder, position: Int) {
-        holder.user_name.text = uuids[position]["USER_NAME"].toString()
-        holder.price_text.text = sum.toString()
+    override fun onBindViewHolder(holder: PersonHolder, position: Int, model: PersonModel) {
+        holder.user_name.text = model.USERNAME
         reference.collection(key)
             .addSnapshotListener { _: QuerySnapshot?, _: FirebaseFirestoreException? ->
-                setData(
-                    holder,
-                    position
-                )
+                getData(holder, model, position)
             }
-        holder.swipeRefreshLayout.setOnRefreshListener { setData(holder, position) }
-        setData(holder, position)
+        holder.swipeRefreshLayout.setOnRefreshListener { getData(holder, model, position) }
     }
-
-    fun setData(holder: PersonHolder, position: Int) {
-        sumMap.clear()
+    private fun getData(holder: PersonHolder, model: PersonModel, position: Int){
+        val sdom = LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
+        Log.e("MODEL","${model.KEY}")
         val query = reference.collection(key)
-            .whereEqualTo("UUID", uuids[position]["UUID"])
-            .orderBy("DATE", Query.Direction.DESCENDING)
-        val options = FirestoreRecyclerOptions.Builder<Detail>()
+            .whereEqualTo("UUID", model.UUID)
+            .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+            .whereGreaterThanOrEqualTo("TIME_STAMP", sdom*1000)
+            options = FirestoreRecyclerOptions.Builder<Detail>()
             .setQuery(query, Detail::class.java)
             .build()
-        holder.price_text.text = sumMap[position].toString()
-        itemsAdapter = ItemsAdapter(options, context, this@PersonAdapter, sumMap, position)
+        itemsAdapter = ItemsAdapter(options, context,reference.collection(key))
         holder.recyclerView.adapter = itemsAdapter
-        itemsAdapter!!.startListening()
+        itemsAdapter?.startListening()
         if (options.snapshots.isEmpty()) {
             holder.lottieAnimationView.visibility = View.GONE
             holder.lottieAnimationView.pauseAnimation()
@@ -87,38 +82,6 @@ class PersonAdapter(
         holder.swipeRefreshLayout.isRefreshing = false
     }
 
-    override fun getItemCount(): Int {
-        return uuids.size
-    }
-
-    override fun onClick(position: Int) {}
-    override fun onIssue() {}
-    override fun sendSumMap(sumMap: MutableMap<Int, Int>) {
-        var newMap = HashMap<String, String>()
-        for (i in sumMap){
-            newMap[i.key.toString()] = i.value.toString()
-        }
-
-
-
-    }
-
-
-    val date: String
-        get() {
-            val date = Date()
-            val sdm = SimpleDateFormat(Contenst.DATE_STRING, Locale.getDefault())
-            return sdm.format(date)
-        }
-
-    override fun sendSum(sum: Int) {
-//        Log.e("PSUM", sum.toString())
-        this.sum = sum
-    }
-
-    override fun openEdit() {
-
-    }
 
     inner class PersonHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var recyclerView: RecyclerView
@@ -140,9 +103,4 @@ class PersonAdapter(
     }
 
 
-    init {
-        this.key = key
-        this.onClickPerson = onClickPerson
-        this.sumMap = HashMap()
-    }
 }

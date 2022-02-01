@@ -29,7 +29,8 @@ class RoomAdapter(options: FirebaseRecyclerOptions<RoomModel?>,
         ref.child(model.UUID!!).get().addOnSuccessListener { dataSnapshot: DataSnapshot ->
             val map: Map<String, Any>? = dataSnapshot.value as HashMap<String, Any>?
             val name = map!!["USER_NAME"].toString()
-            holder.label.text = name
+            val n = name[0].uppercase()+name.substring(1)
+            holder.label.text = n
             if (user_name == name) {
                 holder.materialCardView.setCardBackgroundColor(Color.parseColor("#814285F4"))
             }

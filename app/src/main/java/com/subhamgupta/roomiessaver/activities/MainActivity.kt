@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -114,8 +115,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var summary: Summary
     lateinit var rationFragment: RationFragment
     lateinit var tabLayout: TabLayout
-    lateinit var issuesFragment: IssuesFragment
-    lateinit var chartsFragment: ChartsFragment
+//    lateinit var issuesFragment: IssuesFragment
+//    lateinit var chartsFragment: ChartsFragment
     lateinit var homeFragment: HomeFragment
 
 
@@ -137,11 +138,16 @@ class MainActivity : AppCompatActivity() {
 
         materialCardView.visibility = View.GONE
         setSupportActionBar(bottomAppBar)
+        progressBar.visibility = View.VISIBLE
 
         settingsStorage = SettingsStorage(this)
         if (!settingsStorage.isRoom_joined)
             supportFinishAfterTransition()
-        init()
+
+        Handler().postDelayed({
+            init()
+        }, 1000)
+
 //        updateThings()
     }
     private fun setFCM(){
@@ -169,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         user = mAuth.currentUser!!
         db = FirebaseFirestore.getInstance()
         ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
-        progressBar.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
         user_ref = ref.child(user.uid)
         uuid = user.uid
         settingsStorage.uuid = uuid.toString()
@@ -202,25 +208,6 @@ class MainActivity : AppCompatActivity() {
             .setTopRightCorner(CornerFamily.ROUNDED, 30f)
             .setTopLeftCorner(CornerFamily.ROUNDED, 30f)
             .build()
-
-
-//        viewPager2.addOnPageChangeListener(object : OnPageChangeListener {
-//            override fun onPageScrolled(
-//                position: Int,
-//                positionOffset: Float,
-//                positionOffsetPixels: Int
-//            ) {
-//            }
-//
-//            override fun onPageSelected(position: Int) {
-//                fragmentId = position
-//
-////                    Log.e("fragment", position.toString())
-//            }
-//
-//            override fun onPageScrollStateChanged(state: Int) {}
-//        })
-        //progressBar.visibility = View.VISIBLE
         try {
             addItem()
         }catch (e: Exception){
@@ -296,8 +283,6 @@ class MainActivity : AppCompatActivity() {
                         }
 
                     }
-
-
                 setData()
             }
         }
@@ -362,9 +347,7 @@ class MainActivity : AppCompatActivity() {
         amount_paid.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                if (!TextUtils.isDigitsOnly(charSequence)) amount_layout.error =
-                    "Only numbers are allowed" else amount_layout.error =
-                    ""
+                amount_layout.error = if (!TextUtils.isDigitsOnly(charSequence)) "Only numbers are allowed" else ""
             }
 
             override fun afterTextChanged(editable: Editable) {}
@@ -391,25 +374,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveItems(item: String?, amount: String) {
         val timeStamp = time
-        val ts = Timestamp(Date().time)
+        val ts = System.currentTimeMillis()
         val map: MutableMap<String, Any?> = HashMap()
         val uid = user.uid
-//        Log.e("time", timeStamp)
         map["UUID"] = uid
         map["TIME"] = timeStamp
         map["DATE"] = date
-        map["TIME_STAMP"] = ts.toString()
+        map["TIME_STAMP"] = ts
         map["AMOUNT_PAID"] = amount.toInt()
         map["ITEM_BOUGHT"] = item
         map["BOUGHT_BY"] = user_name
-        sendNotify("New Buying", "$user_name has bought $item for $amount ")
         key?.let {
-            db.collection(it).add(map)
+            db.collection(it).document(ts.toString()).set(map)
                 .addOnFailureListener { e: Exception -> Log.e("ERROR", e.message!!) }
                 .addOnSuccessListener {
-//                    Log.e("ONSUCCESS", "")
+
+                    sendNotify("New Buying", "$user_name has bought $item for $amount ")
                     showSnackBar("Item Saved")
-                    updateThings()
+                    //updateThings()
                     item_bought.text = null
                     amount_paid.text = null
                 }
@@ -492,7 +474,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createIssue() {
         val map1: MutableMap<String, String?> = HashMap()
-        val ts = Timestamp(Date().time)
+        val ts = System.currentTimeMillis()
         val issue = msg_t.text.toString()
         if (issue.isNotEmpty()) {
             val person = user_name //issue_person.getText().toString();
@@ -516,7 +498,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createAlert(text: String?) {
         val time = time
-        val ts = Timestamp(Date().time)
+        val ts = System.currentTimeMillis()
         val map1: MutableMap<String, Any?> = HashMap()
         map1["ALERT"] = text
         map1["DATE"] = date

@@ -1,31 +1,25 @@
 package com.subhamgupta.roomiessaver.fragments
 
-import android.app.ActivityOptions
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.activities.RationActivity
 import com.subhamgupta.roomiessaver.adapters.RationAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import io.reactivex.rxjava3.internal.util.LinkedArrayList
-import java.lang.Exception
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class RationFragment : Fragment() {
     lateinit var recyclerView: RecyclerView
@@ -66,13 +60,13 @@ class RationFragment : Fragment() {
         roomId = settingsStorage.room_id
         try {
             getData()
-        }catch (e:Exception){
+        } catch (e: Exception) {
 
         }
         swipeRefreshLayout.setOnRefreshListener {
             try {
                 getData()
-            }catch (e:Exception){
+            } catch (e: Exception) {
 
             }
         }
@@ -85,6 +79,7 @@ class RationFragment : Fragment() {
 
         }
     }
+
     fun openSheet() {
         val bottomFragment = BottomFragment()
         fragmentManager?.let { it1 -> bottomFragment.show(it1, "Enter new ration") }
@@ -92,47 +87,29 @@ class RationFragment : Fragment() {
 
     private fun getData() {
         datas = ArrayList()
-        db.collection(roomId + "_RATION")
+        val query: Query = db.collection(roomId + "_RATION")
+        val sdom = LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault())
+            .toInstant().epochSecond
+        query.orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
                 datas.clear()
-
                 if (value != null) {
                     emptyText.visibility = View.INVISIBLE
-                    if (!value.isEmpty){
+                    if (!value.isEmpty) {
                         for (ds in value) {
-                            val k: MutableMap<String, Any?> = HashMap()
-                            k["DATE"] = ds["DATE"]
-                            k["IMG_NAME"] = ds["IMG_NAME"]
-                            k["IMG_URL"] = ds["IMG_URL"]
-                            k["NOTE"] = ds["NOTE"]
-                            datas.add(k)
+                            val d = ds.data as MutableMap<String, Any>
+                            datas.add(d)
                         }
-
-
-
-                        val g = datas.sortedWith(compareBy {
-                            LocalDate.parse(it?.get("DATE").toString(), DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss"))
-                                .atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
-                        }) as MutableList
-                        println(g)
-                        g.reverse()
-                        try {
-                            rationAdapter = fragmentManager?.let {
-                                RationAdapter(g, requireContext(),
-                                    it
-                                )
-                            }!!
-                        }catch (e:Exception){
-
-                        }
-
+                        rationAdapter = fragmentManager?.let {
+                            RationAdapter(datas, requireContext(), it)
+                        }!!
                         recyclerView.adapter = rationAdapter
                         swipeRefreshLayout.isRefreshing = false
-                    }else{
+                    } else {
                         emptyText.visibility = View.VISIBLE
                     }
 
-                }else{
+                } else {
                     emptyText.visibility = View.VISIBLE
                 }
 

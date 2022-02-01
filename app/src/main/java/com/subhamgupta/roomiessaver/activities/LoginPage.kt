@@ -286,6 +286,7 @@ class LoginPage : AppCompatActivity() {
     }
     private fun nextActivity(user: FirebaseUser?) {
         val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        hideKeyboard()
         try {
             if (user != null) {
 //              if (user.isEmailVerified)

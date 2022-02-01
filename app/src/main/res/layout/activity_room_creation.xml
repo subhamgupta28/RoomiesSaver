@@ -27,11 +27,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Join Room"
+            app:startIconDrawable="@drawable/ic_baseline_meeting_room"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusBottomEnd="8dp"
-            app:helperText="Enter ID shared to you">
+            app:helperText="Enter Room ID shared to you">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/join_room"
@@ -49,14 +50,32 @@
             android:layout_margin="8dp"
             android:text="Join" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="OR"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+            <View
+                android:layout_width="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@color/md_theme_light_inverseOnSurface"
+                android:layout_height="1dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="OR"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@color/md_theme_light_inverseOnSurface"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_height="1dp"/>
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/room_layout"
@@ -67,6 +86,7 @@
             android:hint="Room name"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
+            app:startIconDrawable="@drawable/ic_outline_add"
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusBottomEnd="8dp"
             app:helperText="Create room name">
@@ -85,6 +105,7 @@
             android:layout_marginTop="16dp"
             android:hint="Limit Person"
             app:boxCornerRadiusTopEnd="8dp"
+            app:startIconDrawable="@drawable/ic_person"
             app:boxCornerRadiusTopStart="8dp"
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusBottomEnd="8dp"

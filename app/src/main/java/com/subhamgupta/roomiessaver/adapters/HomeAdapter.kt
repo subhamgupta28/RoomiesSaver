@@ -20,8 +20,10 @@ class HomeAdapter(
         return HomeHolder(view)
     }
     override fun onBindViewHolder(holder: HomeHolder, position: Int) {
-        holder.name.setText(data[position]["USER_NAME"])
-        holder.amount.setText("₹"+data[position]["AMOUNT"])
+        val name = data[position]["USER_NAME"].toString()
+        val n = name[0].uppercase()+name.substring(1)
+        holder.name.text = n
+        holder.amount.text = "₹"+data[position]["AMOUNT"]
     }
 
     override fun getItemCount(): Int {

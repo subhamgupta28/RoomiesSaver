@@ -28,6 +28,7 @@ import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.sql.Date
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -112,19 +113,20 @@ class BottomFragment : BottomSheetDialogFragment() {
     }
     private fun setRation(date: String, note: String, byt: ByteArray){
         val n = if(note.isNotEmpty()) note else ""
-        val timeStamp = System.currentTimeMillis()
-        val ref = storage.child("$timeStamp.jpg")
+        val ts = System.currentTimeMillis()
+        val ref = storage.child("$ts.jpg")
         val task = ref.putBytes(byt)
 
         progress.visibility = View.VISIBLE
         task.addOnCompleteListener { t ->
             if (t.isSuccessful)
-                storage.child("$timeStamp.jpg").downloadUrl.addOnSuccessListener {
+                storage.child("$ts.jpg").downloadUrl.addOnSuccessListener {
                     val map = HashMap<String, Any>()
                     println(Uri.parse(it.toString()))
                     map["DATE"] = date
                     map["NOTE"] = n
-                    map["IMG_NAME"] = "$timeStamp.jpg"
+                    map["TIME_STAMP"] = ts
+                    map["IMG_NAME"] = "$ts.jpg"
                     map["IMG_URL"] = Uri.parse(it.toString()).toString()
                     db.collection(room_id+"_RATION").add(map)
                         .addOnCompleteListener {

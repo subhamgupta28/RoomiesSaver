@@ -7,7 +7,6 @@
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="2dp"
     app:cardPreventCornerOverlap="false">
 
     <LinearLayout
@@ -36,8 +35,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:text="name"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold" />
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorPrimary" />
 
                 <TextView
                     android:id="@+id/item_name"
@@ -77,31 +76,31 @@
 
         </LinearLayout>
 
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:orientation="horizontal"
-         android:gravity="center"
-          android:id="@+id/line2"
-          android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-          <com.google.android.material.progressindicator.CircularProgressIndicator
-              android:id="@+id/timeout"
-              android:layout_width="0dp"
-              android:layout_height="wrap_content"
-              android:layout_gravity="bottom"
-              android:layout_margin="4dp"
-              android:indeterminate="true"
-              android:visibility="gone"
-              app:indeterminateAnimationType="disjoint" />
-          <Button
-              android:id="@+id/edit_query"
-              style="@style/Widget.Material3.Button.TextButton"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_margin="4dp"
-              android:text="Edit"
-              android:visibility="gone"
-              />
-      </LinearLayout>
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/timeout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_margin="4dp"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indeterminateAnimationType="disjoint" />
+
+            <Button
+                android:id="@+id/edit_query"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Edit"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
