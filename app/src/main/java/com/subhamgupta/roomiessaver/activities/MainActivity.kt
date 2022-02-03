@@ -3,7 +3,6 @@ package com.subhamgupta.roomiessaver.activities
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
@@ -12,28 +11,19 @@ import android.os.Handler
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomappbar.BottomAppBar
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -46,33 +36,25 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
-import com.subhamgupta.roomiessaver.Contenst
-import com.subhamgupta.roomiessaver.Contenst.Companion.BASE_URL
-import com.subhamgupta.roomiessaver.Contenst.Companion.CONTENT_TYPE
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
-import com.subhamgupta.roomiessaver.Contenst.Companion.SERVER_KEY
 import com.subhamgupta.roomiessaver.Contenst.Companion.TIME_STRING
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.fragments.*
-import com.subhamgupta.roomiessaver.models.NotifyModel
+import com.subhamgupta.roomiessaver.fragments.DiffUser
+import com.subhamgupta.roomiessaver.fragments.HomeFragment
+import com.subhamgupta.roomiessaver.fragments.RationFragment
+import com.subhamgupta.roomiessaver.fragments.Summary
 import com.subhamgupta.roomiessaver.services.FirebaseService
-import com.subhamgupta.roomiessaver.utility.FirebaseDataUtil
 import com.subhamgupta.roomiessaver.utility.NotificationSender
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
     lateinit var progressBar: ProgressBar
@@ -391,7 +373,7 @@ class MainActivity : AppCompatActivity() {
 
                     sendNotify("New Buying", "$user_name has bought $item for $amount ")
                     showSnackBar("Item Saved")
-                    //updateThings()
+                    updateThings()
                     item_bought.text = null
                     amount_paid.text = null
                 }
@@ -560,33 +542,9 @@ class MainActivity : AppCompatActivity() {
             else            -> value
         }
     }
-    fun updateThings(){
-        val jsonObj = JSONObject(settingsStorage.json)
-        val nmap = jsonObj.toMap()
-//        Log.e("MAIN_MAP","${nmap}")
-        var sumMap=  HashMap<String, Int>()
-        for (i in nmap)
-            sumMap[i.key] = i.value.toString().toInt()
-        var key = settingsStorage.room_id.toString()
-        ref.child("ROOM").child(key).child("ROOM_MATES").get()
-            .addOnCompleteListener { task: Task<DataSnapshot> ->
-                if (task.isSuccessful) {
-                    val map = HashMap<String, Any>()
-                    for (ds in task.result!!.children) {
-                        var ik = ds.key!!.toString()
-                        val md = ds.value!! as HashMap<String, String>
-                        md["MONEY_SPENT"] = sumMap[md["USER_NAME"].toString()].toString()
-                        //Log.e("MP", "$md $ik")
-                        map[ik] = md
-                    }
-
-                    ref.child("ROOM").child(key).child("ROOM_MATES")
-                        .updateChildren(map).addOnSuccessListener {
-                            ref.child("ROOM").child(key).child("LAST_UPDATED").setValue(date)
-                        }
-//                    Log.e("ACT_MAP", "$map")
-                }
-            }
+    private fun updateThings(){
+        val key = key.toString()
+        ref.child("ROOM").child(key).child("LAST_UPDATED").setValue(date)
     }
 
 

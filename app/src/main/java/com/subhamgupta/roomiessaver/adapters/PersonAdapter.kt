@@ -20,7 +20,6 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.adapters.ItemsAdapter
 import com.subhamgupta.roomiessaver.models.Detail
 import com.subhamgupta.roomiessaver.models.PersonModel
 import java.time.LocalDate

@@ -1,14 +1,10 @@
 package com.subhamgupta.roomiessaver.fragments
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import androidx.core.view.get
@@ -24,8 +20,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
-import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.PersonAdapter
@@ -34,15 +31,12 @@ import com.subhamgupta.roomiessaver.models.PersonModel
 import com.subhamgupta.roomiessaver.models.RoomModel
 import com.subhamgupta.roomiessaver.onClickPerson
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 class DiffUser : Fragment(), onClickPerson {
     lateinit var ref: DatabaseReference
     lateinit var user_ref: DatabaseReference
-    lateinit private var viewPager2: ViewPager2
+    private lateinit var viewPager2: ViewPager2
     lateinit var list: List<String>
     lateinit var issue_name: TextInputEditText
     lateinit var issue_person: AutoCompleteTextView
@@ -61,9 +55,6 @@ class DiffUser : Fragment(), onClickPerson {
     lateinit var recyclerView: RecyclerView
     lateinit var db: FirebaseFirestore
     lateinit var user_key: HashMap<Int, Any?>
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -92,7 +83,7 @@ class DiffUser : Fragment(), onClickPerson {
         return view
     }
 
-    fun addItem() {
+    private fun addItem() {
         map = HashMap()
         user_ref.get().addOnCompleteListener { task: Task<DataSnapshot> ->
             if (task.isSuccessful) {
@@ -104,7 +95,7 @@ class DiffUser : Fragment(), onClickPerson {
             }
         }
     }
-    fun setTestData(){
+    private fun setTestData(){
         val query = ref.child("ROOM").child(key).child("ROOM_MATES").limitToFirst(100)
         val options = FirebaseRecyclerOptions.Builder<PersonModel>()
             .setQuery(query, PersonModel::class.java)
@@ -156,22 +147,10 @@ class DiffUser : Fragment(), onClickPerson {
                 }
 
             }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-            }
-
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) {
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-            }
         })
     }
 
-    fun showPerson() {
+    private fun showPerson() {
         list = ArrayList()
         uuids = ArrayList()
         val options = FirebaseRecyclerOptions.Builder<RoomModel>()
@@ -179,7 +158,6 @@ class DiffUser : Fragment(), onClickPerson {
             .build()
         roomAdapter = RoomAdapter(options, requireContext(), ref, user_name, this@DiffUser)
         recyclerView.adapter = roomAdapter
-
         roomAdapter.startListening()
 
     }
@@ -187,49 +165,5 @@ class DiffUser : Fragment(), onClickPerson {
     override fun onClick(position: Int) {
         viewPager2.currentItem = position
     }
-
-    override fun onIssue() {
-//        materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
-//        val contactPopupView = layoutInflater.inflate(R.layout.issue_popup, null)
-//        issue_name = contactPopupView.findViewById(R.id.issue)
-//        issue_person = contactPopupView.findViewById(R.id.issue_person)
-//        issue_btn = contactPopupView.findViewById(R.id.issue_btn)
-//        issue_btn.setOnClickListener { createIssue() }
-//        val adapter =
-//            activity?.let { ArrayAdapter(requireContext(), R.layout.list_popup_item, room_mates) }
-//        issue_person.setAdapter(adapter)
-//        materialAlertDialogBuilder.setView(contactPopupView)
-//        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-//        materialAlertDialogBuilder.show()
-    }
-
-    override fun sendSumMap(sumMap: MutableMap<Int, Int>) {
-//        Log.e("SUMMAP", "$sumMap")
-    }
-
-    override fun sendSum(sum: Int) {}
-    override fun openEdit() {
-       // editPopup()
-    }
-
-    fun createIssue() {
-        val map1: MutableMap<String, String?> = HashMap()
-        val issue = issue_name.text.toString()
-        val person = issue_person.text.toString()
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
-            .format(Calendar.getInstance().time)
-        map1["ISSUE"] = issue
-        map1["TIME"] = timeStamp
-        map1["PERSON_TO"] = person
-        map1["PERSON_FROM"] = user_name
-        reference.collection(key + "_ISSUES")
-            .add(map1)
-            .addOnSuccessListener { documentReference: DocumentReference ->
-                issue_name.setText("")
-                issue_person.setText("")
-//                Log.e("ISSUE_CREATED", documentReference.id)
-            }
-    }
-
 
 }

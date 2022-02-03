@@ -21,9 +21,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.hadiidbouk.charts.BarData
+import com.hadiidbouk.charts.ChartProgressBar
 import com.majorik.sparklinelibrary.SparkLineLayout
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
-import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.HomeAdapter
 import com.subhamgupta.roomiessaver.adapters.SummaryAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
@@ -32,6 +33,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+
 
 class HomeFragment : DialogFragment() {
     lateinit var personRecycler: RecyclerView
@@ -53,13 +55,10 @@ class HomeFragment : DialogFragment() {
     lateinit var kt: LinearLayout
     lateinit var summaryAdapter: SummaryAdapter
     lateinit var line1: MaterialCardView
+    lateinit var mChart: ChartProgressBar
     var totalAmount: Int = 0
     var todayTotal: Int = 0
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -84,7 +83,7 @@ class HomeFragment : DialogFragment() {
         kt = view.findViewById(R.id.kt)
         k = view.findViewById(R.id.k)
         line1 = view.findViewById(R.id.line1)
-
+        mChart = view.findViewById(R.id.ChartProgressBar)
         personRecycler.setHasFixedSize(true)
         personRecycler.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -97,13 +96,36 @@ class HomeFragment : DialogFragment() {
         key = settingsStorage.room_id.toString()
         dbref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
         ref.collection(key)
+        val dataList: ArrayList<BarData> = ArrayList()
+
+        var data = BarData("Sep", 3.4f, "3.4€")
+        dataList.add(data)
+
+        data = BarData("Oct", 8f, "8€")
+        dataList.add(data)
+
+        data = BarData("Nov", 1.8f, "1.8€")
+        dataList.add(data)
+
+        data = BarData("Dec", 7.3f, "7.3€")
+        dataList.add(data)
+
+        data = BarData("Jan", 6.2f, "6.2€")
+        dataList.add(data)
+
+        data = BarData("Feb", 3.3f, "3.3€")
+        dataList.add(data)
+
+
+        mChart.setDataList(dataList)
+        mChart.build()
         setData()
         setRecentPurchase()
 
     }
 
 
-    fun setData() {
+    private fun setData() {
         dbref.child("ROOM").child(key).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 try {
@@ -111,7 +133,6 @@ class HomeFragment : DialogFragment() {
                         if (ds.key.toString() == "LAST_UPDATED") {
                             updatedOn.text = "Updated ${getTimeAgo(ds.value.toString())}"
                         }
-
                     }
                 } catch (e: Exception) {
                     Log.e("ERROR", "${e.localizedMessage}")
@@ -236,7 +257,7 @@ class HomeFragment : DialogFragment() {
     private fun getColor(v: String): Int {
         val color = String.format(
             "#%X",
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ$v".hashCode()
+            "ABC DEF GHI JKL MNO PQR STU VWX YZ$v".hashCode()
         )
         return Color.parseColor(color)
     }
