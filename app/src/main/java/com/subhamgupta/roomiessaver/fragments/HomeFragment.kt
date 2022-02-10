@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.subhamgupta.roomiessaver.R
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,8 +22,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.hadiidbouk.charts.BarData
-import com.hadiidbouk.charts.ChartProgressBar
 import com.majorik.sparklinelibrary.SparkLineLayout
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiessaver.adapters.HomeAdapter
@@ -55,7 +54,7 @@ class HomeFragment : DialogFragment() {
     lateinit var kt: LinearLayout
     lateinit var summaryAdapter: SummaryAdapter
     lateinit var line1: MaterialCardView
-    lateinit var mChart: ChartProgressBar
+
     var totalAmount: Int = 0
     var todayTotal: Int = 0
 
@@ -83,7 +82,7 @@ class HomeFragment : DialogFragment() {
         kt = view.findViewById(R.id.kt)
         k = view.findViewById(R.id.k)
         line1 = view.findViewById(R.id.line1)
-        mChart = view.findViewById(R.id.ChartProgressBar)
+
         personRecycler.setHasFixedSize(true)
         personRecycler.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -96,29 +95,6 @@ class HomeFragment : DialogFragment() {
         key = settingsStorage.room_id.toString()
         dbref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
         ref.collection(key)
-        val dataList: ArrayList<BarData> = ArrayList()
-
-        var data = BarData("Sep", 3.4f, "3.4€")
-        dataList.add(data)
-
-        data = BarData("Oct", 8f, "8€")
-        dataList.add(data)
-
-        data = BarData("Nov", 1.8f, "1.8€")
-        dataList.add(data)
-
-        data = BarData("Dec", 7.3f, "7.3€")
-        dataList.add(data)
-
-        data = BarData("Jan", 6.2f, "6.2€")
-        dataList.add(data)
-
-        data = BarData("Feb", 3.3f, "3.3€")
-        dataList.add(data)
-
-
-        mChart.setDataList(dataList)
-        mChart.build()
         setData()
         setRecentPurchase()
 
@@ -135,7 +111,7 @@ class HomeFragment : DialogFragment() {
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("ERROR", "${e.localizedMessage}")
+                    Log.e("ERROR", e.localizedMessage)
                 }
 
             }

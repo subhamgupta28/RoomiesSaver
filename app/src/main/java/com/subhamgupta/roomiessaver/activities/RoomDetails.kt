@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
+import androidx.core.view.marginBottom
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
@@ -128,11 +129,12 @@ class RoomDetails : AppCompatActivity() {
                             (details as HashMap<String?, Any?>)[ds.key] = ds.value
                         }
                         val list = details["ROOM_MATES"] as List<Map<String, Any>>?
-
                         for (i in list!!.indices) {
                             val chip = Chip(this@RoomDetails)
-                            //chip.setTextColor(Color.parseColor("#4285F4"))
                             chip.text = list[i]["USER_NAME"].toString()
+                            chip.chipStrokeWidth = 0f
+                            if(user.uid==list[i]["UUID"].toString())
+                                chip.setTextColor(Color.parseColor("#4285F4"))
                             chipGroup.addView(chip)
                         }
                         r_id.text = "ROOM ID: $key"

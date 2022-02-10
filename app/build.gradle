@@ -61,5 +61,4 @@ dependencies {
     //donut
     implementation("app.futured.donut:donut:2.2.0")
     implementation 'com.github.majorkik:SparkLineLayout:1.0.1'
-    implementation 'com.github.hadiidbouk:ChartProgressBar-Android:2.0.6'
 }

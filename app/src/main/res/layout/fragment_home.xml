@@ -19,7 +19,7 @@
             android:layout_margin="14dp"
             android:orientation="vertical"
             android:padding="8dp"
-            app:cardCornerRadius="16dp">
+            app:cardCornerRadius="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -83,29 +83,6 @@
                     app:s_line_thickness="4dp"
                     app:s_marker_background_color="#fed32c"
                     app:s_marker_width="8dp" />
-                <com.hadiidbouk.charts.ChartProgressBar
-                    android:id="@+id/ChartProgressBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:gravity="center"
-                    app:hdBarCanBeClick="true"
-                    app:hdBarHeight="170dp"
-                    app:hdBarWidth="4dp"
-                    app:hdBarRadius="10dp"
-                    app:hdEmptyColor="@color/empty"
-                    app:hdProgressColor="@color/progress"
-                    app:hdProgressClickColor="@color/progress_click"
-                    app:hdPinBackgroundColor="@color/pin_background"
-                    app:hdPinTextColor="@color/pin_text"
-                    app:hdPinPaddingBottom="5dp"
-                    app:hdBarTitleColor="@color/bar_title_color"
-                    app:hdBarTitleTxtSize="12sp"
-                    app:hdPinTxtSize="17sp"
-                    app:hdPinMarginTop="10dp"
-                    app:hdPinMarginBottom="55dp"
-                    app:hdPinMarginEnd="22dp"
-                    app:hdBarTitleMarginTop="9dp"
-                    app:hdProgressDisableColor="@color/progress_disable" />
 
 
             </LinearLayout>
