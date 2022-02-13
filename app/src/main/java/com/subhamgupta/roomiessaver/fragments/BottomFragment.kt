@@ -128,7 +128,7 @@ class BottomFragment : BottomSheetDialogFragment() {
                     map["TIME_STAMP"] = ts
                     map["IMG_NAME"] = "$ts.jpg"
                     map["IMG_URL"] = Uri.parse(it.toString()).toString()
-                    db.collection(room_id+"_RATION").add(map)
+                    db.collection(room_id+"_RATION").document(ts.toString()).set(map)
                         .addOnCompleteListener {
                             showSnackBar("Ration saved")
                             progress.progress = 50

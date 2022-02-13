@@ -36,8 +36,9 @@
             style="@style/Widget.Material3.CardView.Outlined"
             android:layout_marginTop="2dp"
             app:strokeColor="@color/colorPrimary"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             app:strokeWidth="2dp"
-            android:visibility="gone"
             app:cardBackgroundColor="#2A4285F4">
 
             <LinearLayout

@@ -52,14 +52,12 @@ class RationAdapter(
         val g = TimeAgo().getTimeDur(datas[position]?.get("DATE").toString())
         holder.date.text = datas[position]?.get("DATE").toString()
         //holder.date.text = sdf.format(netDate)
-        var note = datas[position]?.get("NOTE").toString()
-        if (note.isEmpty())
-            note=""
+
         holder.imageView.setOnClickListener {
 
             rationCardFragment.show(fm,"image show")
             datas[position]?.get("IMG_URL")?.toString()
-                ?.let { it1 -> rationCardFragment.setUrl(it1, holder.imageView.context, sdf.format(netDate), note) }
+                ?.let { it1 -> rationCardFragment.setUrl(it1, holder.imageView.context, datas[position]) }
 
         }
     }

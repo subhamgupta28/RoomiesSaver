@@ -16,10 +16,13 @@
             android:layout_marginTop="16dp"
             android:hint="Announce"
             app:boxCornerRadiusTopEnd="8dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="150"
+            app:startIconDrawable="@drawable/ic_outline_mic"
             app:boxCornerRadiusTopStart="8dp"
             app:boxCornerRadiusBottomEnd="8dp"
             app:boxCornerRadiusBottomStart="8dp"
-            app:helperText="Write your announcement"
+            app:helperText="Write your announcement. Visible for 24Hr"
             android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/alert_et"

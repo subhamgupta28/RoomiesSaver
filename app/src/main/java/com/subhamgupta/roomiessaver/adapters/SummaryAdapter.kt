@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.subhamgupta.roomiessaver.R
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,7 +41,7 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
         holder.amount_paid.text = price
         holder.item_name.text =  item
         holder.itemView.setOnClickListener {
-            infoCard(holder.amount_paid.context, boughtBy, price, time, item)
+            infoCard(holder, time)
         }
         val sdf = SimpleDateFormat(Contenst.DATE_STRING, Locale.getDefault())
         try {
@@ -60,20 +61,9 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
         data = newData
         result.dispatchUpdatesTo(this)
     }
-    private fun infoCard(context: Context, bought:String, priceP:String, time:String, itemN:String){
-        val mcard = MaterialAlertDialogBuilder(context)
-        val view = LayoutInflater.from(context).inflate(R.layout.item_info, null)
-        val boughtBy = view.findViewById(R.id.ii_bought_by) as TextView
-        val item = view.findViewById(R.id.ii_item_name) as TextView
-        val price = view.findViewById(R.id.ii_price) as TextView
-        val date = view.findViewById(R.id.ii_date) as TextView
-        boughtBy.text = bought
-        item.text = itemN
-        price.text = priceP
-        date.text = time
-        mcard.setView(view)
-        mcard.background = ColorDrawable(Color.TRANSPARENT)
-        mcard.show()
+    private fun infoCard(holder: TestHolder, time:String){
+        holder.fullDate.text = time
+        holder.fullDate.visibility = if (holder.fullDate.isVisible) View.GONE else View.VISIBLE
     }
     override fun getItemCount(): Int {
         return data.size
@@ -84,6 +74,7 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
         var amount_paid: TextView
         var date: TextView
         var bought_by: TextView
+        var fullDate:TextView
         var materialCardView: MaterialCardView
         var timeout: ProgressBar
         var linearLayout: LinearLayout
@@ -92,6 +83,7 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
             item_name = itemView.findViewById(R.id.item_name)
             amount_paid = itemView.findViewById(R.id.amount)
             date = itemView.findViewById(R.id.date)
+            fullDate = itemView.findViewById(R.id.full_date)
             bought_by = itemView.findViewById(R.id.bought_by)
             materialCardView = itemView.findViewById(R.id.materialcard)
             timeout = itemView.findViewById(R.id.timeout)

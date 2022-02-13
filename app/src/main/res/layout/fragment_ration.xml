@@ -29,14 +29,14 @@
             android:scaleY="1.4"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
-            app:lottie_rawRes="@raw/emptybox" />
+            app:lottie_rawRes="@raw/emptyastro" />
         <TextView
             android:layout_marginTop="22dp"
             android:layout_width="wrap_content"
             android:layout_gravity="center"
             android:textAlignment="center"
 
-            android:text="Empty! Add ration by clicking on + button"
+            android:text="Empty! Add items by clicking on + button"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:layout_height="wrap_content"/>
     </LinearLayout>

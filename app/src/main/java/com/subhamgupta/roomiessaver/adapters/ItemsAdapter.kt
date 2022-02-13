@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
@@ -47,7 +48,7 @@ class ItemsAdapter(
             holder.item_name.text = model.ITEM_BOUGHT
             ("₹${model.AMOUNT_PAID}").also { holder.amount_paid.text = it }
             holder.itemView.setOnClickListener {
-                infoCard(holder.edit.context, model)
+                infoCard(holder, model)
             }
             try {
                 val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
@@ -111,20 +112,9 @@ class ItemsAdapter(
 
     }
 
-    private fun infoCard(context: Context, model: Detail){
-        val mcard = MaterialAlertDialogBuilder(context)
-        val view = LayoutInflater.from(context).inflate(R.layout.item_info, null)
-        val boughtBy = view.findViewById(R.id.ii_bought_by) as TextView
-        val item = view.findViewById(R.id.ii_item_name) as TextView
-        val price = view.findViewById(R.id.ii_price) as TextView
-        val date = view.findViewById(R.id.ii_date) as TextView
-        boughtBy.text = model.BOUGHT_BY
-        item.text = model.ITEM_BOUGHT
-        price.text = model.AMOUNT_PAID.toString()
-        date.text = model.TIME
-        mcard.setView(view)
-        mcard.background = ColorDrawable(Color.TRANSPARENT)
-        mcard.show()
+    private fun infoCard(holder: ItemsHolder, model: Detail){
+        holder.fullDate.text = model.TIME
+        holder.fullDate.visibility = if (holder.fullDate.isVisible) View.GONE else View.VISIBLE
     }
     private fun editPopup(context: Context, model: Detail) {
         val mcard = MaterialAlertDialogBuilder(context)
@@ -155,6 +145,7 @@ class ItemsAdapter(
         var date: TextView
         var bought_by: TextView
         var timeout: ProgressBar
+        var fullDate:TextView
         var edit: Button
 
         init {
@@ -162,6 +153,7 @@ class ItemsAdapter(
             amount_paid = itemView.findViewById(R.id.amount)
             date = itemView.findViewById(R.id.date)
             bought_by = itemView.findViewById(R.id.bought_by)
+            fullDate = itemView.findViewById(R.id.full_date)
             bought_by.visibility = View.GONE
             timeout = itemView.findViewById(R.id.timeout)
             edit = itemView.findViewById(R.id.edit_query)

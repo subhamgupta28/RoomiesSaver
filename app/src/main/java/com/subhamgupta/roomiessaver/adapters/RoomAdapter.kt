@@ -31,9 +31,9 @@ class RoomAdapter(options: FirebaseRecyclerOptions<RoomModel?>,
             val name = map!!["USER_NAME"].toString()
             val n = name[0].uppercase()+name.substring(1)
             holder.label.text = n
-            if (user_name == name) {
-                holder.materialCardView.setCardBackgroundColor(Color.parseColor("#814285F4"))
-            }
+//            if (user_name == name) {
+//                holder.materialCardView.setCardBackgroundColor(Color.parseColor("#814285F4"))
+//            }
             holder.materialCardView.setOnClickListener { onClickPerson.onClick(position) }
         }
     }

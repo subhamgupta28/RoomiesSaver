@@ -11,9 +11,13 @@ import android.os.Handler
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.text.format.DateUtils
+import android.transition.ChangeBounds
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.Menu
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -36,10 +40,8 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
+import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiessaver.Contenst.Companion.TIME_STRING
@@ -53,6 +55,7 @@ import com.subhamgupta.roomiessaver.utility.NotificationSender
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import org.json.JSONArray
 import org.json.JSONObject
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -93,11 +96,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var issue_person: AutoCompleteTextView
     lateinit var db: FirebaseFirestore
     lateinit var diffUser: DiffUser
-    var uuid: String?= null
+    var uuid: String? = null
     lateinit var summary: Summary
     lateinit var rationFragment: RationFragment
     lateinit var tabLayout: TabLayout
-//    lateinit var issuesFragment: IssuesFragment
+
+    //    lateinit var issuesFragment: IssuesFragment
 //    lateinit var chartsFragment: ChartsFragment
     lateinit var homeFragment: HomeFragment
 
@@ -132,10 +136,12 @@ class MainActivity : AppCompatActivity() {
 
 //        updateThings()
     }
-    private fun setFCM(){
+
+    private fun setFCM() {
         FirebaseService.sharedPref = getSharedPreferences("settings", Context.MODE_PRIVATE)
         FirebaseService.uid = uuid
-        FirebaseMessaging.getInstance().subscribeToTopic("/topics/${settingsStorage.room_id.toString()}")
+        FirebaseMessaging.getInstance()
+            .subscribeToTopic("/topics/${settingsStorage.room_id.toString()}")
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                 }
@@ -143,7 +149,8 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    fun shareRoomId(){
+
+    fun shareRoomId() {
         val shareIntent = ShareCompat.IntentBuilder.from(this)
             .setType("text/plain")
             .setText("${settingsStorage.username} has invited you to join the room. Click on link to join. https://roomies.app/${settingsStorage.room_id}")
@@ -152,7 +159,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(shareIntent)
         }
     }
-    private fun init(){
+
+    private fun init() {
         mAuth = FirebaseAuth.getInstance()
         user = mAuth.currentUser!!
         db = FirebaseFirestore.getInstance()
@@ -192,13 +200,35 @@ class MainActivity : AppCompatActivity() {
             .build()
         try {
             addItem()
-        }catch (e: Exception){
+        } catch (e: Exception) {
 
         }
 
+        viewPager2.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                if (position == 0) {
+                    runTransition(tabLayout, false)
+                } else {
+                    runTransition(tabLayout, true)
+                }
+            }
+
+            override fun onPageSelected(position: Int) {
+
+            }
+
+        })
         send_btn.setOnClickListener { createIssue() }
         add_item.setOnClickListener {
-            if (viewPager2.currentItem==3)
+            if (viewPager2.currentItem == 3)
                 rationFragment.openSheet()
             else
                 addItems()
@@ -227,6 +257,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun runTransition(view: ViewGroup, isVisible: Boolean) {
+        TransitionManager.beginDelayedTransition(view, ChangeBounds())
+        view.visibility = if (isVisible)
+            View.VISIBLE
+        else
+            View.GONE
+    }
+
     private fun addItem() {
         map = HashMap()
         user_ref.get().addOnCompleteListener { task: Task<DataSnapshot> ->
@@ -237,30 +275,35 @@ class MainActivity : AppCompatActivity() {
                 settingsStorage.room_id = key
                 setFCM()
                 user_name = (map as HashMap<String?, String>)["USER_NAME"].toString()
-                id_text.text = "ID: $key"
+                "ID: $key".also { id_text.text = it }
                 settingsStorage.username = user_name
 //                Log.e("KEY", key!!)
-                db.collection(key + "_ALERT").whereEqualTo("IS_COMPLETED", false)
-                    .addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
+                val query = db.collection(key + "_ALERT")
+                    .whereEqualTo("IS_COMPLETED", false)
+                    query.addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
                         materialCardView.visibility = View.GONE
-                        if (value !=null){
+                        if (value != null) {
                             for (ds in value) {
-                                if (ds["BY"] != user_name) {
-//                                    Log.e("BY", ds.id)
-                                    alert_cancel.visibility = View.GONE
-                                } else alert_cancel.visibility = View.VISIBLE
-//                                Log.e("ALERT", value.toString())
-                                materialCardView.visibility = View.VISIBLE
+
+
+
                                 alert_cancel.setOnClickListener {
-                                    db.collection(key + "_ALERT").document(ds.id)
-                                        .update(
-                                            "IS_COMPLETED", true
-                                        )
+                                    if (ds["UUID"].toString() == user.uid)
+                                        db.collection(key + "_ALERT").document(ds.id)
+                                            .update("IS_COMPLETED", true)
+                                    else
+                                        materialCardView.visibility = View.GONE
                                 }
-                                if (ds["BY"].toString() == user_name)
-                                    alert_text.text = "You have announced ${ds["ALERT"]}"
+                                if (DateUtils.isToday(ds["TIME_STAMP"].toString().toLong()))
+                                    materialCardView.visibility = View.VISIBLE
+                                if (ds["UUID"].toString() == user.uid)
+                                    "You have announced ${ds["ALERT"]}".also {
+                                        alert_text.text = it
+                                    }
                                 else
-                                    alert_text.text = "${ds["BY"].toString()} has announced ${ds["ALERT"]}"
+                                    "${ds["BY"].toString()} has announced ${ds["ALERT"]}".also {
+                                        alert_text.text = it
+                                    }
                             }
                         }
 
@@ -273,12 +316,13 @@ class MainActivity : AppCompatActivity() {
     private fun logOut() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
         materialAlertDialogBuilder.setTitle("Do you want to logout?")
-        materialAlertDialogBuilder.setNegativeButton("Cancel"){ _, _ ->
+        materialAlertDialogBuilder.setNegativeButton("Cancel") { _, _ ->
 
         }
-        materialAlertDialogBuilder.setPositiveButton("Logout"){ _, _ ->
+        materialAlertDialogBuilder.setPositiveButton("Logout") { _, _ ->
             mAuth.signOut()
-            FirebaseMessaging.getInstance().unsubscribeFromTopic("/topics/${settingsStorage.room_id.toString()}")
+            FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic("/topics/${settingsStorage.room_id.toString()}")
             settingsStorage.clear()
             val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
             supportFinishAfterTransition()
@@ -329,12 +373,13 @@ class MainActivity : AppCompatActivity() {
         amount_paid.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-                amount_layout.error = if (!TextUtils.isDigitsOnly(charSequence)) "Only numbers are allowed" else ""
+                amount_layout.error =
+                    if (!TextUtils.isDigitsOnly(charSequence)) "Only numbers are allowed" else ""
             }
 
             override fun afterTextChanged(editable: Editable) {}
         })
-        save_btn.setOnClickListener{
+        save_btn.setOnClickListener {
             if (item_bought.text.toString().isEmpty() || amount_paid.text.toString()
                     .isEmpty()
             ) showSnackBar("Enter all details") else {
@@ -420,8 +465,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        progressBar.visibility =View.GONE
+        progressBar.visibility = View.GONE
     }
+
     private fun setData() {
         room_mates = ArrayList()
         key?.let {
@@ -484,8 +530,9 @@ class MainActivity : AppCompatActivity() {
         val map1: MutableMap<String, Any?> = HashMap()
         map1["ALERT"] = text
         map1["DATE"] = date
+        map1["UUID"] = user.uid
         map1["TIME"] = time
-        map1["TIME_STAMP"] = ts.toString()
+        map1["TIME_STAMP"] = ts
         map1["BY"] = user_name
         map1["IS_COMPLETED"] = false
         if (text != null) {
@@ -496,7 +543,7 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 showSnackBar("Alert created")
 
-             }
+            }
     }
 
     val time: String
@@ -523,26 +570,26 @@ class MainActivity : AppCompatActivity() {
 //            Log.e("NOTIFY_UID", uuid.toString())
             notification.put("to", "/topics/${settingsStorage.room_id}")
             notification.put("data", notifyBody)
-        }catch (e: Exception){
+        } catch (e: Exception) {
 
         }
         NotificationSender().sendNotification(notification, applicationContext)
         //sendNotification(notification)
     }
+
     fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-        when (val value = this[it])
-        {
-            is JSONArray ->
-            {
+        when (val value = this[it]) {
+            is JSONArray -> {
                 val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
                 JSONObject(map).toMap().values.toList()
             }
             is JSONObject -> value.toMap()
             JSONObject.NULL -> null
-            else            -> value
+            else -> value
         }
     }
-    private fun updateThings(){
+
+    private fun updateThings() {
         val key = key.toString()
         ref.child("ROOM").child(key).child("LAST_UPDATED").setValue(date)
     }

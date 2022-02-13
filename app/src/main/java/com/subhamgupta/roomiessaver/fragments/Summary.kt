@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.gms.tasks.Task
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -38,13 +39,13 @@ class Summary : Fragment() {
     lateinit var user: FirebaseUser
     lateinit var mAuth: FirebaseAuth
     lateinit var db: FirebaseFirestore
+    lateinit var materialCardView: MaterialCardView
     lateinit var total_spend: TextView
     lateinit var emptyBox: LinearLayout
     lateinit var key: String
     lateinit var switchMonth: SwitchMaterial
     lateinit var user_name: String
     lateinit var map: HashMap<String?, String>
-    lateinit var connectivityManager: ConnectivityManager
     lateinit var data: MutableList<Map<String, Any?>?>
     lateinit var ref: DatabaseReference
     lateinit var user_ref: DatabaseReference
@@ -65,6 +66,7 @@ class Summary : Fragment() {
         total_spend = view.findViewById(R.id.total_spends)
         emptyBox = view.findViewById(R.id.emptytext)
         switchMonth = view.findViewById(R.id.switch1)
+        materialCardView = view.findViewById(R.id.tlayout)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager =
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
@@ -126,8 +128,9 @@ class Summary : Fragment() {
                 val sum = AtomicLong()
                 data.clear()
                 sumMap.clear()
-                if (value != null) {
+                if (value != null && !value.isEmpty) {
                     emptyBox.visibility = View.INVISIBLE
+                    materialCardView.visibility = View.VISIBLE
                     try {
                         for (qds in value) {
                             val k = qds.data as MutableMap<String, Any>
@@ -142,15 +145,17 @@ class Summary : Fragment() {
                         }
                         val json = JSONObject(sumMap.toMap()).toString()
                         SettingsStorage(requireContext()).json = json
-                        "Total Spendings ₹$sum".also { total_spend.text = it }
+                        "Total ₹$sum".also { total_spend.text = it }
                         testAdapter = SummaryAdapter( requireContext())
                         recyclerView.adapter = testAdapter
                         testAdapter.setDataTo(data)
                     } catch (e: Exception) {
                         Log.e("ERROR", e.message + "")
                     }
-                } else
+                } else{
                     emptyBox.visibility = View.VISIBLE
+                    materialCardView.visibility = View.GONE
+                }
             }
     }
 

@@ -3,13 +3,14 @@ package com.subhamgupta.roomiessaver.fragments
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.transition.Fade
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.subhamgupta.roomiessaver.R
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.majorik.sparklinelibrary.SparkLineLayout
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
+import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.HomeAdapter
 import com.subhamgupta.roomiessaver.adapters.SummaryAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
@@ -39,7 +41,7 @@ class HomeFragment : DialogFragment() {
     lateinit var totalSpending: TextView
     lateinit var sparkLineLayout: SparkLineLayout
     lateinit var updatedOn: TextView
-    lateinit var noText: TextView
+    lateinit var emptyLayout: LinearLayout
     lateinit var db: FirebaseFirestore
     lateinit var latestItem: RecyclerView
     lateinit var ref: FirebaseFirestore
@@ -78,10 +80,11 @@ class HomeFragment : DialogFragment() {
         todayAmount = view.findViewById(R.id.today_amount)
         donutProgressView = view.findViewById(R.id.donut_view)
         sparkLineLayout = view.findViewById(R.id.spark)
-        noText = view.findViewById(R.id.no_text)
+        emptyLayout = view.findViewById(R.id.emptytext)
         kt = view.findViewById(R.id.kt)
         k = view.findViewById(R.id.k)
         line1 = view.findViewById(R.id.line1)
+
 
         personRecycler.setHasFixedSize(true)
         personRecycler.layoutManager =
@@ -98,6 +101,14 @@ class HomeFragment : DialogFragment() {
         setData()
         setRecentPurchase()
 
+    }
+
+    private fun runTransition(view: ViewGroup, isVisible: Boolean) {
+        TransitionManager.beginDelayedTransition(view, Fade())
+        view.visibility = if (isVisible)
+            View.VISIBLE
+        else
+            View.GONE
     }
 
 
@@ -146,12 +157,12 @@ class HomeFragment : DialogFragment() {
         val list: ArrayList<Int> = ArrayList()
 
         var thisMonthAmount = 0
-        sparkLineLayout.setData(mutableListOf(0, 0) as ArrayList<Int>)
+        sparkLineLayout.setData(mutableListOf(0,1,0,1,0,1,0) as ArrayList<Int>)
         val sdom = LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault())
             .toInstant().epochSecond
 //        Log.e("S_DOM","$sdom")
         val query: Query = db.collection(key)
-        query.whereGreaterThanOrEqualTo("TIME_STAMP", sdom*1000)//1643673600
+        query.whereGreaterThanOrEqualTo("TIME_STAMP", sdom * 1000)//1643673600
             .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
                 data.clear()
@@ -159,18 +170,19 @@ class HomeFragment : DialogFragment() {
                 list.clear()
                 todayTotal = 0
                 totalAmount = 0
-                if (value != null) {
-
+                if (value != null && !value.isEmpty) {
+                    runTransition(line1, true)
+                    runTransition(emptyLayout, false)
+                    runTransition(kt, true)
+                    k.visibility = View.VISIBLE
                     try {
                         val donutList = ArrayList<DonutSection>()
                         val userMap = mutableMapOf<String, Int?>()
                         for (qds in value) {
-                            val timestamp = Timestamp(qds["TIME_STAMP"].toString().toLong())
                             val k = qds.data as MutableMap<String, Any>
                             val user = qds["BOUGHT_BY"].toString()
                             val amount = qds["AMOUNT_PAID"].toString().toInt()
                             val mon = qds["AMOUNT_PAID"].toString()
-//                            Log.e("E_DOM","$timestamp")
                             thisMonthAmount++
                             userMap[user] =
                                 if (userMap.containsKey(user))
@@ -181,7 +193,7 @@ class HomeFragment : DialogFragment() {
                                 totalAmount.plus(0)
                             else
                                 totalAmount.plus(mon.toInt())
-                            if (DateUtils.isToday(timestamp.time)) {
+                            if (DateUtils.isToday(qds["TIME_STAMP"].toString().toLong())) {
                                 todayTotal = if (mon.isEmpty())
                                     todayTotal.plus(0)
                                 else
@@ -190,7 +202,7 @@ class HomeFragment : DialogFragment() {
                             }
                         }
                         sparkLineLayout.visibility = View.VISIBLE
-                        sparkLineLayout.setData(list)
+
                         for (i in userMap) {
                             val mp = mutableMapOf(
                                 "USER_NAME" to i.key,
@@ -204,13 +216,7 @@ class HomeFragment : DialogFragment() {
                             donutList.add(section1)
                             map.add(mp)
                         }
-                        if (thisMonthAmount == 0) {
-                            noText.visibility = View.VISIBLE
-                            k.visibility = View.GONE
-                            kt.visibility = View.GONE
-                            line1.visibility = View.GONE
-                        } else
-                            noText.visibility = View.INVISIBLE
+                        sparkLineLayout.setData(list)
                         "₹$totalAmount".also { totalSpending.text = it }
                         donutProgressView.cap = totalAmount.toFloat()
                         donutProgressView.submitData(donutList)
@@ -224,7 +230,10 @@ class HomeFragment : DialogFragment() {
                         Log.e("ERROR", e.message + "")
                     }
                 } else {
-                    noText.visibility = View.VISIBLE
+                    runTransition(line1, false)
+                    runTransition(emptyLayout, true)
+                    runTransition(kt, false)
+                    k.visibility = View.GONE
 
                 }
             }
