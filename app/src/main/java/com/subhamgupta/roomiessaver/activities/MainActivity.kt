@@ -216,8 +216,10 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if (position == 0) {
                     runTransition(tabLayout, false)
+                    runTransition(materialCardView, true)
                 } else {
                     runTransition(tabLayout, true)
+                    runTransition(materialCardView, false)
                 }
             }
 
