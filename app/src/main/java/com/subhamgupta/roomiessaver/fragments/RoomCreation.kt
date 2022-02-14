@@ -1,12 +1,14 @@
-package com.subhamgupta.roomiessaver.activities
+package com.subhamgupta.roomiessaver.fragments
 
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -15,50 +17,57 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.subhamgupta.roomiessaver.R
+import com.subhamgupta.roomiessaver.activities.MainActivity
+import com.subhamgupta.roomiessaver.onItemClick
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RoomCreation : AppCompatActivity() {
+class RoomCreation(
+    var mAuth: FirebaseAuth,
+    var ref: DatabaseReference,
+    var settingsStorage: SettingsStorage,
+    var contextView: View,
+    var onItemClick: onItemClick
+) : Fragment() {
     lateinit var join_btn: Button
     lateinit var generate_btn: Button
     lateinit var logout: Button
-    lateinit var contextView: View
-    lateinit var ref: DatabaseReference
     lateinit var uid: String
     lateinit var user: FirebaseUser
-    lateinit var mAuth: FirebaseAuth
     lateinit var room_layout: TextInputLayout
     lateinit var join_layout: TextInputLayout
     lateinit var limit_layout: TextInputLayout
     lateinit var room_name: TextInputEditText
     lateinit var join_room: TextInputEditText
     lateinit var limit_person: TextInputEditText
-    lateinit var settingsStorage: SettingsStorage
     lateinit var map: HashMap<String, Any?>
     lateinit var user_name: String
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_room_creation)
-        join_btn = findViewById(R.id.join_btn)
-        generate_btn = findViewById(R.id.generate_id_btn)
-        join_room = findViewById(R.id.join_room)
-        join_layout = findViewById(R.id.join_layout)
-        room_layout = findViewById(R.id.room_layout)
-        room_name = findViewById(R.id.room_name)
-        limit_layout = findViewById(R.id.limit_layout)
-        limit_person = findViewById(R.id.limit_person)
-        logout = findViewById(R.id.logout)
-        contextView = findViewById(android.R.id.content)
-        settingsStorage = SettingsStorage(this)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_room_creation, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        join_btn = view.findViewById(R.id.join_btn)
+        generate_btn = view.findViewById(R.id.generate_id_btn)
+        join_room = view.findViewById(R.id.join_room)
+        join_layout = view.findViewById(R.id.join_layout)
+        room_layout = view.findViewById(R.id.room_layout)
+        room_name = view.findViewById(R.id.room_name)
+        limit_layout = view.findViewById(R.id.limit_layout)
+        limit_person = view.findViewById(R.id.limit_person)
+        logout = view.findViewById(R.id.logout)
+
+        user = mAuth.currentUser!!
 
         if (!settingsStorage.room_id.equals("null"))
             join_room.setText(settingsStorage.room_id)
-        mAuth = FirebaseAuth.getInstance()
-        user = mAuth.currentUser!!
-        ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
 
         uid = user.uid
         join_btn.setOnClickListener { joinRoom() }
@@ -81,17 +90,14 @@ class RoomCreation : AppCompatActivity() {
             }
         }
     }
+
     private fun logOut() {
         mAuth.signOut()
-        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        supportFinishAfterTransition()
-        startActivity(Intent(applicationContext, LoginPage::class.java), bundle)
+        onItemClick.logout()
+    }
 
-    }
-    override fun onStop() {
-        super.onStop()
-        supportFinishAfterTransition()
-    }
+
+
     private fun createRoom() {
         val name = room_name.text.toString()
         val id = generateID(name)
@@ -134,8 +140,8 @@ class RoomCreation : AppCompatActivity() {
     }
 
     private fun nextActivity() {
-        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        startActivity(Intent(applicationContext, MainActivity::class.java), bundle)
+        val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
+        startActivity(Intent(activity, MainActivity::class.java), bundle)
     }
 
     private fun joinRoom() {

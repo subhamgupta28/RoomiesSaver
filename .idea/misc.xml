@@ -11,6 +11,7 @@
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/drawable/name_bg.xml" value="0.2" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/drawable/right_bg.xml" value="0.16296296296296298" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/drawable/splash_background.xml" value="0.1787037037037037" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/activity_account_creation.xml" value="0.15067567567567566" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/activity_admin_section.xml" value="0.23177083333333334" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/activity_home.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/activity_login_page.xml" value="0.264" />
@@ -30,10 +31,11 @@
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_diff_user.xml" value="0.23177083333333334" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_home.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_issues.xml" value="0.23229166666666667" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_login_page.xml" value="0.14305555555555555" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_login_sign_up.xml" value="0.15067567567567566" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_ration.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_ration_card.xml" value="0.264" />
-        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_room_creation.xml" value="0.11597222222222223" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_room_creation.xml" value="0.16799999999999998" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_summary.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/home_item.xml" value="0.4" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/issue_item.xml" value="0.23177083333333334" />

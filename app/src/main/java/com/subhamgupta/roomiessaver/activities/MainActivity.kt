@@ -41,21 +41,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiessaver.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiessaver.Contenst.Companion.TIME_STRING
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.fragments.DiffUser
-import com.subhamgupta.roomiessaver.fragments.HomeFragment
-import com.subhamgupta.roomiessaver.fragments.RationFragment
-import com.subhamgupta.roomiessaver.fragments.Summary
+import com.subhamgupta.roomiessaver.fragments.*
 import com.subhamgupta.roomiessaver.services.FirebaseService
 import com.subhamgupta.roomiessaver.utility.NotificationSender
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
+import com.subhamgupta.roomiessaver.utility.ViewPagerAdapter
 import org.json.JSONArray
 import org.json.JSONObject
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -227,28 +223,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private class ViewPagerAdapter(fm: FragmentManager, behavior: Int) :
-        FragmentPagerAdapter(fm, behavior) {
-        private val fragments: MutableList<Fragment> = ArrayList()
-        private val fragmentstitle: MutableList<String> = ArrayList()
-        fun addFragments(fragment: Fragment, title: String) {
-            fragments.add(fragment)
-            fragmentstitle.add(title)
-        }
-
-        override fun getItem(position: Int): Fragment {
-            return fragments[position]
-        }
-
-        override fun getCount(): Int {
-            return fragments.size
-        }
-
-        override fun getPageTitle(position: Int): CharSequence {
-            return fragmentstitle[position]
-        }
-    }
-
     private fun runTransition(view: ViewGroup, isVisible: Boolean) {
         TransitionManager.beginDelayedTransition(view, ChangeBounds())
         view.visibility = if (isVisible)
@@ -315,15 +289,20 @@ class MainActivity : AppCompatActivity() {
             FirebaseMessaging.getInstance()
                 .unsubscribeFromTopic("/topics/${settingsStorage.room_id.toString()}")
             settingsStorage.clear()
-            val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+
             supportFinishAfterTransition()
-            startActivity(Intent(applicationContext, LoginPage::class.java), bundle)
+           goToRoomCreation(2)
         }
         materialAlertDialogBuilder.show()
 
 
     }
-
+    private fun goToRoomCreation(int: Int){
+        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        val intent =  Intent(applicationContext, AccountCreation::class.java)
+        intent.putExtra("CODE", int)
+        startActivity(intent, bundle)
+    }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.bottomappbar, menu)
         val person_search = menu.findItem(R.id.search)

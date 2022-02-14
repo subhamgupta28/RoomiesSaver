@@ -1,6 +1,7 @@
-package com.subhamgupta.roomiessaver.activities
+package com.subhamgupta.roomiessaver.fragments
 
 import android.app.ActivityOptions
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -10,11 +11,14 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.util.Patterns
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -29,92 +33,76 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.subhamgupta.roomiessaver.R
+import com.subhamgupta.roomiessaver.activities.MainActivity
+import com.subhamgupta.roomiessaver.onItemClick
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 
 
-class LoginPage : AppCompatActivity() {
-    lateinit var mdc: MaterialAlertDialogBuilder
+class LoginPage(
+    var mAuth: FirebaseAuth,
+    var ref: DatabaseReference,
+    var settingsStorage: SettingsStorage,
+    var isLogin: Boolean,
+    var contextView: View,
+    var onItemClick: onItemClick
+) : Fragment() {
     lateinit var create_account: Button
     lateinit var login_btn: Button
     lateinit var forgot: Button
-    lateinit var login_pop: MaterialCardView
-    lateinit var signin_pop: MaterialCardView
     lateinit var tname: TextInputEditText
     lateinit var tpass: TextInputEditText
     lateinit var temail: TextInputEditText
-    lateinit var cnf_pass: TextInputEditText
     lateinit var text: TextView
     lateinit var linearProgressIndicator: LinearProgressIndicator
-    private lateinit var mAuth: FirebaseAuth
+
     lateinit var email_layout: TextInputLayout
     lateinit var name_layout: TextInputLayout
-    lateinit var cnf_layout: TextInputLayout
     lateinit var pass_layout: TextInputLayout
-    var user: FirebaseUser? = null
-    lateinit var contextView: View
-    lateinit var contactPopupView: View
-    lateinit var ref: DatabaseReference
-    lateinit var settingsStorage: SettingsStorage
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login_page)
-        login_pop = findViewById(R.id.login_pop_btn)
-        signin_pop = findViewById(R.id.signin_pop_btn)
-        contextView = findViewById(android.R.id.content)
-        settingsStorage = SettingsStorage(this)
-        mAuth = FirebaseAuth.getInstance()
-        user = mAuth.currentUser
-        ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
-        mdc = MaterialAlertDialogBuilder(this)
 
-        login_pop.setOnClickListener { login_popup(0) }
-        signin_pop.setOnClickListener { login_popup(1) }
-        if (user != null)
-            nextActivity(user)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_login_page, container, false)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        temail = view.findViewById(R.id.email)
+        tname = view.findViewById(R.id.name)
+        tpass = view.findViewById(R.id.pass)
+        email_layout = view.findViewById(R.id.email_layout)
+        create_account = view.findViewById(R.id.create_acc)
+        login_btn = view.findViewById(R.id.login_btn)
+        forgot = view.findViewById(R.id.forgot)
+        name_layout = view.findViewById(R.id.name_layout)
+        text = view.findViewById(R.id.text)
+        pass_layout = view.findViewById(R.id.pass_layout)
+        linearProgressIndicator = view.findViewById(R.id.progress)
+
+
+        if (settingsStorage.email != "null")
+            temail.setText(settingsStorage.email)
+
+        login_popup(isLogin)
+
     }
 
     private fun isValidEmail(email: String): Boolean {
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    private fun login_popup(t: Int) {
-        contactPopupView = layoutInflater.inflate(R.layout.signup_popup, null)
-        temail = contactPopupView.findViewById(R.id.email)
-        tname = contactPopupView.findViewById(R.id.name)
-        tpass = contactPopupView.findViewById(R.id.pass)
-        cnf_pass = contactPopupView.findViewById(R.id.cnf_pass)
-        email_layout = contactPopupView.findViewById(R.id.email_layout)
-        create_account = contactPopupView.findViewById(R.id.create_acc)
-        login_btn = contactPopupView.findViewById(R.id.login_btn)
-        cnf_layout = contactPopupView.findViewById(R.id.cnf_layout)
-        forgot = contactPopupView.findViewById(R.id.forgot)
-        name_layout = contactPopupView.findViewById(R.id.name_layout)
-        text = contactPopupView.findViewById(R.id.text)
-        pass_layout = contactPopupView.findViewById(R.id.pass_layout)
-        linearProgressIndicator = contactPopupView.findViewById(R.id.progress)
-        if (settingsStorage.email != "null")
-            temail.setText(settingsStorage.email)
-
-        if (t != 0)
+    private fun login_popup(isLogin: Boolean) {
+        if (!isLogin)
             text.text = "Create Acount"
         else
             text.text = "Login"
-
-        name_layout.visibility = if (t == 0) View.GONE else View.VISIBLE
-        cnf_layout.visibility = if (t == 0) View.GONE else View.VISIBLE
-        create_account.visibility = if (t == 0) View.GONE else View.VISIBLE
-        login_btn.visibility = if (t == 0) View.VISIBLE else View.GONE
-        forgot.visibility = if (t == 0) View.VISIBLE else View.GONE
+        name_layout.visibility = if (isLogin) View.GONE else View.VISIBLE
+        create_account.visibility = if (isLogin) View.GONE else View.VISIBLE
+        login_btn.visibility = if (isLogin) View.VISIBLE else View.GONE
+        forgot.visibility = if (isLogin) View.VISIBLE else View.GONE
         create_account.setOnClickListener {
-            val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-            startActivity(
-                Intent(
-                    applicationContext,
-                    RoomCreation::class.java
-                ),
-                bundle
-            )
         }
         forgot.setOnClickListener {
             resetPassword(temail.text.toString())
@@ -144,8 +132,6 @@ class LoginPage : AppCompatActivity() {
             emailLogIn()
 //            Log.e("login", "login")
         }
-        mdc.background = ColorDrawable(Color.TRANSPARENT)
-        mdc.setView(contactPopupView).show()
 
     }
 
@@ -191,7 +177,7 @@ class LoginPage : AppCompatActivity() {
             create_account.isEnabled = true
         } else {
             mAuth.signInWithEmailAndPassword(email, pass)
-                .addOnCompleteListener(this) { task: Task<AuthResult?> ->
+                .addOnCompleteListener{ task: Task<AuthResult?> ->
                     if (task.isSuccessful) {
                         linearProgressIndicator.visibility = View.GONE
                         val user = mAuth.currentUser!!
@@ -214,7 +200,8 @@ class LoginPage : AppCompatActivity() {
                             hideKeyboard()
                             settingsStorage.email = email
 
-                            nextActivity(user)
+//                            nextActivity(user)
+                            onItemClick.loginComplete(user)
                             showSnackBar("Login Successful")
                             enableButton()
 //                        updateNmae(sharedSession.getUsername(), mAuth);
@@ -248,7 +235,7 @@ class LoginPage : AppCompatActivity() {
             enableButton()
         } else {
             mAuth.createUserWithEmailAndPassword(email, pass)
-                .addOnCompleteListener(this) { task: Task<AuthResult> ->
+                .addOnCompleteListener { task: Task<AuthResult> ->
                     linearProgressIndicator.visibility = View.GONE
                     if (task.isComplete) {
                         hideKeyboard()
@@ -256,6 +243,7 @@ class LoginPage : AppCompatActivity() {
                         settingsStorage.username = name
                         settingsStorage.email = email
                         settingsStorage.isRoom_joined = false
+                        onItemClick.signInComplete()
                         try {
                             saveUser(name, email, task.result!!.user)
                             emailLogIn()
@@ -284,67 +272,14 @@ class LoginPage : AppCompatActivity() {
             }
     }
 
-    override fun onStop() {
-        super.onStop()
-        supportFinishAfterTransition()
-    }
-
-    private fun goToMain() {
-        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        startActivity(
-            Intent(
-                this,
-                MainActivity::class.java
-            ),
-            bundle
-        )
-    }
-    private fun goToRoom(){
-        val bundle =
-            ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        startActivity(
-            Intent(
-                this,
-                RoomCreation::class.java
-            ),
-            bundle
-        )
-    }
-
-    private fun nextActivity(user: FirebaseUser?) {
-        Log.e("USER", user!!.uid)
-
-        hideKeyboard()
-        try {
-            ref.child(user.uid).child("IS_ROOM_JOINED").get()
-                .addOnCompleteListener { task: Task<DataSnapshot> ->
-                    if (task.isSuccessful) {
-                        try {
-                            Log.e("USER", "11")
-                            val b = task.result!!.value as Boolean
-                            if (b) {
-                                Log.e("USER", "22")
-                                goToMain()
 
 
-                            } else {
-                                Log.e("USER", "33")
-                               goToRoom()
-                            }
-                        } catch (e: Exception) {
-                            Log.e("ERROR", e.message!!)
-                           goToRoom()
-                        }
-                    }
-                }
-        } catch (e: Exception) {
-            Log.e("ERROR", e.message!!)
-        }
-    }
+
+
 
     private fun hideKeyboard() {
 
-        val inputManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputManager = activity?.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
     }
 

@@ -8,9 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.gms.tasks.Task
 import com.google.android.material.color.DynamicColors
 import com.google.firebase.auth.FirebaseAuth
@@ -19,13 +17,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.subhamgupta.roomiessaver.R
+import com.subhamgupta.roomiessaver.fragments.LoginPage
+import com.subhamgupta.roomiessaver.fragments.RoomCreation
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.util.*
-import kotlin.concurrent.schedule
 
 class SplashScreen : AppCompatActivity() {
     var user: FirebaseUser? = null
@@ -85,11 +79,11 @@ class SplashScreen : AppCompatActivity() {
                                     if (b) {
                                         nextActivity()
                                     } else {
-                                        goToRoomCreation()
+                                        goToRoomCreation(1)
                                     }
                                 } catch (e: Exception) {
                                     Log.e("ERROR", e.message!!)
-                                   goToRoomCreation()
+                                   goToRoomCreation(1)
                                 }
                             }
                         }
@@ -98,7 +92,7 @@ class SplashScreen : AppCompatActivity() {
                 }
             }
         } else {
-            startActivity(Intent(applicationContext, LoginPage::class.java), bundle)
+            goToRoomCreation(2)
         }
     }
 
@@ -107,27 +101,10 @@ class SplashScreen : AppCompatActivity() {
         supportFinishAfterTransition()
     }
 
-    private fun goToRoomCreation(){
-        try {
-            val uri = intent.data
-//            Log.e("uri", uri.toString())
-            if (uri != null) {
-                val path = uri.pathSegments
-                println(path)
-                var key = path[path.size - 1]
-                key = key.substring(key.lastIndexOf("/") + 1)
-                settingsStorage.room_id = key
-//                Log.e("path", key)
-            }
-        }catch (e:Exception){
-
-        }
-        startActivity(
-            Intent(
-                applicationContext,
-                RoomCreation::class.java
-            ), bundle
-        )
+    private fun goToRoomCreation(int: Int){
+        val intent =  Intent(applicationContext, AccountCreation::class.java)
+        intent.putExtra("CODE", int)
+        startActivity(intent, bundle)
     }
     private fun nextActivity() {
         startActivity(Intent(applicationContext, MainActivity::class.java), bundle)

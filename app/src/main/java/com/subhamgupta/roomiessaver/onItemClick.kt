@@ -1,8 +1,11 @@
 package com.subhamgupta.roomiessaver
 
+import com.google.firebase.auth.FirebaseUser
+
 interface onItemClick {
-    fun sendTotalSpending(price:Int)
-    fun updateTime(time:String)
-    fun updateItem()
-    fun allPersonSpending(sumMap: MutableMap<Int, Int>)
+    fun loginComplete(user: FirebaseUser)
+    fun roomCreated()
+    fun logout()
+    fun signInComplete()
+
 }

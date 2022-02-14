@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiessaver.R
+import com.subhamgupta.roomiessaver.fragments.RoomCreation
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import java.util.*
 
@@ -178,7 +179,6 @@ class RoomDetails : AppCompatActivity() {
     }
 
     fun leaveRoom() {
-
         val dataSnapshotTask = ref.child("ROOM").child(key).child("ROOM_MATES").get()
         dataSnapshotTask.addOnSuccessListener { dataSnapshot ->
 //            Log.e("data", dataSnapshot.toString())
@@ -211,17 +211,16 @@ class RoomDetails : AppCompatActivity() {
                 settingsStorage.room_name = ""
                 //supportFinishAfterTransition()
                 settingsStorage.isLoggedIn = false
-                val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-                startActivity(
-                    Intent(
-                        this,
-                        RoomCreation::class.java
-                    ).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY), bundle
-                )
+                goToRoomCreation(1)
             }
         }
     }
-
+    private fun goToRoomCreation(int: Int){
+        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        val intent =  Intent(applicationContext, AccountCreation::class.java)
+        intent.putExtra("CODE", int)
+        startActivity(intent, bundle)
+    }
     override fun onStop() {
         super.onStop()
         supportFinishAfterTransition()

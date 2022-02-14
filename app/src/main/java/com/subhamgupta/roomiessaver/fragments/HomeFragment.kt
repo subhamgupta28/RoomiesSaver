@@ -29,7 +29,6 @@ import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.adapters.HomeAdapter
 import com.subhamgupta.roomiessaver.adapters.SummaryAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -157,7 +156,7 @@ class HomeFragment : DialogFragment() {
         val list: ArrayList<Int> = ArrayList()
 
         var thisMonthAmount = 0
-        sparkLineLayout.setData(mutableListOf(0,1,0,1,0,1,0) as ArrayList<Int>)
+        sparkLineLayout.setData(mutableListOf(0, 1, 0, 1, 0, 1, 0) as ArrayList<Int>)
         val sdom = LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault())
             .toInstant().epochSecond
 //        Log.e("S_DOM","$sdom")
@@ -177,17 +176,22 @@ class HomeFragment : DialogFragment() {
                     k.visibility = View.VISIBLE
                     try {
                         val donutList = ArrayList<DonutSection>()
-                        val userMap = mutableMapOf<String, Int?>()
+                        val userMap = mutableMapOf<String, HashMap<String, Any?>>()
                         for (qds in value) {
-                            val k = qds.data as MutableMap<String, Any>
+                            val k = qds.data as MutableMap<String, Any?>
                             val user = qds["BOUGHT_BY"].toString()
                             val amount = qds["AMOUNT_PAID"].toString().toInt()
                             val mon = qds["AMOUNT_PAID"].toString()
+                            val uuid = qds["UUID"].toString()
                             thisMonthAmount++
-                            userMap[user] =
-                                if (userMap.containsKey(user))
-                                    userMap[user]?.plus(amount)
-                                else amount
+
+                            if (userMap.containsKey(uuid)) {
+                                userMap[uuid]?.set("USER", user)
+                                userMap[uuid]?.set("AMOUNT", userMap[uuid]?.get("AMOUNT").toString().toInt().plus(amount))
+                            } else {
+                                userMap[uuid] = mutableMapOf<String, Any?>("USER" to user, "AMOUNT" to amount) as HashMap<String, Any?>
+                            }
+
                             list.add(amount)
                             totalAmount = if (mon.isEmpty())
                                 totalAmount.plus(0)
@@ -204,9 +208,10 @@ class HomeFragment : DialogFragment() {
                         sparkLineLayout.visibility = View.VISIBLE
 
                         for (i in userMap) {
+                            Log.e("USER_MAP", "${i.value}")
                             val mp = mutableMapOf(
-                                "USER_NAME" to i.key,
-                                "AMOUNT" to i.value.toString()
+                                "USER_NAME" to i.value["USER"].toString(),
+                                "AMOUNT" to i.value["AMOUNT"].toString()
                             )
                             val section1 = DonutSection(
                                 name = i.key,

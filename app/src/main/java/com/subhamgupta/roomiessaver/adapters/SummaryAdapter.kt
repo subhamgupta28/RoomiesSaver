@@ -18,6 +18,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 import com.subhamgupta.roomiessaver.Contenst
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -25,6 +26,7 @@ import java.util.*
 
 class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Context) : RecyclerView.Adapter<TestHolder>() {
     var data = emptyList<Map<String, Any?>?>()
+    var uuid: String
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TestHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.items, parent, false)
         return TestHolder(view)
@@ -32,12 +34,16 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
 
     override fun onBindViewHolder(holder: TestHolder, position: Int) {
         val boughtBy = data[position]?.get("BOUGHT_BY").toString()
+        val uid = data[position]?.get("UUID").toString()
         val price = "₹" + (data[position]?.get("AMOUNT_PAID") )
         val time = data[position]?.get("TIME").toString()
         val item = data[position]?.get("ITEM_BOUGHT").toString()
         val n = boughtBy[0].uppercase()+boughtBy.substring(1)
         //Log.e("NEW_DATA", boughtBy)
-        holder.bought_by.text = n
+        if (uuid==uid)
+            holder.bought_by.text = "You"
+        else
+            holder.bought_by.text = n
         holder.amount_paid.text = price
         holder.item_name.text =  item
         holder.itemView.setOnClickListener {
@@ -91,5 +97,8 @@ class SummaryAdapter(/*var data: List<Map<String, Any?>?>,*/ var context: Contex
             linearLayout.visibility = View.GONE
             timeout.visibility = View.INVISIBLE
         }
+    }
+    init {
+        uuid = FirebaseAuth.getInstance().currentUser!!.uid.toString()
     }
 }
