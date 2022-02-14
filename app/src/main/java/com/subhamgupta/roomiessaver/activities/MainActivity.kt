@@ -164,11 +164,10 @@ class MainActivity : AppCompatActivity() {
         //issuesFragment = IssuesFragment()
         rationFragment = RationFragment()
 //        chartsFragment = ChartsFragment()
-
-
+        
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         viewPagerAdapter.addFragments(homeFragment, "Home")
-        viewPagerAdapter.addFragments(diffUser, "Everyone's Expenses")
+        viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(summary, "All Expenses")
         //viewPagerAdapter.addFragments(issuesFragment, "Chats")
         viewPagerAdapter.addFragments(rationFragment, "Items")

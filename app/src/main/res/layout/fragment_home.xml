@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/line1"
             android:layout_marginStart="12dp"
-            android:text="All Person"
+            android:text="Roomies"
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 
         <androidx.recyclerview.widget.RecyclerView

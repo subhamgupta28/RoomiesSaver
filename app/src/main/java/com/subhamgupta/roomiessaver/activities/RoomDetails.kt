@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -182,13 +183,14 @@ class RoomDetails : AppCompatActivity() {
         val dataSnapshotTask = ref.child("ROOM").child(key).child("ROOM_MATES").get()
         dataSnapshotTask.addOnSuccessListener { dataSnapshot ->
 //            Log.e("data", dataSnapshot.toString())
-            val snap: MutableMap<String, Any?>? = HashMap()
+            val snap: MutableMap<String, Any?> = HashMap()
             var data: HashMap<String?, Any?>? = null
             for (d in dataSnapshot.children) {
                 val v = d.value as HashMap<String?, Any?>
                 for (l in v) {
                     if (l.value.toString() != user.uid) {
                         data = v
+                        Log.e("VAl","$v")
                     }
                 }
                 snap!![d.key!!] = d.value as HashMap<String?, Any?>

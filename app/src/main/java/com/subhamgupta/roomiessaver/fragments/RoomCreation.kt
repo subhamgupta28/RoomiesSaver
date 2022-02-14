@@ -170,6 +170,7 @@ class RoomCreation(
                             val map1: MutableMap<String?, Any?> = HashMap()
                             map1["KEY"] = room_id
                             map1["MONEY_PAID"] = 0
+                            map1["IS_JOINED"] = true
                             map1["UUID"] = user.uid
                             map1["USER_NAME"] = user_name
                             list.add(map1)

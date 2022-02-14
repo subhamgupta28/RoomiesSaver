@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class HomeFragment : DialogFragment() {
@@ -206,17 +207,20 @@ class HomeFragment : DialogFragment() {
                             }
                         }
                         sparkLineLayout.visibility = View.VISIBLE
-
+                        Log.e("USER_MAP", "$userMap")
                         for (i in userMap) {
-                            Log.e("USER_MAP", "${i.value}")
+
+                            val mj = i.value as HashMap<*, *>
+
                             val mp = mutableMapOf(
-                                "USER_NAME" to i.value["USER"].toString(),
-                                "AMOUNT" to i.value["AMOUNT"].toString()
+                                "USER_NAME" to mj["USER"].toString(),
+                                "AMOUNT" to mj["AMOUNT"].toString(),
+                                "UUID" to i.key
                             )
                             val section1 = DonutSection(
-                                name = i.key,
+                                name = mj["USER"].toString(),
                                 color = getColor(i.key),
-                                amount = i.value.toString().toFloat()
+                                amount = mj["AMOUNT"].toString().toFloat()
                             )
                             donutList.add(section1)
                             map.add(mp)

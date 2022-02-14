@@ -32,11 +32,11 @@ class RoomAdapter(options: FirebaseRecyclerOptions<RoomModel?>,
             val uuid = map!!["UUID"].toString()
             val n = name[0].uppercase()+name.substring(1)
 
-            if (model.UUID == uuid) {
-                holder.label.text = "You"
-//                holder.materialCardView.setCardBackgroundColor(Color.parseColor("#814285F4"))
-            }
-            else
+//            if (model.UUID == uuid) {
+//                holder.label.text = "You"
+////                holder.materialCardView.setCardBackgroundColor(Color.parseColor("#814285F4"))
+//            }
+//            else
                 holder.label.text = n
             holder.materialCardView.setOnClickListener { onClickPerson.onClick(position) }
         }
