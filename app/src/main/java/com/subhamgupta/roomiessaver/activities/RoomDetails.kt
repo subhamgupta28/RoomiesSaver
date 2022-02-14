@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
-import androidx.core.view.marginBottom
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
@@ -26,7 +25,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiessaver.R
-import com.subhamgupta.roomiessaver.adapters.DetailAdapter
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
 import java.util.*
 
@@ -57,7 +55,6 @@ class RoomDetails : AppCompatActivity() {
     var name: String? = null
     var l: String? = null
     var joinedPerson: Int? = null
-    lateinit var detailAdapter: DetailAdapter
     lateinit var map: MutableMap<String?, String>
     lateinit var key: String
     override fun onCreate(savedInstanceState: Bundle?) {

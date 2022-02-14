@@ -58,9 +58,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.AdminSection"
-            android:exported="false" />
-        <activity
             android:name=".activities.RoomCreation"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" >

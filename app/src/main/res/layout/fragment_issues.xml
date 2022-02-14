@@ -18,7 +18,7 @@
        android:visibility="gone"
        android:layout_centerInParent="true"
        android:layout_height="wrap_content"
-       app:lottie_rawRes="@raw/empty"
+       app:lottie_rawRes="@raw/emptyastro"
        app:lottie_autoPlay="true"
        app:lottie_loop="true"/>
    <androidx.recyclerview.widget.RecyclerView

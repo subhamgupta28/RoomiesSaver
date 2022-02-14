@@ -8,8 +8,7 @@
     android:layout_marginTop="2dp"
     android:layout_marginEnd="10dp"
     android:layout_marginBottom="10dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="0dp">
+    app:cardCornerRadius="14dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -24,7 +23,7 @@
             android:visibility="gone"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
-            app:lottie_rawRes="@raw/empty_cart" />
+            app:lottie_rawRes="@raw/emptyastro" />
 
 
         <TextView

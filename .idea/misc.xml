@@ -30,8 +30,10 @@
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_diff_user.xml" value="0.23177083333333334" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_home.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_issues.xml" value="0.23229166666666667" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_login_sign_up.xml" value="0.15067567567567566" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_ration.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_ration_card.xml" value="0.264" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_room_creation.xml" value="0.11597222222222223" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/fragment_summary.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/home_item.xml" value="0.4" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/issue_item.xml" value="0.23177083333333334" />
@@ -40,7 +42,7 @@
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/items.xml" value="0.25" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/list_popup_item.xml" value="0.23177083333333334" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/login_popup.xml" value="0.23177083333333334" />
-        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/person_items.xml" value="0.264" />
+        <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/person_items.xml" value="0.2" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/popup.xml" value="0.264" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/ration_card.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/layout/room_item.xml" value="0.23177083333333334" />

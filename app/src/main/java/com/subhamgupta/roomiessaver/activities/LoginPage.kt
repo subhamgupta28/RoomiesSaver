@@ -1,5 +1,6 @@
 package com.subhamgupta.roomiessaver.activities
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -29,10 +30,6 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.subhamgupta.roomiessaver.R
 import com.subhamgupta.roomiessaver.utility.SettingsStorage
-import android.app.Activity
-import android.app.ActivityOptions
-import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.gms.tasks.OnCompleteListener
 
 
 class LoginPage : AppCompatActivity() {
@@ -151,6 +148,7 @@ class LoginPage : AppCompatActivity() {
         mdc.setView(contactPopupView).show()
 
     }
+
     fun resetPassword(email: String) {
         if (!email.isEmpty()) {
             mAuth.sendPasswordResetEmail(email)
@@ -162,7 +160,8 @@ class LoginPage : AppCompatActivity() {
                 }
         }
     }
-    private fun disableButton(){
+
+    private fun disableButton() {
         login_btn.isEnabled = false
         create_account.isEnabled = false
         temail.isEnabled = false
@@ -171,7 +170,8 @@ class LoginPage : AppCompatActivity() {
         name_layout.isEnabled = false
         pass_layout.isEnabled = false
     }
-    private fun enableButton(){
+
+    private fun enableButton() {
         login_btn.isEnabled = true
         create_account.isEnabled = true
         temail.isEnabled = true
@@ -180,6 +180,7 @@ class LoginPage : AppCompatActivity() {
         name_layout.isEnabled = true
         pass_layout.isEnabled = true
     }
+
     private fun emailLogIn() {
         val email = temail.text.toString()
         val pass = tpass.text.toString()
@@ -212,6 +213,7 @@ class LoginPage : AppCompatActivity() {
                         } else {
                             hideKeyboard()
                             settingsStorage.email = email
+
                             nextActivity(user)
                             showSnackBar("Login Successful")
                             enableButton()
@@ -226,12 +228,12 @@ class LoginPage : AppCompatActivity() {
                         linearProgressIndicator.visibility = View.GONE
                     }
                 }.addOnFailureListener { e: Exception ->
-                Log.e("onfail", e.message!!)
-                hideKeyboard()
-                linearProgressIndicator.visibility = View.INVISIBLE
+                    Log.e("onfail", e.message!!)
+                    hideKeyboard()
+                    linearProgressIndicator.visibility = View.INVISIBLE
                     enableButton()
-                email_layout.error = "Wrong Password or Email"
-            }
+                    email_layout.error = "Wrong Password or Email"
+                }
         }
     }
 
@@ -243,7 +245,7 @@ class LoginPage : AppCompatActivity() {
         if (email == "" || pass == "" || name == "") {
             showSnackBar("Enter Credentials")
             linearProgressIndicator.visibility = View.INVISIBLE
-           enableButton()
+            enableButton()
         } else {
             mAuth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(this) { task: Task<AuthResult> ->
@@ -273,6 +275,7 @@ class LoginPage : AppCompatActivity() {
 
     private fun saveUser(name: String, email: String, u: FirebaseUser?) {
         ref.child(u!!.uid).child("USER_NAME").setValue(name)
+        ref.child(u.uid).child("UUID").setValue(u.uid)
         ref.child(u.uid).child("USER_EMAIL").setValue(email)
             .addOnSuccessListener { unused: Void? -> settingsStorage.username = name }
             .addOnFailureListener { e: Exception ->
@@ -280,57 +283,60 @@ class LoginPage : AppCompatActivity() {
                 hideKeyboard()
             }
     }
+
     override fun onStop() {
         super.onStop()
         supportFinishAfterTransition()
     }
-    private fun nextActivity(user: FirebaseUser?) {
+
+    private fun goToMain() {
         val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        startActivity(
+            Intent(
+                this,
+                MainActivity::class.java
+            ),
+            bundle
+        )
+    }
+    private fun goToRoom(){
+        val bundle =
+            ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        startActivity(
+            Intent(
+                this,
+                RoomCreation::class.java
+            ),
+            bundle
+        )
+    }
+
+    private fun nextActivity(user: FirebaseUser?) {
+        Log.e("USER", user!!.uid)
+
         hideKeyboard()
         try {
-            if (user != null) {
-//              if (user.isEmailVerified)
-                    ref.child(user.uid).child("IS_ROOM_JOINED").get()
-                        .addOnCompleteListener { task: Task<DataSnapshot> ->
-                            if (task.isSuccessful) {
-                                try {
-                                    val b = task.result!!.value as Boolean
-                                    if (b) {
-                                        startActivity(
-                                            Intent(
-                                                applicationContext,
-                                                MainActivity::class.java
-                                            ),
-                                            bundle
-                                        )
-                                    } else {
-                                        startActivity(
-                                            Intent(
-                                                applicationContext,
-                                                RoomCreation::class.java
-                                            ),
-                                            bundle
-                                        )
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("ERROR", e.message!!)
+            ref.child(user.uid).child("IS_ROOM_JOINED").get()
+                .addOnCompleteListener { task: Task<DataSnapshot> ->
+                    if (task.isSuccessful) {
+                        try {
+                            Log.e("USER", "11")
+                            val b = task.result!!.value as Boolean
+                            if (b) {
+                                Log.e("USER", "22")
+                                goToMain()
 
-                                    startActivity(
-                                        Intent(
-                                            applicationContext,
-                                            RoomCreation::class.java
-                                        ),bundle
-                                    )
-                                }
+
+                            } else {
+                                Log.e("USER", "33")
+                               goToRoom()
                             }
+                        } catch (e: Exception) {
+                            Log.e("ERROR", e.message!!)
+                           goToRoom()
                         }
-//                } else {
-//                    user.sendEmailVerification()
-//                    hideKeyboard()
-//                    enableButton()
-//                    showSnackBar("Verification link is sent to your email, verify to login")
-//                }
-            }
+                    }
+                }
         } catch (e: Exception) {
             Log.e("ERROR", e.message!!)
         }

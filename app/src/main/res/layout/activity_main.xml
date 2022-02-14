@@ -30,6 +30,7 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/mdc"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_below="@id/tablayout"
             android:minHeight="50dp"
@@ -54,6 +55,7 @@
                     android:layout_gravity="center"
                     android:layout_margin="3dp"
                     android:layout_weight="3"
+                    android:padding="3dp"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
                     android:textColor="@color/colorPrimary" />
@@ -98,41 +100,6 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/line1"
-        android:layout_width="match_parent"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:layout_marginStart="8dp"
-        android:layout_alignParentBottom="true"
-        android:layout_height="wrap_content">
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            app:boxCornerRadiusBottomStart="30dp"
-            app:boxCornerRadiusBottomEnd="30dp"
-            app:boxCornerRadiusTopEnd="30dp"
-            app:boxCornerRadiusTopStart="30dp"
-            app:shapeAppearance="@style/ShapeAppearance.Material3.SmallComponent"
-            android:layout_weight="4"
-            android:layout_height="wrap_content">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/msg_t"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </com.google.android.material.textfield.TextInputLayout>
-        <Button
-            android:id="@+id/send_b"
-            app:icon="@drawable/ic_baseline_send"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_margin="8dp"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottombar"

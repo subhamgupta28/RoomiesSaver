@@ -67,10 +67,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var save_btn: Button
     lateinit var alert_btn: Button
     lateinit var alert_cancel: Button
-    lateinit var issue_btn: Button
-    lateinit var send_btn: Button
-    var fragmentId: Int? = null
-    lateinit var linearLayout: LinearLayout
     lateinit var amount_layout: TextInputLayout
     lateinit var connectivityManager: ConnectivityManager
     lateinit var ref: DatabaseReference
@@ -92,8 +88,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var map: MutableMap<String?, String>
     lateinit var mAuth: FirebaseAuth
     lateinit var recyclerView: RecyclerView
-    lateinit var issue_name: TextInputEditText
-    lateinit var issue_person: AutoCompleteTextView
     lateinit var db: FirebaseFirestore
     lateinit var diffUser: DiffUser
     var uuid: String? = null
@@ -116,9 +110,6 @@ class MainActivity : AppCompatActivity() {
         tabLayout = findViewById(R.id.tablayout)
         materialCardView = findViewById(R.id.mdc)
         alert_text = findViewById(R.id.alert_text)
-        msg_t = findViewById(R.id.msg_t)
-        send_btn = findViewById(R.id.send_b)
-        linearLayout = findViewById(R.id.line1)
         alert_cancel = findViewById(R.id.alert_cancel)
         progressBar = findViewById(R.id.progress)
 
@@ -216,10 +207,10 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if (position == 0) {
                     runTransition(tabLayout, false)
-                    runTransition(materialCardView, true)
+                    //runTransition(materialCardView, true)
                 } else {
                     runTransition(tabLayout, true)
-                    runTransition(materialCardView, false)
+                    //runTransition(materialCardView, false)
                 }
             }
 
@@ -228,7 +219,6 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        send_btn.setOnClickListener { createIssue() }
         add_item.setOnClickListener {
             if (viewPager2.currentItem == 3)
                 rationFragment.openSheet()
@@ -286,9 +276,6 @@ class MainActivity : AppCompatActivity() {
                         materialCardView.visibility = View.GONE
                         if (value != null) {
                             for (ds in value) {
-
-
-
                                 alert_cancel.setOnClickListener {
                                     if (ds["UUID"].toString() == user.uid)
                                         db.collection(key + "_ALERT").document(ds.id)
@@ -298,6 +285,8 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 if (DateUtils.isToday(ds["TIME_STAMP"].toString().toLong()))
                                     materialCardView.visibility = View.VISIBLE
+                                else
+                                    materialCardView.visibility = View.GONE
                                 if (ds["UUID"].toString() == user.uid)
                                     "You have announced ${ds["ALERT"]}".also {
                                         alert_text.text = it
@@ -350,7 +339,6 @@ class MainActivity : AppCompatActivity() {
         }
         person_search.setOnMenuItemClickListener { false }
         issue.setOnMenuItemClickListener {
-            newIssue()
             false
         }
         room_details.setOnMenuItemClickListener {
@@ -433,26 +421,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun newIssue() {
-        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
-        val contactPopupView = layoutInflater.inflate(R.layout.issue_popup, null)
-        issue_name = contactPopupView.findViewById(R.id.issue)
-        issue_person = contactPopupView.findViewById(R.id.issue_person)
-        issue_btn = contactPopupView.findViewById(R.id.issue_btn)
-        issue_btn.setOnClickListener { createIssue() }
-        val list: ArrayList<String> = ArrayList()
-        for (i in room_mates) {
-//            Log.e("ROOM_MATES", i["USER_NAME"].toString())
-            list.add(i["USER_NAME"].toString())
-        }
-        if (list.contains(user_name))
-            list.remove(user_name)
-        val adapter = ArrayAdapter(this@MainActivity, R.layout.list_popup_item, list)
-        issue_person.setAdapter(adapter)
-        materialAlertDialogBuilder.setView(contactPopupView)
-        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-        materialAlertDialogBuilder.show()
-    }
+
 
     private fun newAlert() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
@@ -502,29 +471,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createIssue() {
-        val map1: MutableMap<String, String?> = HashMap()
-        val ts = System.currentTimeMillis()
-        val issue = msg_t.text.toString()
-        if (issue.isNotEmpty()) {
-            val person = user_name //issue_person.getText().toString();
-            val timeStamp = time
-            map1["ISSUE"] = issue
-            map1["DATE"] = date
-            map1["TIME"] = timeStamp
-            map1["TIME_STAMP"] = ts.toString()
-            map1["PERSON_TO"] = person
-            map1["PERSON_FROM"] = user_name
-            sendNotify(user_name, "New message\n$issue")
-            db.collection(key + "_ISSUES")
-                .add(map1)
-                .addOnSuccessListener { documentReference: DocumentReference ->
-
-                    msg_t.text = null
-//                    Log.e("ISSUE_CREATED", documentReference.id)
-                }
-        }
-    }
+//    private fun createIssue() {
+//        val map1: MutableMap<String, String?> = HashMap()
+//        val ts = System.currentTimeMillis()
+//        val issue = msg_t.text.toString()
+//        if (issue.isNotEmpty()) {
+//            val person = user_name //issue_person.getText().toString();
+//            val timeStamp = time
+//            map1["ISSUE"] = issue
+//            map1["DATE"] = date
+//            map1["TIME"] = timeStamp
+//            map1["TIME_STAMP"] = ts.toString()
+//            map1["PERSON_TO"] = person
+//            map1["PERSON_FROM"] = user_name
+//            sendNotify(user_name, "New message\n$issue")
+//            db.collection(key + "_ISSUES")
+//                .add(map1)
+//                .addOnSuccessListener { documentReference: DocumentReference ->
+//
+//                    msg_t.text = null
+////                    Log.e("ISSUE_CREATED", documentReference.id)
+//                }
+//        }
+//    }
 
     private fun createAlert(text: String?) {
         val time = time

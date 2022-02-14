@@ -5,7 +5,6 @@ import com.airbnb.lottie.LottieAnimationView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.auth.FirebaseUser
-import com.subhamgupta.roomiessaver.adapters.IssueAdapter
 import com.subhamgupta.roomiessaver.adapters.ChatAdapter
 import android.os.Bundle
 import android.util.Log

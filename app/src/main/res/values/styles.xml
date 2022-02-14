@@ -5,7 +5,6 @@
     <style name="Theme.App" parent="Theme.Material3.Dark">
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.App.SmallComponent</item>
     </style>
-
     <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.Material3.Button.TextButton.Icon">
         <item name="iconPadding">0dp</item>
         <item name="android:insetTop">0dp</item>
@@ -36,11 +35,11 @@
         <item name="cornerSize">16dp</item>
     </style>
     <style name="Theme.App.Dialog.FullScreen"
-        parent="Theme.Material3.Dark.Dialog">
+        parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowIsFloating">false</item>
-        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowBackground">@color/md_theme_dark_background</item>
     </style>
     <style name="Widget.App.CircularProgressIndicator" parent="Widget.Material3.CircularProgressIndicator">
         <item name="materialThemeOverlay">@style/ThemeOverlay.App.CircularProgressIndicator</item>
