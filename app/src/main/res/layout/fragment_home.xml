@@ -9,6 +9,31 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:id="@+id/appbar"
+            android:layout_alignParentTop="true"
+
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:menu="@menu/appbarmenu"
+                app:title="Welcome" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+        <TextView
+            android:id="@+id/welcometext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_margin="6dp"
+            android:paddingTop="6dp"
+            android:text="Welcome"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
 
         <com.google.android.material.card.MaterialCardView
@@ -16,11 +41,12 @@
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="14dp"
+            android:layout_below="@id/appbar"
+            android:layout_margin="12dp"
             android:orientation="vertical"
             android:padding="8dp"
-            app:cardElevation="8dp"
-            app:cardCornerRadius="12dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="18dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -50,7 +76,7 @@
                             android:id="@+id/total_spends"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+                            android:textAppearance="@style/TextAppearance.Material3.DisplayLarge"
                             android:textColor="#0F9D58" />
 
                         <TextView
@@ -143,13 +169,14 @@
 
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_marginTop="300dp"
             android:id="@+id/emptytext"
-            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_height="wrap_content">
+            android:layout_marginTop="300dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
             <com.airbnb.lottie.LottieAnimationView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
@@ -158,15 +185,16 @@
                 app:lottie_autoPlay="true"
                 app:lottie_loop="true"
                 app:lottie_rawRes="@raw/emptyastro" />
+
             <TextView
-                android:layout_marginTop="22dp"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textAlignment="center"
+                android:layout_marginTop="22dp"
 
                 android:text="No new purchase this month\nEmpty! Add items by clicking on + button"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_height="wrap_content"/>
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
         </LinearLayout>
 
     </RelativeLayout>

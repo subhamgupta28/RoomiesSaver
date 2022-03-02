@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.MyNotesFragment">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/l"
+        style="@style/Widget.Material3.CardView.Filled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp">
+
+        <com.majorik.sparklinelibrary.SparkLineLayout
+            android:id="@+id/myspark"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"
+            app:s_gradient_line="true"
+            app:s_line_color="#fed32c"
+            app:s_line_second_color="@color/colorPrimary"
+            app:s_line_thickness="4dp"
+            app:s_marker_background_color="#fed32c"
+            app:s_marker_width="8dp" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/k"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/l"
+        android:layout_marginStart="12dp"
+        android:text="Spending"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/myrecycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/k"
+        android:padding="8dp" />
+</RelativeLayout>

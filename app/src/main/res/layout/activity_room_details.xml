@@ -10,14 +10,17 @@
         android:layout_width="match_parent"
         android:visibility="gone"
         android:layout_height="match_parent"/>
+
     <TextView
-        android:layout_width="match_parent"
-        android:text="Roomies"
-        android:layout_margin="12dp"
         android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_height="wrap_content"/>
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:text="Settings"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chips"
         android:paddingStart="12dp"
@@ -47,19 +50,21 @@
                 android:textColor="@color/colorPrimary"
                 android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
                 android:layout_width="match_parent"
-                android:layout_margin="8dp"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/r_id"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:layout_width="match_parent"
-                android:layout_margin="8dp"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/c_date"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:layout_width="match_parent"
-                android:layout_margin="8dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="match_parent"
+                android:id="@+id/setDText"
                 android:layout_height="wrap_content"/>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -67,7 +72,7 @@
                 android:layout_height="wrap_content">
                 <TextView
                     android:id="@+id/limit"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="match_parent"
                     android:layout_weight="5"
                     android:layout_gravity="center"
@@ -92,19 +97,26 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <Button
+        android:id="@+id/shareid"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/m"
+        android:layout_marginStart="16dp"
+        android:text="Share Rood Id"
+        app:icon="@drawable/ic_baseline_share" />
 
     <Button
+        android:id="@+id/setDate"
         android:layout_width="wrap_content"
-        android:layout_marginStart="16dp"
-        android:id="@+id/shareid"
-        android:layout_below="@id/m"
-        android:text="Share Rood Id"
-        app:icon="@drawable/ic_baseline_share"
-        style="@style/Widget.Material3.Button"
-        android:layout_height="wrap_content"/>
-    <LinearLayout
+        android:layout_height="wrap_content"
         android:layout_below="@id/shareid"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="16dp"
+        android:text="Change Start Day Of Month"
+        app:icon="@drawable/ic_create" />
+    <LinearLayout
+        android:layout_below="@id/setDate"
         android:padding="16dp"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -120,6 +132,10 @@
             android:text="Show this month data"
             android:id="@+id/this_month_data"
             android:layout_height="wrap_content"/>
+
+
+
+
 
     </LinearLayout>
 </RelativeLayout>

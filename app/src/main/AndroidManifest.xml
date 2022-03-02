@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.subhamgupta.roomiessaver" >
+    package="com.subhamgupta.roomiesapp" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="true"
         android:label="@string/app_name"
         android:resizeableActivity="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.RoomiesSaver" >
         <activity
-            android:name=".activities.AccountCreation"
+            android:name="com.subhamgupta.roomiesapp.activities.AccountCreation"
             android:allowEmbedded="true"
             android:exported="false"
             android:launchMode="singleInstancePerTask"
@@ -25,7 +25,7 @@
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name=".activities.RationActivity"
+            android:name="com.subhamgupta.roomiesapp.activities.RationActivity"
             android:exported="false" />
 
         <meta-data
@@ -36,7 +36,7 @@
             android:resource="@color/md_theme_dark_primary" />
 
         <service
-            android:name=".services.FirebaseService"
+            android:name="com.subhamgupta.roomiesapp.services.FirebaseService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -44,10 +44,10 @@
         </service>
 
         <activity
-            android:name=".activities.RoomDetails"
+            android:name="com.subhamgupta.roomiesapp.activities.RoomDetails"
             android:exported="false" />
         <activity
-            android:name=".activities.SplashScreen"
+            android:name="com.subhamgupta.roomiesapp.activities.SplashScreen"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -66,7 +66,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.subhamgupta.roomiesapp.activities.MainActivity"
             android:allowEmbedded="true"
             android:exported="false"
             android:launchMode="singleInstancePerTask"

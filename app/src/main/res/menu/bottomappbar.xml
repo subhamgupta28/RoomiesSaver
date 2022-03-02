@@ -16,7 +16,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/info"
-        android:icon="@drawable/ic_outline_info"
+        android:icon="@drawable/ic_outline_settings"
         android:title="Info"
         app:showAsAction="always" />
     <item

@@ -1,40 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    app:cardCornerRadius="8dp"
-    android:layout_margin="4dp"
     style="@style/Widget.Material3.CardView.Elevated"
-    app:cardElevation="4dp"
-    android:layout_height="wrap_content">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="4dp"
-        android:layout_marginStart="2dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginStart="2dp"
+        android:orientation="vertical"
+        android:padding="4dp">
 
-            <TextView
-                android:id="@+id/hname"
-                android:textColor="@color/colorPrimary"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:text="Name"
-                android:layout_height="wrap_content"/>
+       <LinearLayout
+           android:layout_width="wrap_content"
+           android:orientation="horizontal"
+           android:layout_height="wrap_content">
+           <TextView
+               android:id="@+id/hname"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="Name"
+               android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+               android:textColor="@color/colorPrimary" />
+           <ImageView
+               android:layout_width="10dp"
+               android:layout_margin="4dp"
+               android:src="@drawable/ic_baseline_link"
+               android:layout_height="10dp"
+               app:tint="@color/colorPrimary" />
+       </LinearLayout>
 
 
         <TextView
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Contributed"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:layout_height="wrap_content"/>
+            android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+
         <TextView
             android:id="@+id/hamount"
             android:layout_width="wrap_content"
-            android:textColor="#0F9D58"
-            android:textStyle="bold"
+            android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:layout_height="wrap_content"/>
+            android:textColor="#0F9D58"
+            android:textStyle="bold" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
