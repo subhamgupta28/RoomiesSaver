@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    style="@style/Widget.Material3.CardView.Filled"
+    app:cardCornerRadius="6dp"
+    android:layout_margin="6dp"
+    android:layout_height="wrap_content">
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:orientation="vertical"
+      android:layout_margin="6dp"
+      android:layout_height="wrap_content">
+      <TextView
+          android:layout_width="match_parent"
+          android:id="@+id/rooms_name"
+          android:text="Room Name"
+          android:textAlignment="center"
+          android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+          android:layout_height="wrap_content"/>
+      <TextView
+          android:layout_width="match_parent"
+          android:text="Click To Enter"
+          android:textColor="@color/colorPrimary"
+          android:textAlignment="center"
+          android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+          android:layout_height="wrap_content"/>
+  </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

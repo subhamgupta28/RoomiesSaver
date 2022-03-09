@@ -12,6 +12,7 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:id="@+id/appbar"
+            android:visibility="gone"
             android:layout_alignParentTop="true"
 
             android:layout_height="wrap_content">
@@ -89,11 +90,11 @@
 
                     <app.futured.donut.DonutProgressView
                         android:id="@+id/donut_view"
-                        android:layout_width="100dp"
+                        android:layout_width="110dp"
                         android:layout_height="wrap_content"
                         app:donut_animateChanges="true"
                         app:donut_gapWidth="100"
-                        app:donut_strokeWidth="12dp" />
+                        app:donut_strokeWidth="10dp" />
 
                 </LinearLayout>
 

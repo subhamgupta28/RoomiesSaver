@@ -98,7 +98,8 @@ class Summary : Fragment() {
         map = HashMap()
         user_ref.get().addOnCompleteListener { task: Task<DataSnapshot> ->
             if (task.isSuccessful) {
-                for (ds in task.result!!.children) map[ds.key] = ds.value.toString()
+                for (ds in task.result!!.children)
+                    map[ds.key] = ds.value.toString()
                 key = map[roomRef].toString()
                 user_name = map["USER_NAME"].toString()
 //                Log.e("KEY", key)

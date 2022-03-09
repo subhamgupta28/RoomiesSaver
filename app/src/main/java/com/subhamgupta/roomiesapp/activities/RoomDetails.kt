@@ -1,6 +1,7 @@
 package com.subhamgupta.roomiesapp.activities
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Color
@@ -10,12 +11,15 @@ import android.util.Log
 import android.view.View
 import com.subhamgupta.roomiesapp.R
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -30,11 +34,16 @@ import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiesapp.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.Contenst.Companion.TIME_STRING
+import com.subhamgupta.roomiesapp.adapters.AllRoomsAdapter
+import com.subhamgupta.roomiesapp.models.AllRooms
+import com.subhamgupta.roomiesapp.models.RoomModel
 import com.subhamgupta.roomiesapp.utility.SettingsStorage
 import java.lang.Exception
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class RoomDetails : AppCompatActivity() {
@@ -56,6 +65,8 @@ class RoomDetails : AppCompatActivity() {
     lateinit var r_limit: TextView
     lateinit var setDText: TextView
     lateinit var editrdetail: Button
+    lateinit var allRoomRecyclerView: RecyclerView
+    lateinit var cngRoomBtn: Button
     lateinit var leaveRoom: Button
     lateinit var shareId: Button
     lateinit var save_btn: Button
@@ -63,7 +74,7 @@ class RoomDetails : AppCompatActivity() {
     lateinit var thisMonthData: SwitchMaterial
     lateinit var settingsStorage: SettingsStorage
     lateinit var setDateBtn: Button
-
+    lateinit var roomIds: MutableMap<String, String>
     var name: String? = null
     var l: String? = null
     var joinedPerson: Int? = null
@@ -83,11 +94,16 @@ class RoomDetails : AppCompatActivity() {
         editrdetail = findViewById(R.id.limit_btn)
         setDateBtn = findViewById(R.id.setDate)
         setDText = findViewById(R.id.setDText)
+        allRoomRecyclerView = findViewById(R.id.roomsRecycler)
+        cngRoomBtn = findViewById(R.id.chnRoom)
 
         thisMonthData = findViewById(R.id.this_month_data)
         darkMode = findViewById(R.id.dark_mode_switch)
         recyclerView.setHasFixedSize(true)
+        allRoomRecyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        allRoomRecyclerView.layoutManager =
+            StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
         mAuth = FirebaseAuth.getInstance()
         user = mAuth.currentUser!!
         ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
@@ -100,7 +116,7 @@ class RoomDetails : AppCompatActivity() {
             val netDate = Date(settingsStorage.startDateMillis!!)
             val date = sdf.format(netDate)
             setDText.text = "Start Day of Month $date"
-        }catch (e: Exception){
+        } catch (e: Exception) {
 
         }
         leaveRoom.setOnClickListener {
@@ -118,19 +134,25 @@ class RoomDetails : AppCompatActivity() {
             settingsStorage.isMonth = isCheck
         }
         darkMode.setOnCheckedChangeListener { _, isCheck ->
-            if (isCheck){
+            if (isCheck) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 settingsStorage.darkMode = true
-            }
-
-            else{
+            } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 settingsStorage.darkMode = false
             }
-
+        }
+        cngRoomBtn.setOnClickListener {
+            settingsStorage.roomRef = "ROOM_ID1"
+            val intent = Intent()
+            intent.putExtra("RES", 100)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
         }
         addItem()
+        getAllRooms()
     }
+
 
     private fun setDateOfMonth() {
         val datePicker = MaterialDatePicker.Builder.datePicker()
@@ -153,6 +175,26 @@ class RoomDetails : AppCompatActivity() {
                     showSnackBar("Start date of month updated")
                 }
         }
+    }
+
+    private fun getAllRooms() {
+        roomIds = HashMap()
+        ref.child(user.uid).child("ROOMS_JOINED").get()
+            .addOnCompleteListener { task: Task<DataSnapshot> ->
+                if (task.isSuccessful) {
+                    val list = ArrayList<String>()
+                    var count=1
+                    for (ds in task.result.children){
+                        val d = ds.value.toString()
+                        list.add(d)
+                        roomIds["ROOM_ID$count"] = d
+                        count++
+                    }
+                    Log.e("DATA","$roomIds")
+                    val allRoomsAdapter = AllRoomsAdapter(list, settingsStorage)
+                    allRoomRecyclerView.adapter = allRoomsAdapter
+                }
+            }
     }
 
     private fun showSnackBar(msg: String) {
@@ -188,15 +230,15 @@ class RoomDetails : AppCompatActivity() {
                         val list = details["ROOM_MATES"] as List<Map<String, Any>>?
 
                         for (i in list!!.indices) {
-                            Log.e("LIST","$i")
-                            try{
+                            Log.e("LIST", "$i")
+                            try {
                                 val chip = Chip(this@RoomDetails)
                                 chip.text = list[i]["USER_NAME"].toString()
                                 chip.chipStrokeWidth = 0f
                                 if (user.uid == list[i]["UUID"].toString())
                                     chip.setTextColor(Color.parseColor("#4285F4"))
                                 chipGroup.addView(chip)
-                            }catch (e:Exception){
+                            } catch (e: Exception) {
 
                             }
 
@@ -258,11 +300,11 @@ class RoomDetails : AppCompatActivity() {
                         Log.e("VAl", "$v")
                     }
                 }
-                snap!![d.key!!] = d.value as HashMap<String?, Any?>
+                snap[d.key!!] = d.value as HashMap<String?, Any?>
 
             }
             var c = ""
-            for (f in snap!!) {
+            for (f in snap) {
                 if (f.value == data)
                     c = f.key
             }

@@ -46,4 +46,7 @@ class MyNotesFragment : Fragment() {
         list.add(900)
         sparkLineLayout.setData(list)
     }
+    private fun addItem(){
+
+    }
 }

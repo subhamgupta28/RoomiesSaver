@@ -10,24 +10,19 @@
         android:title="Logout"
         app:showAsAction="always" />
     <item
-        android:id="@+id/search"
-        android:icon="@drawable/ic_person_search"
-        android:title="Search"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/info"
         android:icon="@drawable/ic_outline_settings"
-        android:title="Info"
+        android:title="Settings"
         app:showAsAction="always" />
     <item
-        android:id="@+id/issue"
-        android:icon="@drawable/ic_outline_back_hand"
-        android:title="Info"
+        android:id="@+id/changeRoom"
+        android:icon="@drawable/ic_outline_change_room"
+        android:title="Switch Room"
         app:showAsAction="always" />
     <item
         android:id="@+id/alert"
         android:icon="@drawable/ic_outline_alert"
-        android:title="Announcement"
+        android:title="Announce"
         app:showAsAction="always" />
 
 

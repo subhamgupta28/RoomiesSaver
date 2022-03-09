@@ -54,6 +54,25 @@
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/menu/bottomappbar.xml" value="0.23229166666666667" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2484375" />
         <entry key="..\:/Android App Development/RoomiesSaver/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2484375" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_icon.xml" value="0.244" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_necon.xml" value="0.2105" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/splash_background.xml" value="0.2105" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_account_creation.xml" value="0.15953177257525084" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_room_details.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_splash_screen.xml" value="0.16148648648648647" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/change_room_card.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_details.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/home_item.xml" value="0.15208333333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/items.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/person_items.xml" value="0.15208333333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/popup.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/ration_card.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/room_item.xml" value="0.15208333333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/rooms_item.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/signup_popup.xml" value="0.16148648648648647" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/menu/bottomappbar.xml" value="0.264" />
       </map>
     </option>
   </component>

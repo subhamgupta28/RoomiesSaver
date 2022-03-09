@@ -21,11 +21,14 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
+import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.shape.CornerFamily
@@ -52,6 +55,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity(), HomeToMain {
@@ -82,6 +87,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
     var key: String? = null
     lateinit var user_name: String
     lateinit var map: MutableMap<String?, String>
+    lateinit var roomMap: MutableMap<String?, String>
     lateinit var mAuth: FirebaseAuth
     lateinit var recyclerView: RecyclerView
     lateinit var db: FirebaseFirestore
@@ -113,10 +119,8 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         setSupportActionBar(bottomAppBar)
         progressBar.visibility = View.VISIBLE
 
-        settingsStorage = SettingsStorage(this)
-        if (!settingsStorage.isRoom_joined)
-            supportFinishAfterTransition()
-        roomRef = settingsStorage.roomRef.toString()
+
+
         Handler().postDelayed({
             init()
         }, 1000)
@@ -146,6 +150,10 @@ class MainActivity : AppCompatActivity(), HomeToMain {
     }
 
     private fun init() {
+        settingsStorage = SettingsStorage(this)
+        if (!settingsStorage.isRoom_joined)
+            supportFinishAfterTransition()
+        roomRef = settingsStorage.roomRef.toString()
         mAuth = FirebaseAuth.getInstance()
         user = mAuth.currentUser!!
         db = FirebaseFirestore.getInstance()
@@ -162,8 +170,9 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         //issuesFragment = IssuesFragment()
         rationFragment = RationFragment()
         myNotesFragment = MyNotesFragment()
-
+        roomMap = HashMap()
         updateChanges()
+        getRooms()
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         viewPagerAdapter.addFragments(homeFragment, "Home")
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
@@ -189,6 +198,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         viewPager2.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
             }
+
             override fun onPageScrolled(
                 position: Int,
                 positionOffset: Float,
@@ -213,6 +223,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
                 addItems()
         }
     }
+
     private fun runTransition(view: ViewGroup, isVisible: Boolean) {
         TransitionManager.beginDelayedTransition(view, ChangeBounds())
         view.visibility = if (isVisible)
@@ -220,77 +231,156 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         else
             View.GONE
     }
+
     private fun updateChanges() {
         ref.child(user.uid).get().addOnCompleteListener {
-            val res = it.result.value as MutableMap<*,*>
-            if (res.keys.contains("ROOM_ID")){
-                for (i in res){
-                    if (i.key.toString()=="ROOM_ID"){
+            val res = it.result.value as MutableMap<*, *>
+            val list = ArrayList<Any?>()
+            res.forEach { (k, v) ->
+                val st = k.toString()
+                if (st.contains("ROOM_ID"))
+                    list.add(v)
+            }
+            ref.child(user.uid).child("ROOMS_JOINED").setValue(list)
+            if (res.keys.contains("ROOM_ID")) {
+                for (i in res) {
+                    if (i.key.toString() == "ROOM_ID") {
                         ref.child(user.uid).child("ROOM_ID1").setValue(i.value)
                         ref.child(user.uid).child("ROOM_ID").removeValue()
                     }
                 }
                 addItem()
+
             }
         }
     }
 
-    private fun addItem() {
-        map = HashMap()
-        user_ref.get().addOnCompleteListener { task: Task<DataSnapshot> ->
-            if (task.isSuccessful) {
-                for (ds in task.result!!.children) (map as HashMap<String?, String>)[ds.key] =
-                    ds.value.toString()
-                key = (map as HashMap<String?, String>)[roomRef].toString()
-                settingsStorage.room_id = key
-                setFCM()
-                user_name = (map as HashMap<String?, String>)["USER_NAME"].toString()
-                "ID: $key".also { id_text.text = it }
-                settingsStorage.username = user_name
-                val query = db.collection(key + "_ALERT")
-                    .whereEqualTo("IS_COMPLETED", false)
-                query.addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
-                    materialCardView.visibility = View.GONE
-                    if (value != null) {
-                        for (ds in value) {
-                            alert_cancel.setOnClickListener {
-                                if (ds["UUID"].toString() == user.uid)
-                                    db.collection(key + "_ALERT").document(ds.id)
-                                        .update("IS_COMPLETED", true)
-                                else
-                                    materialCardView.visibility = View.GONE
+    private fun getRooms() {
+        ref.child(user.uid).get()
+            .addOnCompleteListener {
+                val res = it.result.value as MutableMap<*, *>
+                val listOfRooms = ArrayList<String>()
+                roomMap.clear()
+                for (i in res) {
+                    val key = i.key.toString()
+                    val value = i.value.toString()
+                    if (key.contains("ROOM_ID")) {
+                        listOfRooms.add(value)
+
+                        ref.child("ROOM").child(value).child("ROOM_NAME").get()
+                            .addOnCompleteListener { it1 ->
+                                val result = it1.result.value.toString()
+                                roomMap[result] = key
+                                if (key==roomRef)
+                                    id_text.text = result
                             }
-                            if (DateUtils.isToday(ds["TIME_STAMP"].toString().toLong()))
-                                materialCardView.visibility = View.VISIBLE
-                            else
-                                materialCardView.visibility = View.GONE
-                            if (ds["UUID"].toString() == user.uid)
-                                "You have announced ${ds["ALERT"]}".also {alert_text.text = it}
-                            else
-                                "${ds["BY"].toString()} has announced ${ds["ALERT"]}".also {alert_text.text = it}
-                        }
                     }
+
                 }
-                setData()
-                try {
-                    ref.child("ROOM").child(key!!)
-                        .child("START_DATE_MONTH").get()
-                        .addOnCompleteListener { task: Task<DataSnapshot> ->
-                            try {
-                                if (task.isSuccessful) {
-                                    val res = task.result
-                                    Log.e("START", "${res.value}")
-                                    settingsStorage.startDateMillis = res.value.toString().toLong()
-                                }
-                            } catch (e: Exception) {
-                                Log.e("MAIN A ERROR", "$e")
-                            }
-                        }
-                } catch (e: Exception) {
-                    Log.e("MAIN A ERROR", "$e")
+                Log.e("ALL_ROOMS", "$listOfRooms")
+
+
+            }
+    }
+
+    private fun changeRoom() {
+        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        val cv = layoutInflater.inflate(R.layout.change_room_card, null)
+
+        val chipGroup = cv.findViewById<ChipGroup>(R.id.all_room_chip)
+        val enterBtn = cv.findViewById<Button>(R.id.roomEnter)
+        chipGroup.isSingleSelection = true
+        roomMap.forEach { (k, v) ->
+            val chip = Chip(this)
+            chip.text = k
+            chip.isCheckable = true
+            chip.isCheckedIconVisible = true
+            if (v == roomRef){
+                chip.isChecked = true
+                chip.isSelected = true
+            }
+            chipGroup.addView(chip)
+        }
+        var roomId = ""
+        chipGroup.children.forEach {
+            (it as Chip).setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    Log.e("ROOM_NAME", "$roomMap")
+                    roomId = roomMap[it.text.toString()].toString()
+                    Log.e("chip",roomId)
+                    enterBtn.setOnClickListener {
+                        settingsStorage.roomRef = roomId
+                        init()
+                    }
                 }
             }
         }
+        materialAlertDialogBuilder.setView(cv)
+        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+        materialAlertDialogBuilder.show()
+    }
+
+    private fun addItem() {
+        map = HashMap()
+        user_ref.get()
+            .addOnCompleteListener { task: Task<DataSnapshot> ->
+                if (task.isSuccessful) {
+                    for (ds in task.result!!.children) (map as HashMap<String?, String>)[ds.key] =
+                        ds.value.toString()
+                    key = (map as HashMap<String?, String>)[roomRef].toString()
+                    val roomName = (map as HashMap<String?, String>)["ROOM_NAME"].toString()
+                    settingsStorage.room_id = key
+                    setFCM()
+                    user_name = (map as HashMap<String?, String>)["USER_NAME"].toString()
+                    roomName.also { id_text.text = it }
+                    settingsStorage.username = user_name
+                    val query = db.collection(key + "_ALERT")
+                        .whereEqualTo("IS_COMPLETED", false)
+                    query.addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
+                        materialCardView.visibility = View.GONE
+                        if (value != null) {
+                            for (ds in value) {
+                                alert_cancel.setOnClickListener {
+                                    if (ds["UUID"].toString() == user.uid)
+                                        db.collection(key + "_ALERT").document(ds.id)
+                                            .update("IS_COMPLETED", true)
+                                    else
+                                        materialCardView.visibility = View.GONE
+                                }
+                                if (DateUtils.isToday(ds["TIME_STAMP"].toString().toLong()))
+                                    materialCardView.visibility = View.VISIBLE
+                                else
+                                    materialCardView.visibility = View.GONE
+                                if (ds["UUID"].toString() == user.uid)
+                                    "You have announced ${ds["ALERT"]}".also {
+                                        alert_text.text = it
+                                    }
+                                else
+                                    "${ds["BY"].toString()} has announced ${ds["ALERT"]}".also {
+                                        alert_text.text = it
+                                    }
+                            }
+                        }
+                    }
+                    try {
+                        ref.child("ROOM").child(key!!)
+                            .child("START_DATE_MONTH").get()
+                            .addOnCompleteListener { task: Task<DataSnapshot> ->
+                                try {
+                                    if (task.isSuccessful) {
+                                        val res = task.result
+                                        settingsStorage.startDateMillis =
+                                            res.value.toString().toLong()
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("MAIN A ERROR", "$e")
+                                }
+                            }
+                    } catch (e: Exception) {
+                        Log.e("MAIN A ERROR", "$e")
+                    }
+                }
+            }
     }
 
 
@@ -312,6 +402,17 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         materialAlertDialogBuilder.show()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100) {
+            if (resultCode == RESULT_OK) {
+                Log.e("DATA", "recreate")
+                recreate()
+                settingsStorage = SettingsStorage(this)
+            }
+        }
+    }
+
     private fun goToRoomCreation(int: Int) {
         val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
         val intent = Intent(applicationContext, AccountCreation::class.java)
@@ -321,24 +422,22 @@ class MainActivity : AppCompatActivity(), HomeToMain {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.bottomappbar, menu)
-        val person_search = menu.findItem(R.id.search)
         val logout_btn = menu.findItem(R.id.logout)
         val room_details = menu.findItem(R.id.info)
-        val issue = menu.findItem(R.id.issue)
-        issue.isVisible = false
-        person_search.isVisible = false
+        val chRoom = menu.findItem(R.id.changeRoom)
         val alert = menu.findItem(R.id.alert)
         logout_btn.setOnMenuItemClickListener {
             logOut()
             false
         }
-        person_search.setOnMenuItemClickListener { false }
-        issue.setOnMenuItemClickListener {
+        chRoom.setOnMenuItemClickListener {
+            changeRoom()
             false
         }
         room_details.setOnMenuItemClickListener {
             val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
             startActivity(Intent(applicationContext, RoomDetails::class.java), bundle)
+            startActivityForResult(Intent(applicationContext, RoomDetails::class.java), 100, bundle)
             false
         }
         alert.setOnMenuItemClickListener {
@@ -465,30 +564,6 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         }
     }
 
-//    private fun createIssue() {
-//        val map1: MutableMap<String, String?> = HashMap()
-//        val ts = System.currentTimeMillis()
-//        val issue = msg_t.text.toString()
-//        if (issue.isNotEmpty()) {
-//            val person = user_name //issue_person.getText().toString();
-//            val timeStamp = time
-//            map1["ISSUE"] = issue
-//            map1["DATE"] = date
-//            map1["TIME"] = timeStamp
-//            map1["TIME_STAMP"] = ts.toString()
-//            map1["PERSON_TO"] = person
-//            map1["PERSON_FROM"] = user_name
-//            sendNotify(user_name, "New message\n$issue")
-//            db.collection(key + "_ISSUES")
-//                .add(map1)
-//                .addOnSuccessListener { documentReference: DocumentReference ->
-//
-//                    msg_t.text = null
-////                    Log.e("ISSUE_CREATED", documentReference.id)
-//                }
-//        }
-//    }
-
     private fun createAlert(text: String?) {
         val time = time
         val ts = System.currentTimeMillis()
@@ -532,26 +607,12 @@ class MainActivity : AppCompatActivity(), HomeToMain {
             notifyBody.put("message", msg)
             notifyBody.put("uid", uuid.toString())
             notifyBody.put("time", time)
-//            Log.e("NOTIFY_UID", uuid.toString())
             notification.put("to", "/topics/${settingsStorage.room_id}")
             notification.put("data", notifyBody)
         } catch (e: Exception) {
 
         }
         NotificationSender().sendNotification(notification, applicationContext)
-        //sendNotification(notification)
-    }
-
-    fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-        when (val value = this[it]) {
-            is JSONArray -> {
-                val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
-                JSONObject(map).toMap().values.toList()
-            }
-            is JSONObject -> value.toMap()
-            JSONObject.NULL -> null
-            else -> value
-        }
     }
 
     private fun updateThings() {
@@ -560,11 +621,9 @@ class MainActivity : AppCompatActivity(), HomeToMain {
     }
 
     override fun goToMain(position: Int, uuid: String) {
-//        Log.e("FROM_MAIN", uuid)
         viewPager2.setCurrentItem(1, true)
         diffUser.goToUser(position, uuid)
     }
-
 
 }
 

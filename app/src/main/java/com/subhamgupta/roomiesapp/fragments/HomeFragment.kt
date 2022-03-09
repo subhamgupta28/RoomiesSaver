@@ -2,6 +2,7 @@ package com.subhamgupta.roomiesapp.fragments
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
 import android.text.format.DateUtils
 import android.transition.Fade
 import android.transition.TransitionManager
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import app.futured.donut.DonutProgressView
 import app.futured.donut.DonutSection
+import com.google.android.gms.tasks.Task
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
@@ -38,7 +40,9 @@ import java.time.ZoneId
 import java.util.*
 
 
-class HomeFragment(var homeToMain: HomeToMain? = null) : Fragment(), HAdapToHFrag {
+class HomeFragment(
+    var homeToMain: HomeToMain? = null,
+) : Fragment(), HAdapToHFrag {
     lateinit var personRecycler: RecyclerView
     lateinit var totalSpending: TextView
     lateinit var sparkLineLayout: SparkLineLayout
@@ -48,6 +52,7 @@ class HomeFragment(var homeToMain: HomeToMain? = null) : Fragment(), HAdapToHFra
     lateinit var db: FirebaseFirestore
     lateinit var latestItem: RecyclerView
     lateinit var ref: FirebaseFirestore
+    lateinit var roomRef: String
     lateinit var k: TextView
     lateinit var todayAmount: TextView
     lateinit var data: MutableList<Map<String, Any?>?>
@@ -90,22 +95,38 @@ class HomeFragment(var homeToMain: HomeToMain? = null) : Fragment(), HAdapToHFra
         k = view.findViewById(R.id.k)
         line1 = view.findViewById(R.id.line1)
 
-
         personRecycler.setHasFixedSize(true)
         personRecycler.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         latestItem.setHasFixedSize(true)
         latestItem.layoutManager =
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
+        init()
+    }
+    private fun getUser(){
+
+    }
+    private fun init() {
         ref = FirebaseFirestore.getInstance()
         db = FirebaseFirestore.getInstance()
         settingsStorage = SettingsStorage(requireContext())
         key = settingsStorage.room_id.toString()
+        roomRef = settingsStorage.roomRef.toString()
         dbref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
 //        welcomeText.text = "Welcome ${settingsStorage.username}"
-        ref.collection(key)
-        setData()
-        setRecentPurchase()
+        val map: HashMap<String?, String> = HashMap()
+        val uid = settingsStorage.uuid.toString()
+        dbref.child(uid).get().addOnCompleteListener { task: Task<DataSnapshot> ->
+            if (task.isSuccessful) {
+                for (ds in task.result!!.children)
+                    map[ds.key] = ds.value.toString()
+                key = map[roomRef].toString()
+                ref.collection(key)
+                setData()
+                setRecentPurchase()
+            }
+        }
+
         topAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.mspends -> {
@@ -155,10 +176,10 @@ class HomeFragment(var homeToMain: HomeToMain? = null) : Fragment(), HAdapToHFra
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        setRecentPurchase()
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        init()
+//    }
 
     private fun getTimeAgo(time: String): String {
         val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
