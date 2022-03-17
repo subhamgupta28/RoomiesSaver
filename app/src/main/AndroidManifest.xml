@@ -18,11 +18,18 @@
         android:theme="@style/Theme.RoomiesSaver" >
         <activity
             android:name="com.subhamgupta.roomiesapp.activities.AccountCreation"
-            android:allowEmbedded="true"
-            android:exported="false"
+            android:exported="true"
             android:launchMode="singleInstancePerTask"
             android:resizeableActivity="true"
             android:windowSoftInputMode="adjustResize" >
+            <intent-filter android:autoVerify="true" >
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="roomies.app"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.subhamgupta.roomiesapp.activities.RationActivity"
@@ -51,19 +58,9 @@
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter android:autoVerify="true" >
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="roomies.app"
-                    android:scheme="https" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.subhamgupta.roomiesapp.activities.MainActivity"

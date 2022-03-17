@@ -1,7 +1,6 @@
 package com.subhamgupta.roomiesapp.activities
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Color
@@ -9,17 +8,11 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import com.subhamgupta.roomiesapp.R
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -34,16 +27,11 @@ import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.subhamgupta.roomiesapp.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.Contenst.Companion.TIME_STRING
-import com.subhamgupta.roomiesapp.adapters.AllRoomsAdapter
-import com.subhamgupta.roomiesapp.models.AllRooms
-import com.subhamgupta.roomiesapp.models.RoomModel
+import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.utility.SettingsStorage
-import java.lang.Exception
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class RoomDetails : AppCompatActivity() {
@@ -55,21 +43,21 @@ class RoomDetails : AppCompatActivity() {
     lateinit var ref: DatabaseReference
     lateinit var roomRef: String
     lateinit var user_ref: DatabaseReference
-    lateinit var recyclerView: RecyclerView
     lateinit var r_id: TextView
     lateinit var r_name: TextView
     lateinit var limit: TextInputEditText
+    lateinit var roomMap: MutableMap<String?, String>
+    lateinit var tempRoomMap: MutableMap<String?, String>
     lateinit var rname: TextInputEditText
     lateinit var c_date: TextView
     lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     lateinit var r_limit: TextView
     lateinit var setDText: TextView
     lateinit var editrdetail: Button
-    lateinit var allRoomRecyclerView: RecyclerView
-    lateinit var cngRoomBtn: Button
     lateinit var leaveRoom: Button
     lateinit var shareId: Button
     lateinit var save_btn: Button
+    lateinit var joinRoom: Button
     lateinit var darkMode: SwitchMaterial
     lateinit var thisMonthData: SwitchMaterial
     lateinit var settingsStorage: SettingsStorage
@@ -83,7 +71,6 @@ class RoomDetails : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_room_details)
-        recyclerView = findViewById(R.id.detail_recycler)
         chipGroup = findViewById(R.id.chips)
         r_id = findViewById(R.id.r_id)
         r_name = findViewById(R.id.r_name)
@@ -94,16 +81,14 @@ class RoomDetails : AppCompatActivity() {
         editrdetail = findViewById(R.id.limit_btn)
         setDateBtn = findViewById(R.id.setDate)
         setDText = findViewById(R.id.setDText)
-        allRoomRecyclerView = findViewById(R.id.roomsRecycler)
-        cngRoomBtn = findViewById(R.id.chnRoom)
+
+
+        joinRoom = findViewById(R.id.joinRoom)
 
         thisMonthData = findViewById(R.id.this_month_data)
         darkMode = findViewById(R.id.dark_mode_switch)
-        recyclerView.setHasFixedSize(true)
-        allRoomRecyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        allRoomRecyclerView.layoutManager =
-            StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
+
+
         mAuth = FirebaseAuth.getInstance()
         user = mAuth.currentUser!!
         ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
@@ -111,14 +96,20 @@ class RoomDetails : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         settingsStorage = SettingsStorage(this)
         roomRef = settingsStorage.roomRef.toString()
+
+        init()
+    }
+    private fun init(){
         try {
-            val sdf = SimpleDateFormat(TIME_STRING, Locale.getDefault())
+            val sdf = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
             val netDate = Date(settingsStorage.startDateMillis!!)
             val date = sdf.format(netDate)
-            setDText.text = "Start Day of Month $date"
+            setDText.text = date
         } catch (e: Exception) {
 
         }
+        roomMap = HashMap()
+        tempRoomMap = HashMap()
         leaveRoom.setOnClickListener {
             leaveRoom()
         }
@@ -127,6 +118,9 @@ class RoomDetails : AppCompatActivity() {
         }
         setDateBtn.setOnClickListener {
             setDateOfMonth()
+        }
+        joinRoom.setOnClickListener {
+            joinRoomPopUp()
         }
         thisMonthData.isChecked = settingsStorage.isMonth == true
         darkMode.isChecked = settingsStorage.darkMode == true
@@ -142,15 +136,14 @@ class RoomDetails : AppCompatActivity() {
                 settingsStorage.darkMode = false
             }
         }
-        cngRoomBtn.setOnClickListener {
-            settingsStorage.roomRef = "ROOM_ID1"
-            val intent = Intent()
-            intent.putExtra("RES", 100)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        }
         addItem()
-        getAllRooms()
+        getRooms()
+    }
+    private fun joinRoomPopUp(){
+        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        val intent = Intent(applicationContext, AccountCreation::class.java)
+        intent.putExtra("CODE", 1)
+        startActivity(intent, bundle)
     }
 
 
@@ -177,25 +170,6 @@ class RoomDetails : AppCompatActivity() {
         }
     }
 
-    private fun getAllRooms() {
-        roomIds = HashMap()
-        ref.child(user.uid).child("ROOMS_JOINED").get()
-            .addOnCompleteListener { task: Task<DataSnapshot> ->
-                if (task.isSuccessful) {
-                    val list = ArrayList<String>()
-                    var count=1
-                    for (ds in task.result.children){
-                        val d = ds.value.toString()
-                        list.add(d)
-                        roomIds["ROOM_ID$count"] = d
-                        count++
-                    }
-                    Log.e("DATA","$roomIds")
-                    val allRoomsAdapter = AllRoomsAdapter(list, settingsStorage)
-                    allRoomRecyclerView.adapter = allRoomsAdapter
-                }
-            }
-    }
 
     private fun showSnackBar(msg: String) {
         Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG)
@@ -212,6 +186,42 @@ class RoomDetails : AppCompatActivity() {
             startActivity(shareIntent)
         }
     }
+    private fun getRooms() {
+        ref.child(user.uid).get()
+            .addOnCompleteListener {
+                val res = it.result.value as MutableMap<*, *>
+                val listOfRooms = ArrayList<String>()
+                roomMap.clear()
+                tempRoomMap.clear()
+                for (i in res) {
+                    val key = i.key.toString()
+                    val value = i.value.toString()
+                    if (key.contains("ROOM_ID")) {
+                        listOfRooms.add(value)
+
+                        ref.child("ROOM").child(value).child("ROOM_NAME").get()
+                            .addOnCompleteListener { it1 ->
+                                val result = it1.result.value.toString()
+                                roomMap[result] = key
+                                tempRoomMap[key] = result
+                                val chip = Chip(this)
+                                chip.text = result
+                                chip.isCheckedIconVisible = true
+                                if (key == roomRef){
+                                    chip.isCheckable = true
+                                    chip.isChecked = true
+                                    chip.isSelected = true
+                                }
+                                chipGroup.addView(chip)
+                            }
+                    }
+
+                }
+                Log.e("ALL_ROOMS", "$listOfRooms")
+
+
+            }
+    }
 
     private fun addItem() {
         map = HashMap()
@@ -227,28 +237,12 @@ class RoomDetails : AppCompatActivity() {
                         for (ds in snapshot.children) {
                             (details as HashMap<String?, Any?>)[ds.key] = ds.value
                         }
-                        val list = details["ROOM_MATES"] as List<Map<String, Any>>?
-
-                        for (i in list!!.indices) {
-                            Log.e("LIST", "$i")
-                            try {
-                                val chip = Chip(this@RoomDetails)
-                                chip.text = list[i]["USER_NAME"].toString()
-                                chip.chipStrokeWidth = 0f
-                                if (user.uid == list[i]["UUID"].toString())
-                                    chip.setTextColor(Color.parseColor("#4285F4"))
-                                chipGroup.addView(chip)
-                            } catch (e: Exception) {
-
-                            }
-
-                        }
-                        r_id.text = "ROOM ID: $key"
-                        r_name.text = "ROOM NAME: " + details["ROOM_NAME"]
+                        r_id.text = key
+                        r_name.text = details["ROOM_NAME"].toString()
                         name = details["ROOM_NAME"].toString()
                         l = details["LIMIT"].toString()
-                        c_date.text = "CREATED ON: " + details["CREATED_ON"]
-                        r_limit.text = "LIMIT: " + details["LIMIT"]
+                        c_date.text = convertDate(details["CREATED_ON"].toString())
+                        r_limit.text = details["LIMIT"].toString()
                         joinedPerson = details["JOINED_PERSON"].toString().toInt()
                         editrdetail.setOnClickListener {
                             editLimit()
@@ -259,6 +253,23 @@ class RoomDetails : AppCompatActivity() {
                 })
             }
         }
+    }
+    private fun convertDate(s:String) : String{
+        var dt =""
+        try {
+            val dte = SimpleDateFormat(DATE_STRING, Locale.ROOT)
+            val de = dte.parse(s)
+            val dt1 = SimpleDateFormat("EEE, dd MMM yyyy", Locale.ROOT)
+            println(dt1.format(de))
+            dt = dt1.format(de)
+        } catch (e: Exception) {
+            Log.e("ERROR ON RD","$e")
+
+        }
+        finally {
+            dt = s
+        }
+        return dt
     }
 
     fun editLimit() {

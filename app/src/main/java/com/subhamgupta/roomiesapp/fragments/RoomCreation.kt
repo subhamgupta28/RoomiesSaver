@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
+import com.subhamgupta.roomiesapp.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.activities.MainActivity
 import com.subhamgupta.roomiesapp.onItemClick
@@ -106,44 +107,74 @@ class RoomCreation(
         var limit = 10
         if (l != "") limit = l.toInt()
         //String t = String.valueOf((System.currentTimeMillis()));
-        ref.child(room).child(id).child("ROOM_ID").setValue(id)
-        ref.child(room).child(id).child("CREATED_ON").setValue(date)
-        ref.child(room).child(id).child("ROOM_NAME").setValue(name)
-        ref.child(room).child(id).child("START_DATE_MONTH").setValue(0)
-        ref.child(room).child(id).child("LIMIT").setValue(limit)
-        val list: MutableList<Map<String, Any?>> = ArrayList()
-        map = HashMap()
-        map["KEY"] = id
-        map["MONEY_PAID"] = 0
-        map["UUID"] = user.uid
-        map["USER_NAME"] = user_name
-        list.add(map)
-        ref.child(room).child(id).child("ROOM_MATES").setValue(list)
-        ref.child(room).child(id).child("JOINED_PERSON").setValue(1)
-        ref.child(room).child(id).child("CREATED_BY").setValue(uid)
-            .addOnFailureListener { e: Exception ->
-                Log.e("ERROR", e.message!!)
-                Snackbar.make(contextView, "Something went wrong", Snackbar.LENGTH_LONG).show()
-            }.addOnSuccessListener {
-                settingsStorage.isRoom_joined = true
-                Snackbar.make(contextView, "Room Created Successfully", Snackbar.LENGTH_LONG).show()
-                ref.child(uid).child("ROOM_ID1").setValue(id)
-                ref.child(uid).child("ROOM_NAME").setValue(name)
-                ref.child(uid).child("IS_ROOM_JOINED").setValue(true)
-                ref.child(uid).child("KEY").setValue(id)
-                    .addOnFailureListener { e: Exception -> Log.e("ERROR", e.message!!) }
-                    .addOnSuccessListener {
+        ref.child(user.uid).get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val mp = it.result.value as MutableMap<*, *>
+                val ob = getNewKey(mp, id)
+                val finalKey = ob["F_KEY"].toString()
+                val flag = ob["IS_JOIN"].toString().toBoolean()
+                ref.child(room).child(id).child("ROOM_ID").setValue(id)
+                ref.child(room).child(id).child("CREATED_ON").setValue(date)
+                ref.child(room).child(id).child("ROOM_NAME").setValue(name)
+                ref.child(room).child(id).child("START_DATE_MONTH").setValue(0)
+                ref.child(room).child(id).child("LIMIT").setValue(limit)
+                val list: MutableList<Map<String, Any?>> = ArrayList()
+                map = HashMap()
+                map["KEY"] = id
+                map["MONEY_PAID"] = 0
+                map["UUID"] = user.uid
+                map["USER_NAME"] = user_name
+                list.add(map)
+                ref.child(room).child(id).child("ROOM_MATES").setValue(list)
+                ref.child(room).child(id).child("JOINED_PERSON").setValue(1)
+                ref.child(room).child(id).child("CREATED_BY").setValue(uid)
+                    .addOnFailureListener { e: Exception ->
+                        Log.e("ERROR", e.message!!)
+                        Snackbar.make(contextView, "Something went wrong", Snackbar.LENGTH_LONG).show()
+                    }.addOnSuccessListener {
                         settingsStorage.isRoom_joined = true
-                        nextActivity()
+                        Snackbar.make(contextView, "Room Created Successfully", Snackbar.LENGTH_LONG).show()
+                        ref.child(uid).child(finalKey).setValue(id)
+                        ref.child(uid).child("ROOM_NAME").setValue(name)
+                        ref.child(uid).child("IS_ROOM_JOINED").setValue(true)
+                            .addOnFailureListener { e: Exception -> Log.e("ERROR", e.message!!) }
+                            .addOnSuccessListener {
+                                settingsStorage.isRoom_joined = true
+                                nextActivity()
+                            }
                     }
             }
+        }
+
     }
 
     private fun nextActivity() {
         val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
         startActivity(Intent(activity, MainActivity::class.java), bundle)
     }
-
+    private fun getNewKey(mp: MutableMap<*, *>, room_id:String): MutableMap<String, Any> {
+        val kys = mp.keys
+        val nxt = ArrayList<Int>()
+        for (i in kys) {
+            val r = i.toString()
+            if (r.contains("ROOM_ID")) {
+                val k = r.substring(7).toInt()
+                nxt.add(k)
+            }
+        }
+        val finalKey =
+            if (nxt.size != 0)
+                "ROOM_ID${(nxt.maxOrNull() ?: 0) + 1}"
+            else
+                "ROOM_ID1"
+        var flag = false
+        for (i in mp.values) {
+            Log.e("F_KEY", "$i")
+            if (i.toString() == room_id)
+                flag = true
+        }
+        return mutableMapOf( "F_KEY" to finalKey, "IS_JOIN" to flag)
+    }
     private fun joinRoom() {
         val room_id = join_room.text.toString()
         val map: MutableMap<String?, Any?> = HashMap()
@@ -153,19 +184,13 @@ class RoomCreation(
                     if (dataSnapshot.value != null) {
                         var list: MutableList<Map<String?, Any?>> = ArrayList()
                         for (ds in dataSnapshot.children) {
-//                            Log.e("DATA", ds.key + " " + ds.value)
                             map[ds.key] = ds.value
                             if (ds.key == "ROOM_MATES") {
                                 list = ds.value as MutableList<Map<String?, Any?>>
                             }
                         }
-
                         val count = map["JOINED_PERSON"] as Long
                         val limit = map["LIMIT"] as Long
-
-//                        Log.e("count", count.toString())
-//                        Log.e("limit", limit.toString())
-
                         if (count <= limit) {
                             val map1: MutableMap<String?, Any?> = HashMap()
                             map1["KEY"] = room_id
@@ -178,28 +203,9 @@ class RoomCreation(
                             ref.child(user.uid).get().addOnCompleteListener {
                                 if (it.isSuccessful) {
                                     val mp = it.result.value as MutableMap<*, *>
-                                    val kys = mp.keys
-                                    val nxt = ArrayList<Int>()
-                                    Log.e("VALUE", "$kys")
-                                    for (i in kys) {
-                                        val r = i.toString()
-                                        if (r.contains("ROOM_ID")) {
-                                            val k = r.substring(7).toInt()
-                                            nxt.add(k)
-                                        }
-                                    }
-                                    val finalKey =
-                                        if (nxt.size != 0)
-                                            "ROOM_ID${(nxt.maxOrNull() ?: 0) + 1}"
-                                        else
-                                            "ROOM_ID1"
-
-                                    var flag = false
-                                    for (i in mp.values) {
-                                        Log.e("F_KEY", "$i")
-                                        if (i.toString() == room_id)
-                                            flag = true
-                                    }
+                                    val ob = getNewKey(mp, room_id)
+                                    val finalKey = ob["F_KEY"].toString()
+                                    val flag = ob["IS_JOIN"].toString().toBoolean()
                                     if (!flag) {
                                         Log.e("F_KEY", finalKey)
                                         ref.child("ROOM").child(room_id).child("ROOM_MATES").setValue(list)
@@ -229,7 +235,6 @@ class RoomCreation(
                                     }
                                 }
                             }
-
                         } else showSnackBar("Joined person limit exceeded")
                     } else showSnackBar("No room exist with provided id")
                 }.addOnFailureListener { showSnackBar("Something went wrong") }
@@ -245,14 +250,14 @@ class RoomCreation(
     val date: String
         get() {
             val date = Date()
-            val sdm = SimpleDateFormat("dd-MM-yyyy hh:mm:ss", Locale.getDefault())
+            val sdm = SimpleDateFormat(DATE_STRING, Locale.getDefault())
             return sdm.format(date)
         }
 
     companion object {
         fun generateID(text: String): String {
-            var te = text
-            val n = 16
+            var te = text.trim()
+            val n = 10
             val t = System.currentTimeMillis().toString()
             te = text.uppercase()
             val str = t + te + t + te + t + te
@@ -262,7 +267,7 @@ class RoomCreation(
                         * Math.random()).toInt()
                 sb.append(str[index])
             }
-            return sb.toString()
+            return sb.toString().trim()
         }
     }
 }

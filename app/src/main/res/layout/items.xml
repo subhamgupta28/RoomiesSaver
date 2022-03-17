@@ -73,30 +73,16 @@
 
             </LinearLayout>
 
-            <LinearLayout
+
+            <TextView
+                android:id="@+id/amount"
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="4"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="#0F9D58" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_keyboard_arrow_down"
-                    app:tint="@color/colorPrimary" />
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="#0F9D58" />
 
 
         </LinearLayout>

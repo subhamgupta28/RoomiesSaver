@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
     lateinit var user_name: String
     lateinit var map: MutableMap<String?, String>
     lateinit var roomMap: MutableMap<String?, String>
+    lateinit var tempRoomMap: MutableMap<String?, String>
     lateinit var mAuth: FirebaseAuth
     lateinit var recyclerView: RecyclerView
     lateinit var db: FirebaseFirestore
@@ -171,6 +172,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         rationFragment = RationFragment()
         myNotesFragment = MyNotesFragment()
         roomMap = HashMap()
+        tempRoomMap = HashMap()
         updateChanges()
         getRooms()
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
@@ -178,6 +180,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(summary, "All Expenses")
         viewPagerAdapter.addFragments(rationFragment, "Items")
+        viewPagerAdapter.addFragments(myNotesFragment, "My Expenses")
         viewPager2.offscreenPageLimit = 3
         settingsStorage.isRoom_joined = true
         viewPager2.adapter = viewPagerAdapter
@@ -261,6 +264,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
                 val res = it.result.value as MutableMap<*, *>
                 val listOfRooms = ArrayList<String>()
                 roomMap.clear()
+                tempRoomMap.clear()
                 for (i in res) {
                     val key = i.key.toString()
                     val value = i.value.toString()
@@ -271,6 +275,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.value.toString()
                                 roomMap[result] = key
+                                tempRoomMap[key] = result
                                 if (key==roomRef)
                                     id_text.text = result
                             }
@@ -303,11 +308,10 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         }
         var roomId = ""
         chipGroup.children.forEach {
-            (it as Chip).setOnCheckedChangeListener { buttonView, isChecked ->
+            (it as Chip).setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked){
-                    Log.e("ROOM_NAME", "$roomMap")
                     roomId = roomMap[it.text.toString()].toString()
-                    Log.e("chip",roomId)
+                    "Enter ${tempRoomMap[roomId]}".also {i-> enterBtn.text = i }
                     enterBtn.setOnClickListener {
                         settingsStorage.roomRef = roomId
                         init()
@@ -471,7 +475,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
                     if (!TextUtils.isDigitsOnly(amount_paid.text.toString())) {
                         amount_layout.error = "Only numbers are allowed"
                     } else {
-                        saveItems(item_bought.text.toString(), amount_paid.text.toString())
+                        saveItems(item_bought.text.toString().trim(), amount_paid.text.toString().trim())
                     }
                 } catch (e: Exception) {
                 }
@@ -521,7 +525,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         val contactPopupView = layoutInflater.inflate(R.layout.alert_popup, null)
         alert_et = contactPopupView.findViewById(R.id.alert_et)
         alert_btn = contactPopupView.findViewById(R.id.alert_btn)
-        alert_btn.setOnClickListener { if (alert_et.text.toString() != "") createAlert(alert_et.text.toString()) }
+        alert_btn.setOnClickListener { if (alert_et.text.toString() != "") createAlert(alert_et.text.toString().trim()) }
         materialAlertDialogBuilder.setView(contactPopupView)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         materialAlertDialogBuilder.show()
@@ -623,6 +627,10 @@ class MainActivity : AppCompatActivity(), HomeToMain {
     override fun goToMain(position: Int, uuid: String) {
         viewPager2.setCurrentItem(1, true)
         diffUser.goToUser(position, uuid)
+    }
+
+    override fun goToAllExpenses() {
+        viewPager2.setCurrentItem(2, true)
     }
 
 }

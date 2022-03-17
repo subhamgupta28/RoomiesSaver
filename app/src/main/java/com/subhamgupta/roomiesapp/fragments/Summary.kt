@@ -129,7 +129,6 @@ class Summary : Fragment() {
                 sumMap.clear()
                 if (value != null && !value.isEmpty) {
                     emptyBox.visibility = View.INVISIBLE
-                    materialCardView.visibility = View.VISIBLE
                     try {
                         for (qds in value) {
                             val k = qds.data as MutableMap<String, Any>
@@ -153,7 +152,6 @@ class Summary : Fragment() {
                     }
                 } else{
                     emptyBox.visibility = View.VISIBLE
-                    materialCardView.visibility = View.GONE
                 }
             }
     }

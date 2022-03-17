@@ -11,6 +11,7 @@ import com.subhamgupta.roomiesapp.R
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
@@ -28,12 +29,14 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.majorik.sparklinelibrary.SparkLineLayout
+import com.subhamgupta.roomiesapp.Contenst
 import com.subhamgupta.roomiesapp.Contenst.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.adapters.HomeAdapter
 import com.subhamgupta.roomiesapp.adapters.SummaryAdapter
 import com.subhamgupta.roomiesapp.interfaces.HAdapToHFrag
 import com.subhamgupta.roomiesapp.interfaces.HomeToMain
 import com.subhamgupta.roomiesapp.utility.SettingsStorage
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -47,7 +50,9 @@ class HomeFragment(
     lateinit var totalSpending: TextView
     lateinit var sparkLineLayout: SparkLineLayout
     lateinit var updatedOn: TextView
-    lateinit var welcomeText: TextView
+    private lateinit var welcomeText: TextView
+    private lateinit var startDText: TextView
+    lateinit var endDText: TextView
     lateinit var emptyLayout: LinearLayout
     lateinit var db: FirebaseFirestore
     lateinit var latestItem: RecyclerView
@@ -64,7 +69,7 @@ class HomeFragment(
     lateinit var kt: LinearLayout
     lateinit var summaryAdapter: SummaryAdapter
     lateinit var line1: MaterialCardView
-    lateinit var topAppBar: Toolbar
+    lateinit var goToAllExp: Button
     var totalAmount: Int = 0
     var todayTotal: Int = 0
 
@@ -90,7 +95,9 @@ class HomeFragment(
         welcomeText = view.findViewById(R.id.welcometext)
         sparkLineLayout = view.findViewById(R.id.spark)
         emptyLayout = view.findViewById(R.id.emptytext)
-        topAppBar = view.findViewById(R.id.topAppBar)
+        startDText = view.findViewById(R.id.starts_on)
+        endDText = view.findViewById(R.id.today)
+        goToAllExp = view.findViewById(R.id.go_to_all_exp_btn)
         kt = view.findViewById(R.id.kt)
         k = view.findViewById(R.id.k)
         line1 = view.findViewById(R.id.line1)
@@ -103,9 +110,7 @@ class HomeFragment(
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
         init()
     }
-    private fun getUser(){
 
-    }
     private fun init() {
         ref = FirebaseFirestore.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -126,23 +131,19 @@ class HomeFragment(
                 setRecentPurchase()
             }
         }
-
-        topAppBar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.mspends -> {
-                    true
-                }
-                R.id.msummary -> {
-
-                    true
-                }
-                R.id.mration -> {
-
-                    true
-                }
-                else -> false
-            }
+        goToAllExp.setOnClickListener {
+            homeToMain?.goToAllExpenses()
         }
+        try {
+            val sdf = SimpleDateFormat("dd MMM yy", Locale.getDefault())
+            val sd = Date(settingsStorage.startDateMillis!!)
+            val ed = Date(System.currentTimeMillis())
+            "${sdf.format(sd)} -- ".also { startDText.text = it }
+            endDText.text = sdf.format(ed)
+        } catch (e: java.lang.Exception) {
+
+        }
+
     }
 
     private fun runTransition(view: ViewGroup, isVisible: Boolean) {
@@ -162,6 +163,9 @@ class HomeFragment(
                         if (ds.key.toString() == "LAST_UPDATED") {
                             updatedOn.text = "Updated ${getTimeAgo(ds.value.toString())}"
                         }
+                        if (ds.key.toString() == "START_DATE_MONTH"){
+                            settingsStorage.startDateMillis = ds.value.toString().toLong()
+                        }
                     }
                 } catch (e: Exception) {
                     Log.e("ERROR", e.localizedMessage)
@@ -176,10 +180,10 @@ class HomeFragment(
 
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        init()
-//    }
+    override fun onResume() {
+        super.onResume()
+        init()
+    }
 
     private fun getTimeAgo(time: String): String {
         val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
@@ -204,7 +208,7 @@ class HomeFragment(
         val list: ArrayList<Int> = ArrayList()
 
         var thisMonthAmount = 0
-        sparkLineLayout.setData(mutableListOf(0, 1, 0, 1, 0, 1, 0) as ArrayList<Int>)
+        sparkLineLayout.setData(mutableListOf(0, 0) as ArrayList<Int>)
         val sdom = if (settingsStorage.startDateMillis?.toInt()==0)LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond*1000
                     else settingsStorage.startDateMillis
 
@@ -317,25 +321,10 @@ class HomeFragment(
     }
 
     private val randColors = arrayOf(
-        "#FFB300",
-        "#803E75",
-        "#FF6800",
-        "#A6BDD7",
-        "#C10020",
-        "#CEA262",
-        "#817066",
-        "#007D34",
-        "#F6768E",
-        "#00538A",
-        "#FF7A5C",
-        "#53377A",
-        "#FF8E00",
-        "#B32851",
-        "#F4C800",
-        "#7F180D",
-        "#93AA00",
-        "#593315",
-        "#F13A13",
-        "#232C16"
+        "#FFB300", "#803E75", "#FF6800", "#A6BDD7",
+        "#C10020", "#CEA262", "#817066", "#007D34",
+        "#F6768E", "#00538A", "#FF7A5C", "#53377A",
+        "#FF8E00", "#B32851", "#F4C800", "#7F180D",
+        "#93AA00", "#593315", "#F13A13", "#232C16"
     )
 }

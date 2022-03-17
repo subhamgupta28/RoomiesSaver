@@ -5,11 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.RoomDetails">
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/detail_recycler"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="match_parent"/>
+
 
     <TextView
         android:id="@+id/text"
@@ -21,76 +17,134 @@
         android:layout_marginEnd="12dp"
         android:text="Settings"
         android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chips"
-        android:paddingStart="12dp"
-        android:visibility="gone"
-        android:paddingEnd="12dp"
-        android:layout_below="@id/text"
-        style="@style/Widget.Material3.Chip.Filter.Elevated"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </com.google.android.material.chip.ChipGroup>
+
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_margin="12dp"
-        app:cardCornerRadius="12dp"
         android:id="@+id/m"
         style="@style/Widget.Material3.CardView.Elevated"
-        app:cardElevation="18dp"
-        android:layout_below="@id/chips"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_margin="12dp"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="18dp">
 
-            <TextView
-                android:id="@+id/r_name"
-                android:textColor="@color/colorPrimary"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="match_parent"
-                android:text="Room Name"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/r_id"
-                android:textColor="@color/colorSecondary"
-                android:text="Room id"
-                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/c_date"
-                android:text="Date"
-                android:textColor="@color/colorRed"
-                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                android:layout_width="match_parent"
-                android:id="@+id/setDText"
-                android:textColor="@color/colorSecondaryVariant"
-                android:text="Start date"
-                android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:orientation="vertical">
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:orientation="horizontal"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Room Name"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/r_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/colorPrimary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Room ID"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorSecondary" />
+
+                <TextView
+                    android:id="@+id/r_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorSecondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Created On"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorRed" />
+
+                <TextView
+                    android:id="@+id/c_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorRed" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Start Date"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/colorSecondaryVariant" />
+
+                <TextView
+                    android:id="@+id/setDText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+
+                    android:textColor="@color/colorSecondaryVariant" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Limit"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
                 <TextView
                     android:id="@+id/limit"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_height="wrap_content"/>
-                <Button
-                    android:id="@+id/limit_btn"
-                    android:layout_width="wrap_content"
-                    app:icon="@drawable/ic_create"
-                    style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+
             </LinearLayout>
 
         </LinearLayout>
@@ -98,13 +152,13 @@
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_below="@id/m"
-        android:layout_marginBottom="6dp"
-        android:text="Rooms you have joined"
         android:id="@+id/tv"
-        android:layout_height="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/m"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="6dp"
+        android:text="Rooms you have joined" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/roomsRecycler"
@@ -113,69 +167,93 @@
         android:layout_below="@id/tv"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="8dp"
+        android:visibility="gone" />
 
-
-    <Button
-        android:id="@+id/setDate"
-        android:layout_width="wrap_content"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chips"
+        style="@style/Widget.Material3.Chip.Filter.Elevated"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/kl"
-        android:layout_marginStart="16dp"
-        android:text="Change Start Day Of Month"
-        app:icon="@drawable/ic_create" />
+        android:layout_below="@id/tv"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        app:chipSpacingHorizontal="4dp"
+        app:chipSpacingVertical="4dp" />
+
+
     <LinearLayout
-        android:layout_below="@id/roomsRecycler"
-        android:padding="16dp"
-        android:orientation="vertical"
         android:id="@+id/line1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/chips"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <com.google.android.material.switchmaterial.SwitchMaterial
-            android:layout_width="match_parent"
-            android:text="Dark Mode"
             android:id="@+id/dark_mode_switch"
-            android:layout_height="wrap_content"/>
-        <com.google.android.material.switchmaterial.SwitchMaterial
             android:layout_width="match_parent"
-            android:text="Show this month data"
+            android:layout_height="wrap_content"
+            android:text="Dark Mode" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/this_month_data"
-            android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show this month data" />
     </LinearLayout>
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_below="@id/line1"
         android:id="@+id/kl"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/line1"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <Button
+            android:id="@+id/joinRoom"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Join Room"
+            app:icon="@drawable/ic_outline_add" />
+
+        <Button
+            android:id="@+id/limit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Room"
+            app:icon="@drawable/ic_create" />
+
+        <Button
+            android:id="@+id/setDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Start Day Of Month"
+            app:icon="@drawable/ic_create" />
+
         <Button
             android:id="@+id/shareid"
             style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-            android:layout_marginStart="16dp"
             android:text="Share Room"
             app:icon="@drawable/ic_baseline_share" />
+
         <Button
-            android:id="@+id/chnRoom"
-            style="@style/Widget.Material3.Button"
+            android:id="@+id/leaveroom"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/shareid"
-            android:layout_marginStart="12dp"
-            android:text="Change Room"
-            app:icon="@drawable/ic_baseline_room_change" />
+            android:layout_below="@id/setDate"
+            android:layout_gravity="end"
+            android:layout_marginStart="16dp"
+            android:text="leave room"
+            android:textColor="@color/colorRed" />
     </LinearLayout>
-    <Button
-        android:layout_width="wrap_content"
-        android:text="leave room"
-        android:id="@+id/leaveroom"
-        android:layout_below="@id/setDate"
-        android:layout_marginStart="16dp"
-        android:layout_gravity="end"
-        android:textColor="@color/colorRed"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_height="wrap_content"/>
+
 
 </RelativeLayout>

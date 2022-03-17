@@ -2,11 +2,13 @@ package com.subhamgupta.roomiesapp.activities
 
 import android.app.ActivityOptions
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
@@ -23,9 +25,11 @@ import com.subhamgupta.roomiesapp.fragments.RoomCreation
 import com.subhamgupta.roomiesapp.onItemClick
 import com.subhamgupta.roomiesapp.utility.SettingsStorage
 
+
 class AccountCreation : AppCompatActivity(), onItemClick {
     lateinit var login_pop: MaterialCardView
     lateinit var signin_pop: MaterialCardView
+    lateinit var appDetails: TextView
     private lateinit var mAuth: FirebaseAuth
     lateinit var linearLayout: LinearLayout
     var uuid: String?=null
@@ -43,6 +47,7 @@ class AccountCreation : AppCompatActivity(), onItemClick {
         signin_pop = findViewById(R.id.signin_pop_btn)
         contextView = findViewById(android.R.id.content)
         linearLayout = findViewById(R.id.line1)
+        appDetails = findViewById(R.id.app_details)
         settingsStorage = SettingsStorage(this)
         mAuth = FirebaseAuth.getInstance()
         user = mAuth.currentUser
@@ -50,6 +55,23 @@ class AccountCreation : AppCompatActivity(), onItemClick {
 
         roomCreation = RoomCreation(mAuth, ref, settingsStorage, contextView, this)
         try {
+            val uri: Uri? = intent.data
+            Log.e("D","$uri")
+            if (uri != null) {
+                val path: List<String> = uri.pathSegments
+                println(path)
+                Log.e("path", "$path")
+                if (path[0].isNotEmpty()){
+                    settingsStorage.room_id = path[0]
+                    setRoom()
+                }
+
+            }
+        }catch (e:Exception){
+
+        }
+        try {
+
             val code = intent.extras?.get("CODE").toString().toInt()
             Log.e("CODE","$code")
             if (code==0){
@@ -58,6 +80,8 @@ class AccountCreation : AppCompatActivity(), onItemClick {
             if (code==1){
                 setRoom()
             }
+            if ( code != 1 && user != null)
+                nextActivity(user)
         }catch (e:Exception){
 
         }
@@ -68,8 +92,7 @@ class AccountCreation : AppCompatActivity(), onItemClick {
             setSignIn()
         }
 
-        if (user != null)
-            nextActivity(user)
+
     }
     override fun loginComplete(user: FirebaseUser) {
         nextActivity(user)
