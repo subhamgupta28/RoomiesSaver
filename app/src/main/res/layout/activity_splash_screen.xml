@@ -9,7 +9,7 @@
 
     <View
         android:id="@+id/splash_img"
-        android:background="@drawable/ic_necon"
+        android:background="@drawable/ic_ic2"
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
         android:layout_height="320dp"/>

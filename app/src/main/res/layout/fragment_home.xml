@@ -88,14 +88,29 @@
                             android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
                     </LinearLayout>
 
-                    <app.futured.donut.DonutProgressView
-                        android:id="@+id/donut_view"
-                        android:layout_width="90dp"
-                        android:layout_gravity="center"
-                        android:layout_height="wrap_content"
-                        app:donut_animateChanges="true"
-                        app:donut_gapWidth="100"
-                        app:donut_strokeWidth="10dp" />
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/each_amt"
+                            android:layout_marginStart="6dp"
+                            android:layout_width="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorSecondary"
+                            android:textStyle="bold"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                            />
+                        <app.futured.donut.DonutProgressView
+                            android:id="@+id/donut_view"
+                            android:layout_width="90dp"
+                            android:layout_gravity="center"
+                            android:layout_height="wrap_content"
+                            app:donut_animateChanges="true"
+                            app:donut_gapWidth="100"
+                            app:donut_strokeWidth="10dp" />
+                    </RelativeLayout>
 
                 </LinearLayout>
 

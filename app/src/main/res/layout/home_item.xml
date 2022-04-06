@@ -41,12 +41,26 @@
             android:text="Contributed"
             android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 
-        <TextView
-            android:id="@+id/hamount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="#0F9D58"
-            android:textStyle="bold" />
+       <LinearLayout
+           android:layout_width="wrap_content"
+           android:orientation="horizontal"
+           android:layout_height="wrap_content">
+           <TextView
+               android:id="@+id/hamount"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+               android:textColor="#0F9D58"
+               android:textStyle="bold" />
+           <TextView
+               android:id="@+id/each_amt"
+               android:layout_marginStart="6dp"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:textStyle="bold"
+               android:textAlignment="textEnd"
+               android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+               />
+       </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

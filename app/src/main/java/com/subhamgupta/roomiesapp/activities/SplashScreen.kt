@@ -18,8 +18,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.utility.SettingsStorage
+
 
 class SplashScreen : AppCompatActivity() {
     var user: FirebaseUser? = null
@@ -31,22 +34,32 @@ class SplashScreen : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         settingsStorage = SettingsStorage(this)
-        if (settingsStorage.darkMode==true)
+        if (settingsStorage.darkMode == true)
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         else
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DynamicColors.applyToActivitiesIfAvailable(application)
         setContentView(R.layout.activity_splash_screen)
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
         settingsStorage = SettingsStorage(this)
-
+//        if (settingsStorage.darkMode == true)
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//        else
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//        val firestore = FirebaseFirestore.getInstance()
+//        firestore.useEmulator("10.0.2.2", 2828)
+//
+//        val settings = FirebaseFirestoreSettings.Builder()
+//            .setPersistenceEnabled(false)
+//            .build()
+//        firestore.firestoreSettings = settings
         try {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         } catch (e: Exception) {
@@ -57,18 +70,13 @@ class SplashScreen : AppCompatActivity() {
         ref = FirebaseDatabase.getInstance().reference.child("ROOMIES")
         bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
         settingsStorage.email?.let { Log.e("EMAIL", it) }
-        val animZoomIn = AnimationUtils.loadAnimation(
-            this,
-            R.anim.zoom_in
-        )
+        val animZoomIn = AnimationUtils.loadAnimation(this, R.anim.zoom_in)
         splash_img.startAnimation(animZoomIn)
         Handler().postDelayed({
             runSetup()
-        }, 1000)
-
-
-
+        }, 800)
     }
+
     private fun runSetup() {
         if (user != null && user!!.isEmailVerified) {
             if (settingsStorage.isRoom_joined) {
@@ -89,7 +97,7 @@ class SplashScreen : AppCompatActivity() {
                                     }
                                 } catch (e: Exception) {
                                     Log.e("ERROR", e.message!!)
-                                   goToRoomCreation(1)
+                                    goToRoomCreation(1)
                                 }
                             }
                         }
@@ -107,11 +115,12 @@ class SplashScreen : AppCompatActivity() {
         supportFinishAfterTransition()
     }
 
-    private fun goToRoomCreation(int: Int){
-        val intent =  Intent(applicationContext, AccountCreation::class.java)
+    private fun goToRoomCreation(int: Int) {
+        val intent = Intent(applicationContext, AccountCreation::class.java)
         intent.putExtra("CODE", int)
         startActivity(intent, bundle)
     }
+
     private fun nextActivity() {
         startActivity(Intent(applicationContext, MainActivity::class.java), bundle)
     }

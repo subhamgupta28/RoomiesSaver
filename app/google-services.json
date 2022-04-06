@@ -1,10 +1,77 @@
 {
   "project_info": {
     "project_number": "598939789269",
+    "firebase_url": "https://roomies-app-72b01-default-rtdb.firebaseio.com",
     "project_id": "roomies-app-72b01",
     "storage_bucket": "roomies-app-72b01.appspot.com"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598939789269:android:0e133f6bb7cfe9faf0bf5c",
+        "android_client_info": {
+          "package_name": "com.subhamgupta.mvvmfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "598939789269-lehcc656okkl4mqqe7cujm4fcs1iuthi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiRVI4N5KtTVB2PYIETFtom4QXW9pGE8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "598939789269-lehcc656okkl4mqqe7cujm4fcs1iuthi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598939789269:android:cb386b0749efa22af0bf5c",
+        "android_client_info": {
+          "package_name": "com.subhamgupta.roomiesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "598939789269-qqltriuljulnu1moi9a5c1fvosrjt0a5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.subhamgupta.roomiesapp",
+            "certificate_hash": "d80409b9a8e246c969c06df9e8d4d8adfcd07f2a"
+          }
+        },
+        {
+          "client_id": "598939789269-lehcc656okkl4mqqe7cujm4fcs1iuthi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiRVI4N5KtTVB2PYIETFtom4QXW9pGE8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "598939789269-lehcc656okkl4mqqe7cujm4fcs1iuthi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:598939789269:android:85e4ec0f6e80c0a5f0bf5c",

@@ -49,7 +49,6 @@ class RoomCreation(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_room_creation, container, false)
     }
 
@@ -101,12 +100,10 @@ class RoomCreation(
     private fun createRoom() {
         val name = room_name.text.toString()
         val id = generateID(name)
-//        Log.e("ID", id)
         val room = "ROOM"
         val l: String = limit_person.text.toString()
         var limit = 10
         if (l != "") limit = l.toInt()
-        //String t = String.valueOf((System.currentTimeMillis()));
         ref.child(user.uid).get().addOnCompleteListener {
             if (it.isSuccessful) {
                 val mp = it.result.value as MutableMap<*, *>
@@ -145,7 +142,6 @@ class RoomCreation(
                     }
             }
         }
-
     }
 
     private fun nextActivity() {

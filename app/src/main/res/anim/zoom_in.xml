@@ -3,13 +3,13 @@
     android:fillAfter="true">
 
     <scale
-        android:duration="950"
-        android:fromXScale="1"
-        android:fromYScale="1"
+        android:duration="800"
+        android:fromXScale="0.5"
+        android:fromYScale="0.5"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:toXScale="6"
-        android:toYScale="6">
+        android:toXScale="1.5"
+        android:toYScale="1.5">
     </scale>
 
 </set>

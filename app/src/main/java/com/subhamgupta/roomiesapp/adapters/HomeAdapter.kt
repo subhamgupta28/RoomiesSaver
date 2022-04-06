@@ -1,6 +1,7 @@
 package com.subhamgupta.roomiesapp.adapters
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,7 @@ import com.subhamgupta.roomiesapp.interfaces.HAdapToHFrag
 
 class HomeAdapter(
     var data: ArrayList<MutableMap<String, String>>,
-    var totalAmount:Int,
+    var amnt:Int,
     var context: Context,
     var hAdapToHFrag: HAdapToHFrag
 ):RecyclerView.Adapter<HomeAdapter.HomeHolder>() {
@@ -26,7 +27,16 @@ class HomeAdapter(
         val uuid = data[position]["UUID"].toString()
         val n = name[0].uppercase()+name.substring(1)
         holder.name.text = n
-        ("₹"+data[position]["AMOUNT"]).also { holder.amount.text = it }
+        val amount = data[position]["AMOUNT"].toString().toInt()
+        if (amnt<amount){
+            (" ↑${amount-amnt}").also { holder.eachAmt.text = it }
+            holder.eachAmt.setTextColor(Color.parseColor("#FF6D00"))
+        }
+        else{
+            (" ↓${amnt-amount}").also { holder.eachAmt.text = it }
+            holder.eachAmt.setTextColor(Color.parseColor("#DB4437"))
+        }
+        ("₹$amount").also { holder.amount.text = it }
         holder.itemView.setOnClickListener {
             hAdapToHFrag.goToHome(position, uuid)
         }
@@ -39,9 +49,11 @@ class HomeAdapter(
 
         var name: TextView
         var amount:TextView
+        var eachAmt:TextView
         init {
             name = itemView.findViewById(R.id.hname)
             amount = itemView.findViewById(R.id.hamount)
+            eachAmt = itemView.findViewById(R.id.each_amt)
         }
     }
 

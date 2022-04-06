@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import kotlin.math.ceil
 
 
 class HomeFragment(
@@ -48,6 +49,7 @@ class HomeFragment(
 ) : Fragment(), HAdapToHFrag {
     lateinit var personRecycler: RecyclerView
     lateinit var totalSpending: TextView
+    lateinit var eachPersonAmt: TextView
     lateinit var sparkLineLayout: SparkLineLayout
     lateinit var updatedOn: TextView
     private lateinit var welcomeText: TextView
@@ -96,6 +98,7 @@ class HomeFragment(
         sparkLineLayout = view.findViewById(R.id.spark)
         emptyLayout = view.findViewById(R.id.emptytext)
         startDText = view.findViewById(R.id.starts_on)
+        eachPersonAmt = view.findViewById(R.id.each_amt)
         endDText = view.findViewById(R.id.today)
         goToAllExp = view.findViewById(R.id.go_to_all_exp_btn)
         kt = view.findViewById(R.id.kt)
@@ -159,9 +162,15 @@ class HomeFragment(
         dbref.child("ROOM").child(key).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 try {
+
                     for (ds in dataSnapshot.children) {
                         if (ds.key.toString() == "LAST_UPDATED") {
                             updatedOn.text = "Updated ${getTimeAgo(ds.value.toString())}"
+                        }
+                        if (ds.key.toString() == "ROOM_MATES"){
+                            val res = ds.value as List<*>
+                            Log.e("Data", "${res.size}")
+                            settingsStorage.roomSize = res.size
                         }
                         if (ds.key.toString() == "START_DATE_MONTH"){
                             settingsStorage.startDateMillis = ds.value.toString().toLong()
@@ -189,9 +198,9 @@ class HomeFragment(
         val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
         var ago = ""
         try {
-            val time = sdf.parse(time).time
+            val ti = sdf.parse(time)?.time
             ago = DateUtils.getRelativeTimeSpanString(
-                time,
+                ti!!,
                 System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS
             ).toString()
@@ -209,16 +218,17 @@ class HomeFragment(
 
         var thisMonthAmount = 0
         sparkLineLayout.setData(mutableListOf(0, 0) as ArrayList<Int>)
-        val sdom = if (settingsStorage.startDateMillis?.toInt()==0)LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond*1000
+        val som = if (settingsStorage.startDateMillis?.toInt()==0)LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond*1000
                     else settingsStorage.startDateMillis
 
         val query: Query = db.collection(key)
-        query.whereGreaterThanOrEqualTo("TIME_STAMP", sdom!!)//1643673600
+        query.whereGreaterThanOrEqualTo("TIME_STAMP", som!!)//1643673600
             .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .addSnapshotListener { value: QuerySnapshot?, _: FirebaseFirestoreException? ->
                 data.clear()
                 map.clear()
                 list.clear()
+                list.add(0)
                 todayTotal = 0
                 totalAmount = 0
                 if (value != null && !value.isEmpty) {
@@ -288,7 +298,11 @@ class HomeFragment(
                         "₹$totalAmount".also { totalSpending.text = it }
                         donutProgressView.cap = totalAmount.toFloat()
                         donutProgressView.submitData(donutList)
-                        homeAdapter = HomeAdapter(map, totalAmount, requireContext(), this)
+                        var ap = settingsStorage.roomSize!!
+                        ap = ceil((totalAmount/ap).toDouble()).toInt()
+                        Log.e("AMOUNT","${(totalAmount/ap)}")
+                        eachPersonAmt.text = "$ap\neach"
+                        homeAdapter = HomeAdapter(map, ap, requireContext(), this)
                         personRecycler.adapter = homeAdapter
                         ("₹$todayTotal").also { todayAmount.text = it }
                         summaryAdapter = SummaryAdapter(requireContext())
@@ -302,7 +316,6 @@ class HomeFragment(
                     runTransition(emptyLayout, true)
                     runTransition(kt, false)
                     k.visibility = View.GONE
-
                 }
             }
     }
@@ -316,7 +329,6 @@ class HomeFragment(
     }
 
     override fun goToHome(position: Int, uuid: String) {
-//        Log.e("FROM_HOME",uuid)
         homeToMain?.goToMain(position, uuid)
     }
 

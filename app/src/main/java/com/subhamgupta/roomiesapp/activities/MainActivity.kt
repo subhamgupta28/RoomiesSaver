@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
 
         Handler().postDelayed({
             init()
-        }, 1000)
+        }, 500)
     }
 
     private fun setFCM() {
@@ -168,9 +168,8 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         homeFragment = HomeFragment(this)
         diffUser = DiffUser()
         summary = Summary()
-        //issuesFragment = IssuesFragment()
         rationFragment = RationFragment()
-        myNotesFragment = MyNotesFragment()
+//        myNotesFragment = MyNotesFragment()
         roomMap = HashMap()
         tempRoomMap = HashMap()
         updateChanges()
@@ -180,7 +179,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(summary, "All Expenses")
         viewPagerAdapter.addFragments(rationFragment, "Items")
-        viewPagerAdapter.addFragments(myNotesFragment, "My Expenses")
+//        viewPagerAdapter.addFragments(myNotesFragment, "My Expenses")
         viewPager2.offscreenPageLimit = 3
         settingsStorage.isRoom_joined = true
         viewPager2.adapter = viewPagerAdapter
@@ -336,7 +335,7 @@ class MainActivity : AppCompatActivity(), HomeToMain {
                     settingsStorage.room_id = key
                     setFCM()
                     user_name = (map as HashMap<String?, String>)["USER_NAME"].toString()
-                    roomName.also { id_text.text = it }
+//                    roomName.also { id_text.text = it }
                     settingsStorage.username = user_name
                     val query = db.collection(key + "_ALERT")
                         .whereEqualTo("IS_COMPLETED", false)

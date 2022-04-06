@@ -14,6 +14,18 @@ class SettingsStorage(private val context: Context) {
         editor.apply()
     }
 
+    var roomSize: Int? = null
+        get() {
+            field = sharedPreferences.getInt("roomSize", 0)
+            return field
+        }
+        set(value) {
+            if (value != null) {
+                editor.putInt("roomSize", value)
+            }
+            editor.commit()
+            field = value
+        }
     var username: String? = null
         get() {
             field = sharedPreferences.getString("username", "null")
@@ -46,7 +58,7 @@ class SettingsStorage(private val context: Context) {
             editor.commit()
             field = value
         }
-    var roomRef: String?=null
+    var roomRef: String? = null
         get() {
             field = sharedPreferences.getString("room_ref", "ROOM_ID1")
             return field
