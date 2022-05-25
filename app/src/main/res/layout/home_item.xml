@@ -1,66 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Widget.Material3.CardView.Elevated"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="2dp"
-        android:orientation="vertical"
-        android:padding="4dp">
+    <data>
 
-       <LinearLayout
-           android:layout_width="wrap_content"
-           android:orientation="horizontal"
-           android:layout_height="wrap_content">
-           <TextView
-               android:id="@+id/hname"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:text="Name"
-               android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-               android:textColor="@color/colorPrimary" />
-           <ImageView
-               android:layout_width="10dp"
-               android:layout_margin="4dp"
-               android:src="@drawable/ic_baseline_link"
-               android:layout_height="10dp"
-               app:tint="@color/colorPrimary" />
-       </LinearLayout>
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.Material3.CardView.Elevated"
+        android:layout_width="wrap_content"
+        android:focusable="true"
+        android:checkable="true"
+        android:id="@+id/home_layout"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:cardCornerRadius="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="2dp"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/hname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Name"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/colorPrimary" />
+
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_margin="4dp"
+                    android:src="@drawable/ic_baseline_link"
+                    android:layout_height="10dp"
+                    app:tint="@color/colorPrimary" />
+            </LinearLayout>
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contributed"
-            android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contributed"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 
-       <LinearLayout
-           android:layout_width="wrap_content"
-           android:orientation="horizontal"
-           android:layout_height="wrap_content">
-           <TextView
-               android:id="@+id/hamount"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-               android:textColor="#0F9D58"
-               android:textStyle="bold" />
-           <TextView
-               android:id="@+id/each_amt"
-               android:layout_marginStart="6dp"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:textStyle="bold"
-               android:textAlignment="textEnd"
-               android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-               />
-       </LinearLayout>
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/hamount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textColor="#0F9D58"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/each_amt"
+                    android:layout_marginStart="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

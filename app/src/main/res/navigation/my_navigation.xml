@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_navigation"
+    app:startDestination="@id/userAuthFragment">
+
+    <fragment
+        android:id="@+id/loginPage"
+        android:name="com.subhamgupta.roomiesapp.fragments.authentication.LoginPage"
+        android:label="fragment_login_page"
+        tools:layout="@layout/fragment_login_page" >
+        <action
+            android:id="@+id/action_loginPage_to_userAuthFragment"
+            app:destination="@id/userAuthFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/roomCreation"
+        android:name="com.subhamgupta.roomiesapp.fragments.RoomCreation"
+        android:label="fragment_room_creation"
+        tools:layout="@layout/fragment_room_creation" />
+    <fragment
+        android:id="@+id/registerUserFragment"
+        android:name="com.subhamgupta.roomiesapp.fragments.authentication.RegisterUserFragment"
+        android:label="fragment_register_user"
+        tools:layout="@layout/fragment_register_user" >
+        <action
+            android:id="@+id/action_registerUserFragment_to_roomCreation"
+            app:destination="@id/roomCreation" />
+        <action
+            android:id="@+id/action_registerUserFragment_to_userAuthFragment"
+            app:destination="@id/userAuthFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/userAuthFragment"
+        android:name="com.subhamgupta.roomiesapp.fragments.authentication.UserAuthFragment"
+        android:label="fragment_user_auth"
+        tools:layout="@layout/fragment_user_auth" >
+        <action
+            android:id="@+id/action_userAuthFragment_to_loginPage"
+            app:destination="@id/loginPage" />
+        <action
+            android:id="@+id/action_userAuthFragment_to_registerUserFragment"
+            app:destination="@id/registerUserFragment" />
+        <action
+            android:id="@+id/action_userAuthFragment_to_roomCreation"
+            app:destination="@id/roomCreation" />
+    </fragment>
+</navigation>

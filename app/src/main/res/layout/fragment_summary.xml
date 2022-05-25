@@ -1,95 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragments.Summary">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/emptytext"
-            android:layout_marginTop="300dp"
-            android:layout_centerInParent="true"
-            android:layout_height="wrap_content">
-            <com.airbnb.lottie.LottieAnimationView
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:scaleX="1.4"
-                android:scaleY="1.4"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                app:lottie_rawRes="@raw/emptyastro" />
-            <TextView
-                android:layout_marginTop="22dp"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:textAlignment="center"
+    xmlns:tools="http://schemas.android.com/tools">
 
-                android:text="Empty! Add items by clicking on + button"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <LinearLayout
+    <data>
+        <variable
+            name="viewModel"
+            type="com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragments.Summary">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:orientation="vertical"
             android:layout_height="match_parent">
 
 
-           <LinearLayout
-               android:layout_width="match_parent"
-               android:gravity="end"
-
-               android:layout_marginEnd="10dp"
-               android:layout_marginStart="10dp"
-               android:layout_marginTop="6dp"
-               android:orientation="horizontal"
-               android:layout_height="wrap_content">
-               <com.google.android.material.card.MaterialCardView
-                   android:layout_width="match_parent"
-                   android:id="@+id/tlayout"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center_vertical"
-                   app:cardBackgroundColor="#610F9D58"
-
-                   style="@style/Widget.Material3.CardView.Filled"
-                   app:cardCornerRadius="8dp">
-
-                   <TextView
-                       android:id="@+id/total_spends"
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:padding="6dp"
-                       android:layout_marginStart="16dp"
-                       android:layout_gravity="center_vertical|start"
-                       android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-                   <com.google.android.material.switchmaterial.SwitchMaterial
-                       android:id="@+id/switch1"
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:layout_marginStart="16dp"
-                       android:layout_marginEnd="16dp"
-                       android:layout_gravity="center_vertical|end"
-                       android:text="This Month's" />
-               </com.google.android.material.card.MaterialCardView>
-
-
-
-           </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler"
-
-                android:padding="6dp"
+            <LinearLayout
                 android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:id="@+id/emptytext"
+                android:layout_marginTop="300dp"
+                android:visibility="gone"
+                android:layout_centerInParent="true"
+                android:layout_height="wrap_content">
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:scaleX="1.4"
+                    android:scaleY="1.4"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/emptyastro" />
+
+                <TextView
+                    android:layout_marginTop="22dp"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+
+                    android:text="Empty! Add items by clicking on + button"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
                 android:layout_height="match_parent">
 
-            </androidx.recyclerview.widget.RecyclerView>
-        </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:gravity="end"
+
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:id="@+id/tlayout"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        app:cardBackgroundColor="#610F9D58"
+
+                        style="@style/Widget.Material3.CardView.Filled"
+                        app:cardCornerRadius="8dp">
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:indeterminate="true"
+                            app:trackColor="#00DB4437"
+                            app:indeterminateAnimationType="disjoint"
+                            app:trackCornerRadius="8dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="6dp"
+                            app:trackThickness="35dp" />
+                        <TextView
+                            android:id="@+id/total_spends"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="6dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_gravity="center_vertical|start"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_height="wrap_content">
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switch1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+
+                                android:layout_marginEnd="16dp"
+
+                                android:text="This Month's" />
+                        </LinearLayout>
 
 
-    </RelativeLayout>
-</androidx.core.widget.NestedScrollView>
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    android:padding="6dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                </androidx.recyclerview.widget.RecyclerView>
+            </LinearLayout>
+
+
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

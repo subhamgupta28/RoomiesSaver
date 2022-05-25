@@ -58,26 +58,40 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_necon.xml" value="0.2105" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/splash_background.xml" value="0.2105" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_account_creation.xml" value="0.15953177257525084" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_home.xml" value="0.16148648648648647" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_ration.xml" value="0.16148648648648647" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_room_details.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_setting.xml" value="0.17777777777777778" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_splash_screen.xml" value="0.25" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_start.xml" value="0.23020833333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/alert_popup.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/change_room_card.xml" value="0.22" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_details.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_diff_user.xml" value="0.16114864864864864" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_home.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_ration.xml" value="0.23020833333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_register_user.xml" value="0.23020833333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_summary.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_user_auth.xml" value="0.23020833333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/header_recycler.xml" value="0.16148648648648647" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/home_item.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/items.xml" value="0.264" />
-        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/person_items.xml" value="0.15208333333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/loading_popup.xml" value="0.23020833333333332" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/person_items.xml" value="0.2" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/popup.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/ration_card.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/room_item.xml" value="0.15208333333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/rooms_item.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/signup_popup.xml" value="0.16148648648648647" />
-        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/space_item.xml" value="0.4" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/space_item.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/summary_item.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/menu/bottomappbar.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2365" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="18" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

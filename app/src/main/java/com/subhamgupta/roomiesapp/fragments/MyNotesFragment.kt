@@ -1,50 +1,42 @@
 package com.subhamgupta.roomiesapp.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.FirebaseFirestore
-import com.majorik.sparklinelibrary.SparkLineLayout
-
-import com.subhamgupta.roomiesapp.R
+import android.widget.LinearLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.subhamgupta.roomiesapp.adapter.AllRoomAdapter
+import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.databinding.FragmentMynotesBinding
 
 
 class MyNotesFragment : Fragment() {
-
-    lateinit var sparkLineLayout: SparkLineLayout
-    lateinit var data: MutableList<Map<String, Any?>?>
-    lateinit var db: FirebaseFirestore
-    lateinit var recyclerView: RecyclerView
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private lateinit var binding: FragmentMynotesBinding
+    private val viewModel: FirebaseViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        return inflater.inflate(R.layout.fragment_mynotes, container, false)
+        binding = FragmentMynotesBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = view.findViewById(R.id.myrecycler)
-        sparkLineLayout = view.findViewById(R.id.myspark)
-        val list: ArrayList<Int> = ArrayList()
-        list.add(100)
-        list.add(10)
-        list.add(400)
-        list.add(80)
-        list.add(1000)
-        list.add(10)
-        list.add(900)
-        sparkLineLayout.setData(list)
+        binding.myrecycler.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
+        val adapter = AllRoomAdapter()
+        binding.myrecycler.adapter = adapter
+        viewModel.getAllRoomsDetails().observe(viewLifecycleOwner, Observer {
+            adapter.setItems(it)
+        })
+        binding.fetch.setOnClickListener {
+            viewModel.getAllRoomsDetails().value?.let { it1 -> adapter.setItems(it1) }
+        }
     }
     private fun addItem(){
 
