@@ -28,13 +28,13 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
+import com.subhamgupta.roomiesapp.data.database.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.DiffUser
 import com.subhamgupta.roomiesapp.fragments.HomeFragment
 import com.subhamgupta.roomiesapp.fragments.Summary
 import com.subhamgupta.roomiesapp.utils.FirebaseState
-import com.subhamgupta.roomiesapp.utils.SettingsStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
@@ -45,9 +45,10 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: FirebaseViewModel by viewModels()
-    private lateinit var settingsStorage: SettingsStorage
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var diffUser: DiffUser
+    private lateinit var roomRef:String
+    private lateinit var settingDataStore: SettingDataStore
     private lateinit var loadingDismiss: AlertDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,14 +56,14 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         setContentView(binding.root)
 
         binding.lifecycleOwner = this
-
-        settingsStorage = viewModel.getSettings()
+        viewModel.getData()
+        settingDataStore = viewModel.getDataStore()
 
         binding.tablayout.setupWithViewPager(binding.viewpager1)
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         diffUser = DiffUser()
-        viewModel.getData()
+
 //        viewPagerAdapter.addFragments(MyNotesFragment(), "My Notes")
         viewPagerAdapter.addFragments(HomeFragment(this@MainActivity), "Home")
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
@@ -169,14 +170,17 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.setNegativeButton("Cancel") { _, _ ->
 
         }
-        materialAlertDialogBuilder.setPositiveButton("Logout") { _, _ ->
-            FirebaseMessaging.getInstance()
-                .unsubscribeFromTopic("/topics/${settingsStorage.room_id.toString()}")
-            settingsStorage.clear()
-            viewModel.logout()
-            startActivity(Intent(this@MainActivity, StartActivity::class.java))
-            finish()
+        lifecycleScope.launch {
+            val id = settingDataStore.getRoomKey().toString()
+            materialAlertDialogBuilder.setPositiveButton("Logout") { _, _ ->
+                FirebaseMessaging.getInstance()
+                    .unsubscribeFromTopic("/topics/${id}")
+                viewModel.logout()
+                startActivity(Intent(this@MainActivity, StartActivity::class.java))
+                finish()
+            }
         }
+
         materialAlertDialogBuilder.show()
     }
 
@@ -286,6 +290,9 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.setView(binding.root)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         val dialog = materialAlertDialogBuilder.show()
+        lifecycleScope.launch {
+            roomRef= viewModel.getDataStore().getRoomRef()
+        }
         viewModel.getRoomMap().observe(this) { map ->
             binding.allRoomChip.removeAllViews()
             map.forEach { (k, v) ->
@@ -293,7 +300,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                 chip.text = k
                 chip.isCheckable = true
                 chip.isCheckedIconVisible = true
-                if (v == viewModel.getSettings().roomRef) {
+                if (v == roomRef) {
                     chip.isChecked = true
                     chip.isSelected = true
                 }
@@ -306,7 +313,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         roomId = map[view.text.toString()].toString()
                         "Enter ${temp.value?.get(roomId)}".also { i -> binding.roomEnter.text = i }
                         binding.roomEnter.setOnClickListener {
-                            settingsStorage.roomRef = roomId
                             lifecycleScope.launch {
                                 viewModel.getDataStore().setRoomRef(roomId)
                                 viewModel.fetchUserData()

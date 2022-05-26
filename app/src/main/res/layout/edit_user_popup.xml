@@ -9,62 +9,49 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         app:cardCornerRadius="12dp"
+
         style="@style/Widget.Material3.CardView.Elevated"
         android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:padding="16dp"
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Room Limit"
-                app:helperText="change no. of person who can join"
-                app:hintAnimationEnabled="true"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:hintEnabled="true">
+
+                android:hint="User Name">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/rlimit"
-                    android:inputType="number"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Room Name"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:helperText="Change room name?"
-                app:hintAnimationEnabled="true"
-                app:hintEnabled="true">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/rname"
+                    android:id="@+id/user_name"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
+                android:id="@+id/select_img"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="end"
+                android:text="Change profile pic"
+                app:icon="@drawable/ic_outline_photo_camera" />
+
+            <Button
+                android:id="@+id/save_btn"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:icon="@drawable/ic_baseline_save"
                 android:layout_gravity="end"
-                android:id="@+id/save_btn"
+               android:layout_marginTop="12dp"
                 android:text="Save" />
         </LinearLayout>
+
     </com.google.android.material.card.MaterialCardView>
 </layout>

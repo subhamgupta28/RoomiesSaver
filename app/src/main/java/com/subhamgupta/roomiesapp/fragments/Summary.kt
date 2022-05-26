@@ -17,6 +17,7 @@ import com.subhamgupta.roomiesapp.databinding.FragmentSummaryBinding
 import com.subhamgupta.roomiesapp.models.Detail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.launch
 
 class Summary : Fragment() {
 
@@ -36,10 +37,12 @@ class Summary : Fragment() {
             "₹$it".also { binding.totalSpends.text = it }
         }
 
-        viewModel.getSettings().isMonth?.let {
+        lifecycleScope.launch {
+            val it = viewModel.getDataStore().isMonth()
             binding.switch1.text = if (it) "This Month's" else "All Time"
             binding.switch1.isChecked = it
         }
+
         binding.switch1.setOnCheckedChangeListener { _, isChecked ->
             binding.switch1.text = if (isChecked) "This Month's" else "All Time"
             currMonth.postValue(!isChecked)
@@ -53,18 +56,18 @@ class Summary : Fragment() {
 
     private fun setData() {
         lifecycleScope.launchWhenStarted {
-            viewModel.summary.buffer().collect{
+            viewModel.summary.buffer().collect {
                 when (it) {
                     is FirebaseState.Loading -> {
                         binding.progress.isVisible = true
                     }
-                    is FirebaseState.Empty ->{
-                        binding.progress.isVisible= false
+                    is FirebaseState.Empty -> {
+                        binding.progress.isVisible = false
                         binding.emptytext.isVisible = true
                         adapter.setItems(ArrayList())
                     }
                     is FirebaseState.Failed -> {
-                        binding.progress.isVisible= false
+                        binding.progress.isVisible = false
 
                     }
                     is FirebaseState.Success -> {
@@ -72,7 +75,7 @@ class Summary : Fragment() {
                         binding.progress.isVisible = false
                         binding.emptytext.isVisible = false
                     }
-                    else->Unit
+                    else -> Unit
                 }
             }
         }

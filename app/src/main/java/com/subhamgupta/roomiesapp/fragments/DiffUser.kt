@@ -34,21 +34,10 @@ class DiffUser: Fragment(), EditPopLink, onClickPerson {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentDiffUserBinding.inflate(layoutInflater)
-
         binding.personRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
-
-
-
         return binding.root
-
-
-    }
-    fun refresh(){
-        viewModel.getDiffData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,18 +46,16 @@ class DiffUser: Fragment(), EditPopLink, onClickPerson {
         binding.viewpager.adapter = adapter
         binding.viewpager.clipToPadding = false
         binding.viewpager.clipChildren = false
-        binding.viewpager.offscreenPageLimit = 10
+
         viewModel.getDiffData().observe(viewLifecycleOwner) {
             adapter.setData(it)
             binding.swipe.isRefreshing = false
         }
         binding.swipe.setOnRefreshListener {
             viewModel.getDiffData()
-
         }
         val roomAdapter = RoomieAdapter(this)
         viewModel.getRoomMates().observe(viewLifecycleOwner){
-
             binding.personRecycler.adapter = roomAdapter
             if (it != null) {
                 roomAdapter.setItem(it)

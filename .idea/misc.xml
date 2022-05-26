@@ -62,12 +62,13 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_ration.xml" value="0.16148648648648647" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_room_details.xml" value="0.2" />
-        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_setting.xml" value="0.17777777777777778" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_setting.xml" value="0.264" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_splash_screen.xml" value="0.25" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_start.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/alert_popup.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/change_room_card.xml" value="0.22" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_details.xml" value="0.2" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_user_popup.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_diff_user.xml" value="0.16114864864864864" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_home.xml" value="0.2" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_ration.xml" value="0.23020833333333332" />

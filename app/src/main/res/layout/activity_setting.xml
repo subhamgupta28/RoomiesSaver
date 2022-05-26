@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.SettingActivity">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/setting_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+
+            <RelativeLayout
+                android:id="@+id/setting_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/user_layout"
+                    style="@style/Widget.Material3.CardView.Elevated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="18dp">
+
+                    <Button
+                        android:id="@+id/edit_profile"
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        app:icon="@drawable/ic_create" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="22dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/profile_img"
+                                android:layout_width="100dp"
+                               android:layout_marginStart="16dp"
+                                android:layout_height="100dp"
+                                android:layout_gravity="center_horizontal"
+                                android:elevation="2dp"
+                                android:src="@drawable/ic_person" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:orientation="vertical"
+                                android:layout_height="wrap_content">
+                                <TextView
+                                    android:textColor="@color/colorPrimary"
+                                    android:textStyle="bold"
+                                    android:id="@+id/name_text"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="6dp"
+                                    android:text="Name"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
+
+                                <TextView
+                                    android:id="@+id/email_text"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Email"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+
+
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:textColor="#0F9D58"
+                                    android:id="@+id/this_month_amount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Today's\nspending"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/total_spends"
+                                    android:textColor="#0F9D58"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This month's\nSpending"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/no_of_room"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="#0F9D58"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rooms\njoined"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/m"
+                    style="@style/Widget.Material3.CardView.Elevated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/user_layout"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="12dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Room Name"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                                android:textColor="@color/colorPrimary" />
+
+                            <TextView
+                                android:id="@+id/r_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                                android:textColor="@color/colorPrimary" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Room ID"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                android:textColor="@color/colorSecondary" />
+
+                            <TextView
+                                android:id="@+id/r_id"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                android:textColor="@color/colorSecondary" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Created On"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                android:textColor="@color/colorRed" />
+
+                            <TextView
+                                android:id="@+id/c_date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                android:textColor="@color/colorRed" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Start Date"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                android:textColor="@color/colorSecondaryVariant" />
+
+                            <TextView
+                                android:id="@+id/setDText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+
+                                android:textColor="@color/colorSecondaryVariant" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Limit"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+                            <TextView
+                                android:id="@+id/limit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorSecondary"
+                    android:layout_below="@id/m"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginBottom="6dp"
+                    android:text="Room Mates"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/roomsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="8dp"
+                    android:visibility="gone" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chips"
+                    style="@style/Widget.Material3.Chip.Filter.Elevated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    app:chipSpacingHorizontal="4dp"
+                    app:chipSpacingVertical="4dp" />
+
+
+                <LinearLayout
+                    android:id="@+id/line1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/chips"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/dark_mode_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Dark Mode" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/this_month_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Show this month data" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/action"
+                    android:textColor="@color/colorSecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/line1"
+                    android:layout_marginStart="12dp"
+                    android:text="Actions"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <LinearLayout
+                    android:id="@+id/kl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/action"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Button
+                            android:id="@+id/generate_excel"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Generate excel sheet"
+                            app:icon="@drawable/ic_baseline_print_24" />
+
+                        <Button
+                            android:id="@+id/joinRoom"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Join Room"
+                            app:icon="@drawable/ic_outline_add" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Button
+                            android:id="@+id/limit_btn"
+
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Edit Room"
+                            app:icon="@drawable/ic_create" />
+
+                        <Button
+                            android:id="@+id/setDate"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Edit Start Day Of Month"
+                            app:icon="@drawable/ic_baseline_date_range" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/shareid"
+                        style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="Share Room"
+                        app:icon="@drawable/ic_baseline_share" />
+
+                    <Button
+                        android:id="@+id/leaveroom"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/setDate"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="16dp"
+                        android:text="leave room"
+                        android:textColor="@color/colorRed" />
+                </LinearLayout>
+            </RelativeLayout>
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>
