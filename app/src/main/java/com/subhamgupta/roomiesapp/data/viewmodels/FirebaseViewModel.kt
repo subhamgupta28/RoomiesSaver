@@ -14,7 +14,6 @@ import com.subhamgupta.roomiesapp.models.RoomDetail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -64,7 +63,8 @@ class FirebaseViewModel : ViewModel() {
     fun fetchAlert() {
         repository.fetchAlert(_alert)
     }
-    fun generateSheet()= viewModelScope.launch{
+
+    fun generateSheet() = viewModelScope.launch {
         repository.generateExcel(_sheetLoading)
     }
 
@@ -74,11 +74,12 @@ class FirebaseViewModel : ViewModel() {
         repository.loading.collect {
             if (!it) {
                 fetchHomeData()
-                fetchSummary(true)
+                fetchSummary(true, "All")
             }
         }
     }
-    fun editUser(uri:Uri, userName:String)= viewModelScope.launch{
+
+    fun editUser(uri: Uri, userName: String) = viewModelScope.launch {
         repository.uploadPic(uri, userName, _editUser)
     }
 
@@ -123,8 +124,8 @@ class FirebaseViewModel : ViewModel() {
     }
 
 
-    fun addItem(item: String?, amount: String) {
-        repository.addItem(item, amount, _addItem)
+    fun addItem(item: String?, amount: String, note: String, tags: List<String>, category: String) {
+        repository.addItem(item, amount, _addItem, note, tags, category)
 
     }
 
@@ -133,8 +134,8 @@ class FirebaseViewModel : ViewModel() {
         return repository.user
     }
 
-    fun fetchSummary(currMonth: Boolean) = viewModelScope.launch {
-        repository.fetchSummary(currMonth, _summary)
+    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch {
+        repository.fetchSummary(currMonth, category, _summary)
     }
 
 
@@ -154,6 +155,7 @@ class FirebaseViewModel : ViewModel() {
     fun getTotalAmount(): MutableLiveData<Int> {
         return repository.getTotalAmount()
     }
+
     fun getTodayAmount(): MutableLiveData<Int> {
         return repository.getTodayAmount()
     }

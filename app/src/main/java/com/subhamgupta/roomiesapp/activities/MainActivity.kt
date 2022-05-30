@@ -11,6 +11,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.viewModels
@@ -19,6 +20,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.CornerFamily
@@ -28,6 +33,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
+import com.subhamgupta.roomiesapp.data.Worker
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.*
@@ -40,6 +46,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), HomeToMainLink {
@@ -47,7 +54,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private val viewModel: FirebaseViewModel by viewModels()
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var diffUser: DiffUser
-    private lateinit var roomRef:String
+    private lateinit var roomRef: String
     private lateinit var settingDataStore: SettingDataStore
     private lateinit var loadingDismiss: AlertDialog
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,7 +159,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         netStat()
         setupClickListener()
-
+        initializeWorker()
     }
 
     private fun netStat() {
@@ -237,6 +244,31 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
             override fun afterTextChanged(editable: Editable) {}
         })
+        dialogBinding.itemBought.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun afterTextChanged(editable: Editable) {
+                val text = dialogBinding.itemBought.text.toString().split(" ")
+                dialogBinding.tags.removeAllViews()
+                text.forEach {
+                    val chip = Chip(this@MainActivity)
+                    chip.text = it
+                    chip.isCheckable = true
+                    chip.chipStrokeWidth = 0F
+                    chip.isCheckedIconVisible = true
+                    dialogBinding.tags.addView(chip)
+                }
+            }
+        })
+        var category = "Food"
+
+        dialogBinding.category.children.forEach { view ->
+            (view as Chip).setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    category = view.text.toString()
+                }
+            }
+        }
         dialogBinding.saveBtn.setOnClickListener {
             if (dialogBinding.itemBought.text.toString()
                     .isEmpty() || dialogBinding.amountPaid.text.toString()
@@ -247,19 +279,31 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         dialogBinding.amountLayout.error = "Only numbers are allowed"
                     } else {
                         dialogBinding.saveBtn.isEnabled = false
+                        val text = dialogBinding.itemBought.text.toString().trim()
+                        val amount = dialogBinding.amountPaid.text.toString().trim()
+                        val note = dialogBinding.noteText.text.toString().trim()
+                        val tags = ArrayList<String>()
+                        dialogBinding.tags.children.forEach { view ->
+                            if((view as Chip).isChecked){
+                                tags.add(view.text.toString())
+                            }
+                        }
+                        Log.e("ADD", "$category $tags $text $amount")
                         viewModel.addItem(
-                            dialogBinding.itemBought.text.toString().trim(),
-                            dialogBinding.amountPaid.text.toString().trim()
+                            item = text,
+                            amount = amount,
+                            note = note,
+                            tags = tags,
+                            category = category
                         )
+                        viewModel.sendNotification("New Buying", text)
+                        dialogBinding.tags.removeAllViews()
                         dialogBinding.amountPaid.text = null
                         dialogBinding.saveBtn.isEnabled = true
                         dialogBinding.itemBought.text = null
-                        viewModel.sendNotification(
-                            "New Buying",
-                            dialogBinding.itemBought.text.toString()
-                        )
                     }
                 } catch (e: Exception) {
+                    Log.e("ERROR MAIN", "${e.message}")
                 }
             }
 
@@ -291,7 +335,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         val dialog = materialAlertDialogBuilder.show()
         lifecycleScope.launch {
-            roomRef= viewModel.getDataStore().getRoomRef()
+            roomRef = viewModel.getDataStore().getRoomRef()
         }
         viewModel.getRoomMap().observe(this) { map ->
             binding.allRoomChip.removeAllViews()
@@ -357,6 +401,16 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     override fun goToAllExpenses() {
         binding.viewpager1.setCurrentItem(2, true)
 
+    }
+    private fun initializeWorker() {
+        val constraint = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 1, TimeUnit.HOURS)
+            .setConstraints(constraint)
+            .build()
+        WorkManager.getInstance(this).enqueue(workRequest)
     }
 
 }

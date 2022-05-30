@@ -5,14 +5,18 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -42,6 +46,7 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var settingDataStore: SettingDataStore
     private lateinit var name: String
+    private lateinit var imageView: ImageView
     private lateinit var limit: String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,9 +195,11 @@ class SettingActivity : AppCompatActivity() {
             viewModel.userData.buffer().collect {
                 withContext(Main) {
                     Log.e("URL","${it["IMG_URL"]}")
+                    val requestOptions = RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     Glide.with(this@SettingActivity)
                         .load(it["IMG_URL"].toString())
                         .circleCrop()
+                        .apply(requestOptions)
                         .placeholder(R.drawable.ic_person)
                         .into(binding.profileImg)
                 }
@@ -221,12 +228,19 @@ class SettingActivity : AppCompatActivity() {
         if (requestCode == 201 && resultCode == RESULT_OK && data != null && data.data != null) {
             val filePath = data.data
             this.filePath = filePath
+            val bitmap = MediaStore.Images.Media
+                .getBitmap(
+                    contentResolver,
+                    filePath
+                )
+                imageView.setImageBitmap(bitmap)
         }
     }
 
     private fun editUserDetail() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
         val view = EditUserPopupBinding.inflate(layoutInflater)
+        imageView = view.image
         lifecycleScope.launch {
             viewModel.getDataStore().setUpdate(true)
         }
@@ -256,7 +270,7 @@ class SettingActivity : AppCompatActivity() {
         materialAlertDialogBuilder.show()
     }
 
-    fun editLimit() {
+    private fun editLimit() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
         val view = EditDetailsBinding.inflate(layoutInflater)
         lifecycleScope.launch {
@@ -329,52 +343,13 @@ class SettingActivity : AppCompatActivity() {
 
     private fun showSnackBar(msg: String) {
         Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(resources.getColor(com.subhamgupta.roomiesapp.R.color.colorSecondary))
-            .setTextColor(resources.getColor(com.subhamgupta.roomiesapp.R.color.colorOnSecondary))
+            .setBackgroundTint(resources.getColor(R.color.colorSecondary))
+            .setTextColor(resources.getColor(R.color.colorOnSecondary))
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
-            .setAction("Go") {
-
-            }
             .show()
     }
 
     private fun leaveRoom() {
-//        val dataSnapshotTask = ref.child("ROOM").child(key).child("ROOM_MATES").get()
-//        dataSnapshotTask.addOnSuccessListener { dataSnapshot ->
-////            Log.e("data", dataSnapshot.toString())
-//            val snap: MutableMap<String, Any?> = HashMap()
-//            var data: HashMap<String?, Any?>? = null
-//            for (d in dataSnapshot.children) {
-//                val v = d.value as HashMap<String?, Any?>
-//                for (l in v) {
-//                    if (l.value.toString() != user.uid) {
-//                        data = v
-//                        Log.e("VAl", "$v")
-//                    }
-//                }
-//                snap[d.key!!] = d.value as HashMap<String?, Any?>
-//
-//            }
-//            var c = ""
-//            for (f in snap) {
-//                if (f.value == data)
-//                    c = f.key
-//            }
-//            snap.remove(c)
-//            println(snap)
-//            println(data)
-//            ref.child("ROOM").child(key).child("ROOM_MATES").setValue(snap).addOnSuccessListener {
-//                user_ref.child(roomRef).removeValue()
-//                user_ref.child("ROOM_NAME").removeValue()
-//                user_ref.child("IS_ROOM_JOINED").setValue(false)
-//                ref.child("ROOM").child(key).child("JOINED_PERSON").setValue(joinedPerson?.minus(1))
-//                settingsStorage.isRoom_joined = false
-//                settingsStorage.room_name = ""
-//                //supportFinishAfterTransition()
-//                settingsStorage.isLoggedIn = false
-//                goToRoomCreation(1)
-//            }
-//        }
     }
 
 

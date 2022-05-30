@@ -20,7 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 object AuthRepository {
     private val databaseReference = MyApp.instance.databaseReference
     private val auth = MyApp.instance.firebaseAuth
-    private val settingDataStore = SettingDataStore(MyApp.instance)
+    private val settingDataStore = SettingDataStore
 
     private fun saveUserToRDB(email: String, name: String, user: FirebaseUser) {
         val uid = user.uid

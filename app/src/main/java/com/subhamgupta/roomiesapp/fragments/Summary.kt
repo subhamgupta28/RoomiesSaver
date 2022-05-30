@@ -5,12 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.chip.Chip
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentSummaryBinding
@@ -30,9 +32,12 @@ class Summary : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSummaryBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         binding.recycler.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
-
-
         viewModel.getTotalAmount().observe(viewLifecycleOwner) {
             "₹$it".also { binding.totalSpends.text = it }
         }
@@ -46,12 +51,17 @@ class Summary : Fragment() {
         binding.switch1.setOnCheckedChangeListener { _, isChecked ->
             binding.switch1.text = if (isChecked) "This Month's" else "All Time"
             currMonth.postValue(!isChecked)
-            viewModel.fetchSummary(isChecked)
+            viewModel.fetchSummary(isChecked, "All")
         }
         adapter = SummaryAdapter()
         binding.recycler.adapter = adapter
         setData()
-        return binding.root
+        binding.category.children.forEach { chip ->
+            (chip as Chip).setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked)
+                    viewModel.fetchSummary(binding.switch1.isChecked, chip.text.toString())
+            }
+        }
     }
 
     private fun setData() {
@@ -75,7 +85,6 @@ class Summary : Fragment() {
                         binding.progress.isVisible = false
                         binding.emptytext.isVisible = false
                     }
-                    else -> Unit
                 }
             }
         }

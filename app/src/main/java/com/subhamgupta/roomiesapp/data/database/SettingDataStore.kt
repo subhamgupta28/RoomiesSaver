@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.subhamgupta.roomiesapp.MyApp
 import kotlinx.coroutines.flow.first
 
 
-class SettingDataStore(private val context: Context) {
-
+object SettingDataStore {
+    private val context = MyApp.instance
     //fields present
     /*
     roomCount
@@ -51,7 +52,7 @@ class SettingDataStore(private val context: Context) {
     }
 
     suspend fun isMonth(): Boolean {
-        val res = read("isMonth")?:"false"
+        val res = read("isMonth")?:"true"
         return res.toBoolean()
     }
 

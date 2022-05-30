@@ -3,7 +3,6 @@ package com.subhamgupta.roomiesapp.adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -45,13 +44,12 @@ class HomeAdapter(
         fun onBind(data:MutableMap<String,String>, position: Int){
            try {
                val name = data["USER_NAME"].toString()
-               val uuid = data["UUID"].toString()
                val color = data["COLOR"]?.toLong()
 
                if (color != null) {
                    val hexColor = String.format("#%08X", 0xB3FFFFFF and color)
                    val newColor = Color.parseColor(hexColor)
-                   binding.homeLayout.strokeWidth = 8
+                   binding.homeLayout.strokeWidth = 4
                    binding.homeLayout.strokeColor = (newColor)
                }
                val amount = data["AMOUNT"].toString().toInt()

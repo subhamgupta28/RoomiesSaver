@@ -18,5 +18,13 @@ data class Detail(
     @SerializedName("BOUGHT_BY")
     var BOUGHT_BY: String? = null,
     @SerializedName("TIME")
-    var TIME: String? = null
-):Serializable
+    //newly added
+    var TIME: String? = null,
+    @SerializedName("TAGS")
+    var TAGS: List<String>? = null,
+    @SerializedName("CATEGORY")
+    var CATEGORY: String? = null,
+    @SerializedName("NOTE")
+    var NOTE: String? = null
+
+) : Serializable

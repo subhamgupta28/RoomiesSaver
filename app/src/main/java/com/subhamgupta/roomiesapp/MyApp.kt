@@ -15,6 +15,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.subhamgupta.roomiesapp.data.Worker
+import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.TimeUnit
 
 class MyApp : Application() {
@@ -35,19 +36,9 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         initializeFirebase()
-        initializeWorker()
     }
 
-    private fun initializeWorker() {
-        val constraint = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
 
-        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 1, TimeUnit.HOURS)
-            .setConstraints(constraint)
-            .build()
-        WorkManager.getInstance(this).cancelAllWork()
-    }
 
     private fun initializeFirebase() {
         try {
@@ -55,6 +46,7 @@ class MyApp : Application() {
         } catch (e: Exception) {
             Log.e("ERROR", e.message!!)
         }
+
         db = Firebase.firestore
         firebaseAuth = FirebaseAuth.getInstance()
         databaseReference = Firebase.database.getReference("ROOMIES")

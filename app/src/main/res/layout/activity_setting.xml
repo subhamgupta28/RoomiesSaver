@@ -74,7 +74,6 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_margin="6dp"
-                                    android:text="Name"
                                     android:textAlignment="center"
                                     android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
@@ -82,7 +81,6 @@
                                     android:id="@+id/email_text"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="Email"
                                     android:textAlignment="center"
                                     android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
                             </LinearLayout>
@@ -95,8 +93,9 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:orientation="horizontal">
+                            android:layout_margin="12dp"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -117,7 +116,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="Today's\nspending"
                                     android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
                             </LinearLayout>
 
                             <LinearLayout
@@ -139,7 +138,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="This month's\nSpending"
                                     android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 
                             </LinearLayout>
 
@@ -163,7 +162,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="Rooms\njoined"
                                     android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 
                             </LinearLayout>
                         </LinearLayout>

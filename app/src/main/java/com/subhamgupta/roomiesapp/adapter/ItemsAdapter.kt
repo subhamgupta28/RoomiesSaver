@@ -45,14 +45,20 @@ class ItemsAdapter(
 
     ) {
         private val binding = SummaryItemBinding.bind(itemView)
+
         fun onBind(model: Detail){
+            binding.tags.visibility = View.GONE
+            binding.category.visibility = View.GONE
+            binding.tagText.visibility = View.GONE
+            binding.note.visibility = View.GONE
+            binding.noteText.visibility = View.GONE
             binding.boughtBy.visibility = View.GONE
             binding.itemName.text = model.ITEM_BOUGHT
             binding.boughtBy.text = model.BOUGHT_BY
             ("₹${model.AMOUNT_PAID}").also { binding.amount.text = it }
             binding.root.setOnClickListener {
                 binding.fullDate.text = model.TIME
-                binding.fullDate.visibility = if (binding.fullDate.isVisible) View.GONE else View.VISIBLE
+                binding.extra.visibility =  if (binding.extra.isVisible) View.GONE else View.VISIBLE
             }
             try {
                 val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())

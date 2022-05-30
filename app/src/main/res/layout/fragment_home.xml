@@ -142,7 +142,6 @@
 
             <TextView
                 android:id="@+id/k"
-                android:textColor="@color/colorSecondary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/line1"
@@ -172,7 +171,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
-                    android:textColor="@color/colorSecondary"
                     android:text="Today's Purchase"
                     android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
 

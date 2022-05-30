@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Environment
 import android.text.format.DateUtils
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import app.futured.donut.DonutSection
@@ -45,7 +46,7 @@ import kotlin.coroutines.suspendCoroutine
 object FireBaseRepository {
     private var roomKey: String = ""
     private val application = MyApp.instance
-    private val dataStore = SettingDataStore(application)
+    private val dataStore = SettingDataStore
     private val storage = application.storage
     private var databaseReference = application.databaseReference
     private val _loading = MutableStateFlow(true)
@@ -85,7 +86,8 @@ object FireBaseRepository {
     fun getTotalAmount(): MutableLiveData<Int> {
         return totalAmount
     }
-    fun getTodayAmount() :MutableLiveData<Int>{
+
+    fun getTodayAmount(): MutableLiveData<Int> {
         return todayAmount
     }
 
@@ -348,7 +350,7 @@ object FireBaseRepository {
             .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .whereGreaterThanOrEqualTo("TIME_STAMP", som)
             .whereEqualTo("IS_COMPLETED", false)
-            .addSnapshotListener { value, error ->
+            .addSnapshotListener { value, _ ->
                 if (value != null) {
                     val res = value.toObjects(Alerts::class.java)
                     try {
@@ -391,20 +393,33 @@ object FireBaseRepository {
             }
     }
 
-    fun addItem(item: String?, amount: String, liveData: MutableLiveData<Boolean>) {
-        val timeStamp = time
+    fun addItem(
+        item: String?,
+        amount: String,
+        liveData: MutableLiveData<Boolean>,
+        note: String,
+        tags: List<String>,
+        category: String
+    ) {
         val ts = System.currentTimeMillis()
-        val map: MutableMap<String, Any?> = HashMap()
-        val uid = uuid
-        map["UUID"] = uid
-        map["TIME"] = timeStamp
-        map["DATE"] = date
-        map["TIME_STAMP"] = ts
-        map["AMOUNT_PAID"] = amount.toInt()
-        map["ITEM_BOUGHT"] = item
-        map["BOUGHT_BY"] = user_name
-        db.collection(roomKey).document(ts.toString()).set(map)
-            .addOnFailureListener { e: Exception -> Log.e("ERROR", e.message!!) }
+        val detail = mutableMapOf(
+            "UUID" to uuid,
+            "TIME" to time,
+            "DATE" to date,
+            "TIME_STAMP" to ts,
+            "AMOUNT_PAID" to amount.toLong(),
+            "ITEM_BOUGHT" to item,
+            "BOUGHT_BY" to user_name,
+            "TAGS" to tags,
+            "CATEGORY" to category,
+            "NOTE" to note
+        )
+        Log.e("DETAIL", "$roomKey $detail")
+        db.collection(roomKey).document(ts.toString()).set(detail)
+            .addOnFailureListener {
+                Toast.makeText(application, "Error occurred", Toast.LENGTH_LONG).show()
+                liveData.postValue(false)
+            }
             .addOnSuccessListener {
                 liveData.postValue(true)
             }
@@ -544,7 +559,7 @@ object FireBaseRepository {
                 uuidLink[roommates.UUID.toString()] = i
                 i++
                 query.whereEqualTo("UUID", roommates.UUID.toString())
-                    .addSnapshotListener { value, error ->
+                    .addSnapshotListener { value, _ ->
                         if (value != null) {
                             val v = value.toObjects(Detail::class.java)
                             detailMap.add(
@@ -591,35 +606,37 @@ object FireBaseRepository {
             val csvMapper = CsvMapper()
             csvMapper.writerFor(JsonNode::class.java)
                 .with(csvSchema)
-                .writeValue(File(Environment.DIRECTORY_DOWNLOADS,"sheet.csv"), jsonTree)
+                .writeValue(File(Environment.DIRECTORY_DOWNLOADS, "sheet.csv"), jsonTree)
             loading.value = FirebaseState.success(true)
         } catch (e: Exception) {
             Log.e("SAVE DATA FILE ERROR", "$e")
         }
     }
 
-    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<Boolean>) = coroutineScope{
-        val ref = storage.getReference(uuid!!+"/profile_pic.jpg")
+    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<Boolean>) =
+        coroutineScope {
+            val ref = storage.getReference(uuid!! + "/profile_pic.jpg")
             ref.putFile(uri)
-            .addOnCompleteListener {
-                if (it.isComplete) {
+                .addOnCompleteListener {
+                    if (it.isComplete) {
 
-                    it.result.storage.downloadUrl.addOnCompleteListener {
-                    databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
-                    databaseReference.child(uuid!!).child("IMG_URL")
-                        .setValue(it.result.toString())
-                        editUser.value = true
+                        it.result.storage.downloadUrl.addOnCompleteListener {
+                            databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
+                            databaseReference.child(uuid!!).child("IMG_URL")
+                                .setValue(it.result.toString())
+                            editUser.value = true
+                        }
+
                     }
-
                 }
-            }
-            .addOnFailureListener {
-                editUser.value = false
-            }
-    }
+                .addOnFailureListener {
+                    editUser.value = false
+                }
+        }
 
     suspend fun fetchSummary(
         isMonth: Boolean,
+        category: String,
         state: MutableStateFlow<FirebaseState<List<Detail?>>>
     ) = coroutineScope {
         roomKey = dataStore.getRoomKey()
@@ -635,26 +652,33 @@ object FireBaseRepository {
                 else startDate.toLong()
         }
         state.value = FirebaseState.loading()
-        db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+        var query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .whereGreaterThanOrEqualTo("TIME_STAMP", sdom)
-            .addSnapshotListener { value, error ->
-                if (value == null) {
-                    state.value = FirebaseState.failed("ERROR")
-                } else {
-                    value.documents.let {
-                        if (it.isEmpty()) {
-                            state.value = FirebaseState.empty()
-                        } else {
-                            val docs = it.map {
-                                it.toObject(Detail::class.java)
-                            }
-                            _loading.value = true
-                            details.postValue(docs)
-                            state.value = FirebaseState.success(docs)
+        if (category != "All")
+            query = query.whereEqualTo("CATEGORY", category)
+        query.addSnapshotListener { value, error ->
+            if (error!=null){
+                state.value = FirebaseState.failed(error.message)
+            }
+            if (value == null) {
+//                if (value?.documents==null)
+//                    state.value = FirebaseState.empty()
+
+            } else {
+                value.documents.let {
+                    if (it.isEmpty()) {
+                        state.value = FirebaseState.empty()
+                    } else {
+                        val docs = it.map {
+                            it.toObject(Detail::class.java)
                         }
+                        _loading.value = true
+                        details.postValue(docs)
+                        state.value = FirebaseState.success(docs)
                     }
                 }
             }
+        }
     }
 
 }

@@ -28,7 +28,7 @@ object RoomRepository {
 
     init {
         Log.e("INIT", "ROOM-REPO")
-        settingsStorage = SettingDataStore(MyApp.instance)
+        settingsStorage = SettingDataStore
 
     }
 
@@ -145,7 +145,6 @@ object RoomRepository {
         liveData: MutableStateFlow<FirebaseState<CreateRoom>>
     ) = coroutineScope {
         val room = "ROOM"
-        val map = mutableMapOf<String, Any?>()
         liveData.value = FirebaseState.loading()
         val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
             databaseReference.child(uuid!!).get().addOnCompleteListener {
@@ -157,7 +156,7 @@ object RoomRepository {
         }
         val ob = getNewKey(userData, id)
         val finalKey = ob["F_KEY"].toString()
-        val flag = ob["IS_JOIN"].toString().toBoolean()
+//        val flag = ob["IS_JOIN"].toString().toBoolean()
 
         val roomDetail = RoomDetail(
             ROOM_ID = id,
