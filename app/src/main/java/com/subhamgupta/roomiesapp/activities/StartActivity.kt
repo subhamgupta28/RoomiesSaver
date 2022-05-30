@@ -29,17 +29,17 @@ class StartActivity : AppCompatActivity() {
 //            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 //        else
 //            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        binding.logo.visibility = View.VISIBLE
-        val animZoomIn = AnimationUtils.loadAnimation(this, R.anim.zoom_in)
-        binding.logo.startAnimation(animZoomIn)
+//        binding.logo.visibility = View.VISIBLE
+//        val animZoomIn = AnimationUtils.loadAnimation(this, R.anim.zoom_in)
+//        binding.logo.startAnimation(animZoomIn)
         val user = FirebaseAuth.getInstance()
-//        if (user.currentUser != null) {
-//            binding.fragmentContainerView.isVisible = false
-//            startActivity(Intent(this@StartActivity, MainActivity::class.java))
-//            finish()
-//        } else {
-//            binding.fragmentContainerView.isVisible = true
-//        }
+        if (user.currentUser != null) {
+            binding.fragmentContainerView.isVisible = false
+            startActivity(Intent(this@StartActivity, MainActivity::class.java))
+            finish()
+        } else {
+            binding.fragmentContainerView.isVisible = true
+        }
 
 
     }
