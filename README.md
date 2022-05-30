@@ -5,14 +5,14 @@
 <br>
 <br>
 
-<img src="images/1.png" width="200">|
-<img src="images/2.png" width="200">|
-<img src="images/3.png" width="200">|
-<img src="images/4.png" width="200">|
-<img src="images/5.png" width="200">|
-<img src="images/6.png" width="200">|
-<img src="images/7.png" width="200">|
-<img src="images/8.png" width="200">|
+<img src="images/1.jpg" width="200">|
+<img src="images/2.jpg" width="200">|
+<img src="images/3.jpg" width="200">|
+<img src="images/4.jpg" width="200">|
+<img src="images/5.jpg" width="200">|
+<img src="images/6.jpg" width="200">|
+<img src="images/7.jpg" width="200">|
+<img src="images/8.jpg" width="200">|
 
 [comment]: <> (<img src="images/9.png" width="200">|)
 
