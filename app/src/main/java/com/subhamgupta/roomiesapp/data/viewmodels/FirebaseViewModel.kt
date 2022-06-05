@@ -68,7 +68,7 @@ class FirebaseViewModel : ViewModel() {
         repository.generateExcel(_sheetLoading)
     }
 
-    fun getData() = viewModelScope.launch {
+    fun getData() = viewModelScope.launch(Dispatchers.IO) {
         fetchUserData()
         _loading.value = false
         repository.loading.collect {
@@ -79,7 +79,7 @@ class FirebaseViewModel : ViewModel() {
         }
     }
 
-    fun editUser(uri: Uri, userName: String) = viewModelScope.launch {
+    fun editUser(uri: Uri, userName: String) = viewModelScope.launch(Dispatchers.IO) {
         repository.uploadPic(uri, userName, _editUser)
     }
 
@@ -95,7 +95,7 @@ class FirebaseViewModel : ViewModel() {
     fun getDataStore() = repository.getDataStore()
 
 
-    fun logout() = viewModelScope.launch {
+    fun logout() = viewModelScope.launch(Dispatchers.IO) {
         repository.signOut()
     }
 
@@ -108,13 +108,13 @@ class FirebaseViewModel : ViewModel() {
     }
 
     fun getDiffData(): LiveData<MutableList<MutableMap<String, Any>>> {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.fetchDiffData(ArrayList())
         }
         return repository.diffData
     }
 
-    fun modifyStartDate(timeStamp: Long) = viewModelScope.launch {
+    fun modifyStartDate(timeStamp: Long) = viewModelScope.launch(Dispatchers.IO) {
         repository.modifyStartDate(timeStamp, _startDate)
         getDataStore().setStartDate(timeStamp.toString())
     }
@@ -134,21 +134,21 @@ class FirebaseViewModel : ViewModel() {
         return repository.user
     }
 
-    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch {
+    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch(Dispatchers.IO) {
         repository.fetchSummary(currMonth, category, _summary)
     }
 
 
-    fun updateItem(item: String?, amount: String, timeStamp: String) =
+    fun updateItem(item: String?, amount: String, timeStamp: String, note: String, tags: List<String>, category: String) =
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateItem(item, amount, timeStamp, _addItem)
+            repository.updateItem(item, amount, timeStamp, _addItem, note, tags, category)
         }
 
     fun getAllRoomsDetails(): MutableLiveData<MutableList<RoomDetail>> {
         return repository.getAllRoomDetail()
     }
 
-    private fun fetchHomeData() = viewModelScope.launch {
+    private fun fetchHomeData() = viewModelScope.launch(Dispatchers.IO) {
         repository.fetchHomeData(_homeData, _loadingHome)
     }
 

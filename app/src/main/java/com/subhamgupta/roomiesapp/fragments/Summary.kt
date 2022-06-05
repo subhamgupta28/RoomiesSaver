@@ -35,18 +35,14 @@ class Summary : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+
+    override fun onStart() {
+        super.onStart()
         binding.recycler.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
-        viewModel.getTotalAmount().observe(viewLifecycleOwner) {
-            "₹$it".also { binding.totalSpends.text = it }
+        viewModel.getTotalAmount().observe(viewLifecycleOwner) { it1 ->
+            "₹$it1".also { binding.totalSpends.text = it }
         }
 
-        lifecycleScope.launch {
-            val it = viewModel.getDataStore().isMonth()
-            binding.switch1.text = if (it) "This Month's" else "All Time"
-            binding.switch1.isChecked = it
-        }
 
         binding.switch1.setOnCheckedChangeListener { _, isChecked ->
             binding.switch1.text = if (isChecked) "This Month's" else "All Time"
@@ -58,14 +54,24 @@ class Summary : Fragment() {
         setData()
         binding.category.children.forEach { chip ->
             (chip as Chip).setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked)
-                    viewModel.fetchSummary(binding.switch1.isChecked, chip.text.toString())
+                if (isChecked) {
+                    val text = chip.text.toString()
+                    viewModel.fetchSummary(binding.switch1.isChecked, text)
+                    binding.searchLayout.visibility = if (text == "Other") {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                }
             }
         }
     }
 
     private fun setData() {
         lifecycleScope.launchWhenStarted {
+            val it = viewModel.getDataStore().isMonth()
+            binding.switch1.text = if (it) "This Month's" else "All Time"
+            binding.switch1.isChecked = it
             viewModel.summary.buffer().collect {
                 when (it) {
                     is FirebaseState.Loading -> {

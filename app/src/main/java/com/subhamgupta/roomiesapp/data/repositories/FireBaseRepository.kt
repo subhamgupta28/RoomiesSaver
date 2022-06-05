@@ -15,9 +15,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.subhamgupta.roomiesapp.MyApp
@@ -39,6 +41,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
@@ -313,6 +316,8 @@ object FireBaseRepository {
     suspend fun signOut() {
         auth.signOut()
         dataStore.clear()
+        user = null
+        MyApp.instance.workManager.cancelAllWork()
         dataStore.setLoggedIn(false)
         val file = File(application.filesDir, "/user.json")
         val file1 = File(application.filesDir, "/data.json")
@@ -383,10 +388,16 @@ object FireBaseRepository {
         item: String?,
         amount: String,
         timeStamp: String,
-        liveData: MutableLiveData<Boolean>
+        liveData: MutableLiveData<Boolean>,
+        note: String,
+        tags: List<String>,
+        category: String
     ) {
 //        Log.e("Update","$roomKey $item $amount $timeStamp")
         db.collection(roomKey).document(timeStamp).update("ITEM_BOUGHT", item)
+        db.collection(roomKey).document(timeStamp).update("TAGS", tags)
+        db.collection(roomKey).document(timeStamp).update("NOTE", note)
+        db.collection(roomKey).document(timeStamp).update("CATEGORY", category)
         db.collection(roomKey).document(timeStamp).update("AMOUNT_PAID", amount.toInt())
             .addOnCompleteListener {
                 liveData.postValue(true)
@@ -503,6 +514,10 @@ object FireBaseRepository {
                     }
                     val re = (monthTotalAmount.toDouble() / roomSize.toDouble())
                     val round = String.format("%.1f", re)
+
+                    val updatedOn =
+                        if (todayDetail.size != 0) todayDetail[0].TIME_STAMP else System.currentTimeMillis()
+                    Log.e("Updated on", "$updatedOn ${this@FireBaseRepository.updatedOn.value}")
                     totalAmount.postValue(monthTotalAmount)
                     todayAmount.postValue(todayTotalAmount)
                     val home = HomeData(
@@ -513,7 +528,7 @@ object FireBaseRepository {
                         donutList,
                         allUserAmount,
                         startDate,
-                        updatedOn.value.toString(),
+                        updatedOn.toString(),
                         chartList
                     )
 
@@ -606,7 +621,7 @@ object FireBaseRepository {
             val csvMapper = CsvMapper()
             csvMapper.writerFor(JsonNode::class.java)
                 .with(csvSchema)
-                .writeValue(File(Environment.DIRECTORY_DOWNLOADS, "sheet.csv"), jsonTree)
+                .writeValue(File(application.filesDir,"sheet.csv"), jsonTree)
             loading.value = FirebaseState.success(true)
         } catch (e: Exception) {
             Log.e("SAVE DATA FILE ERROR", "$e")
@@ -657,7 +672,7 @@ object FireBaseRepository {
         if (category != "All")
             query = query.whereEqualTo("CATEGORY", category)
         query.addSnapshotListener { value, error ->
-            if (error!=null){
+            if (error != null) {
                 state.value = FirebaseState.failed(error.message)
             }
             if (value == null) {

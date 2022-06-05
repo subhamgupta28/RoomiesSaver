@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -21,8 +22,10 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.subhamgupta.roomiesapp.BuildConfig
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.data.repositories.FireBaseRepository
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.ActivitySettingBinding
 import com.subhamgupta.roomiesapp.databinding.EditDetailsBinding
@@ -35,6 +38,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,6 +57,11 @@ class SettingActivity : AppCompatActivity() {
         binding = ActivitySettingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         settingDataStore = viewModel.getDataStore()
 
         viewModel.startDate.observe(this) {
@@ -118,7 +127,11 @@ class SettingActivity : AppCompatActivity() {
                     }
                     is FirebaseState.Success -> {
                         if (it.data) {
-                            showSnackBar("Excel sheet generated")
+                            withContext(Main){
+                                showSnackBar("Excel sheet generated")
+                                shareFile()
+                            }
+
                         }
                     }
                     else -> Unit
@@ -220,6 +233,23 @@ class SettingActivity : AppCompatActivity() {
             ),
             201
         )
+    }
+    private fun shareFile(){
+        try {
+            val file = File(application.filesDir,"sheet.csv")
+            if(file.exists()) {
+                val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                intent.setType("*/*")
+                intent.putExtra(Intent.EXTRA_STREAM, uri)
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent)
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            Log.e("File sharing error","${e.message}")
+        }
     }
 
     var filePath: Uri? = null

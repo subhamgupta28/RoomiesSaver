@@ -17,10 +17,10 @@ class UserAuthFragment : Fragment() {
     ): View {
         binding = FragmentUserAuthBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
-        binding.loginPopBtn.setOnClickListener {
+        binding.signin.setOnClickListener {
             findNavController().navigate(R.id.action_userAuthFragment_to_loginPage)
         }
-        binding.signinPopBtn.setOnClickListener {
+        binding.signup.setOnClickListener {
             findNavController().navigate(R.id.action_userAuthFragment_to_registerUserFragment)
         }
         return binding.root

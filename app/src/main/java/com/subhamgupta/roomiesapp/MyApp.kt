@@ -23,11 +23,13 @@ class MyApp : Application() {
     lateinit var db: FirebaseFirestore
     lateinit var firebaseAuth: FirebaseAuth
     lateinit var storage :FirebaseStorage
+    lateinit var workManager: WorkManager
 
     companion object {
         lateinit var instance: MyApp
 
     }
+
 
     init {
         instance = this
@@ -36,6 +38,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         initializeFirebase()
+        initializeWorker()
     }
 
 
@@ -51,5 +54,17 @@ class MyApp : Application() {
         firebaseAuth = FirebaseAuth.getInstance()
         databaseReference = Firebase.database.getReference("ROOMIES")
         storage = FirebaseStorage.getInstance()
+    }
+
+    private fun initializeWorker() {
+        val constraint = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 1, TimeUnit.HOURS)
+            .setConstraints(constraint)
+            .build()
+        workManager = WorkManager.getInstance(this)
+        workManager.enqueue(workRequest)
     }
 }

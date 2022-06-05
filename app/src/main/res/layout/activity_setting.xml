@@ -35,7 +35,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="18dp">
+                    app:cardElevation="12dp">
 
                     <Button
                         android:id="@+id/edit_profile"
@@ -49,33 +49,47 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
+
                         <LinearLayout
                             android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:layout_marginTop="22dp"
-                            android:layout_marginBottom="8dp"
-                            android:layout_height="wrap_content">
-                            <ImageView
-                                android:id="@+id/profile_img"
-                                android:layout_width="100dp"
-                               android:layout_marginStart="16dp"
-                                android:layout_height="100dp"
-                                android:layout_gravity="center_horizontal"
-                                android:elevation="2dp"
-                                android:src="@drawable/ic_person" />
+                            android:paddingTop="22dp"
+                            android:paddingBottom="8dp">
+
+                            <com.google.android.material.card.MaterialCardView
+                                style="@style/Widget.Material3.CardView.Elevated"
+                                android:layout_width="120dp"
+                                android:layout_height="120dp"
+                                android:layout_marginStart="16dp"
+                                app:cardCornerRadius="60dp"
+                                app:strokeColor="@color/colorOnPrimary"
+                                app:strokeWidth="3dp">
+
+                                <ImageView
+                                    android:id="@+id/profile_img"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_horizontal"
+                                    android:contentDescription="profile picture"
+                                    android:src="@drawable/ic_person" />
+                            </com.google.android.material.card.MaterialCardView>
+
                             <LinearLayout
                                 android:layout_width="match_parent"
-                                android:orientation="vertical"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:orientation="vertical">
+
                                 <TextView
-                                    android:textColor="@color/colorPrimary"
-                                    android:textStyle="bold"
                                     android:id="@+id/name_text"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_margin="6dp"
                                     android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textStyle="bold" />
 
                                 <TextView
                                     android:id="@+id/email_text"
@@ -87,15 +101,12 @@
                         </LinearLayout>
 
 
-
-
-
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="12dp"
-                            android:orientation="horizontal"
-                            android:baselineAligned="false">
+                            android:baselineAligned="false"
+                            android:orientation="horizontal">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -105,11 +116,11 @@
                                 android:orientation="vertical">
 
                                 <TextView
-                                    android:textColor="#0F9D58"
                                     android:id="@+id/this_month_amount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                    android:textColor="#0F9D58" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -128,10 +139,10 @@
 
                                 <TextView
                                     android:id="@+id/total_spends"
-                                    android:textColor="#0F9D58"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                    android:textColor="#0F9D58" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -153,9 +164,9 @@
                                     android:id="@+id/no_of_room"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:textColor="#0F9D58"
                                     android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                    android:textColor="#0F9D58" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -181,7 +192,7 @@
                     android:layout_marginEnd="12dp"
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="18dp">
+                    app:cardElevation="12dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -309,12 +320,12 @@
                     android:id="@+id/tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorSecondary"
                     android:layout_below="@id/m"
                     android:layout_marginStart="12dp"
                     android:layout_marginBottom="6dp"
                     android:text="Room Mates"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/colorSecondary" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/roomsRecycler"
@@ -362,13 +373,14 @@
 
                 <TextView
                     android:id="@+id/action"
-                    android:textColor="@color/colorSecondary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/line1"
                     android:layout_marginStart="12dp"
                     android:text="Actions"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/colorSecondary" />
+
                 <LinearLayout
                     android:id="@+id/kl"
                     android:layout_width="match_parent"
@@ -382,12 +394,12 @@
                         android:layout_height="wrap_content">
 
                         <Button
-                            android:id="@+id/generate_excel"
+                            android:id="@+id/shareid"
                             style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Generate excel sheet"
-                            app:icon="@drawable/ic_baseline_print_24" />
+                            android:text="Share Room"
+                            app:icon="@drawable/ic_baseline_share" />
 
                         <Button
                             android:id="@+id/joinRoom"
@@ -424,14 +436,12 @@
                     </LinearLayout>
 
                     <Button
-                        android:id="@+id/shareid"
+                        android:id="@+id/generate_excel"
                         style="@style/Widget.Material3.Button.ElevatedButton.Icon"
-
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-
-                        android:text="Share Room"
-                        app:icon="@drawable/ic_baseline_share" />
+                        android:text="Generate and share excel sheet"
+                        app:icon="@drawable/ic_baseline_print_24" />
 
                     <Button
                         android:id="@+id/leaveroom"

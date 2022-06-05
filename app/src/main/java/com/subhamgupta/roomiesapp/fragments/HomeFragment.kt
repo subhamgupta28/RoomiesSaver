@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -50,7 +49,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val homeAdapter = HomeAdapter(this)
@@ -63,22 +61,27 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
                 withContext(Main){
                     when (it) {
                         is FirebaseState.Loading -> {
-
+                            binding.progress.visibility = View.VISIBLE
+                            Log.e("HOME", "LOADING")
                         }
                         is FirebaseState.Empty ->{
+                            binding.progress.visibility = View.GONE
                             binding.emptytext.visibility = View.VISIBLE
                             binding.line1.visibility = View.GONE
                             binding.k.visibility = View.GONE
                             binding.kt.visibility = View.GONE
                         }
                         is FirebaseState.Failed -> {
+                            binding.progress.visibility = View.GONE
                             binding.emptytext.visibility = View.VISIBLE
                             binding.line1.visibility = View.GONE
                             binding.k.visibility = View.GONE
                             binding.kt.visibility = View.GONE
                         }
                         is FirebaseState.Success -> {
+                            Log.e("HOME", "SUCCESS")
                             val res = it.data
+                            binding.progress.visibility = View.GONE
                             binding.emptytext.visibility = View.GONE
                             binding.line1.visibility = View.VISIBLE
                             binding.k.visibility = View.VISIBLE
@@ -130,12 +133,10 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
     }
 
     private fun getTimeAgo(time: String): String {
-        val sdf = SimpleDateFormat(DATE_STRING, Locale.getDefault())
         var ago = ""
         try {
-            val ti = sdf.parse(time)?.time
             ago = DateUtils.getRelativeTimeSpanString(
-                ti!!,
+                time.toLong(),
                 System.currentTimeMillis(),
                 DateUtils.SECOND_IN_MILLIS
             ).toString()

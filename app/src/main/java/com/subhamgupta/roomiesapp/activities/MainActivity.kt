@@ -29,8 +29,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
+import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
 import com.subhamgupta.roomiesapp.data.Worker
@@ -39,6 +41,7 @@ import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.DiffUser
 import com.subhamgupta.roomiesapp.fragments.HomeFragment
+import com.subhamgupta.roomiesapp.fragments.RationFragment
 import com.subhamgupta.roomiesapp.fragments.Summary
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +65,11 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.lifecycleOwner = this
+        val user = MyApp.instance.firebaseAuth.currentUser
+        if (user==null){
+            startActivity(Intent(this, StartActivity::class.java))
+            finish()
+        }
         viewModel.getData()
         settingDataStore = viewModel.getDataStore()
 
@@ -70,7 +77,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         diffUser = DiffUser()
-
 //        viewPagerAdapter.addFragments(MyNotesFragment(), "My Notes")
         viewPagerAdapter.addFragments(HomeFragment(this@MainActivity), "Home")
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
@@ -115,13 +121,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             }
 
         })
-
         binding.floatingbtn.setOnClickListener {
             addItems()
         }
         viewModel.fetchAlert()
-
-
         lifecycleScope.launch(Dispatchers.IO) {
 
             viewModel.roomDetail.buffer().collect {
@@ -159,7 +162,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         netStat()
         setupClickListener()
-        initializeWorker()
     }
 
     private fun netStat() {
@@ -298,6 +300,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         )
                         viewModel.sendNotification("New Buying", text)
                         dialogBinding.tags.removeAllViews()
+                        dialogBinding.noteText.text = null
                         dialogBinding.amountPaid.text = null
                         dialogBinding.saveBtn.isEnabled = true
                         dialogBinding.itemBought.text = null
@@ -314,15 +317,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.show()
     }
 
-    private fun loading(isVisible: Boolean) {
-        if (isVisible) {
-            materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
-            val dialogBinding = LoadingPopupBinding.inflate(layoutInflater)
-            materialAlertDialogBuilder.setView(dialogBinding.root)
-            materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-            loadingDismiss = materialAlertDialogBuilder.show()
-        }
-    }
+
 
     private fun changeRoom() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
@@ -402,16 +397,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         binding.viewpager1.setCurrentItem(2, true)
 
     }
-    private fun initializeWorker() {
-        val constraint = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
 
-        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 1, TimeUnit.HOURS)
-            .setConstraints(constraint)
-            .build()
-        WorkManager.getInstance(this).enqueue(workRequest)
-    }
 
 }
 

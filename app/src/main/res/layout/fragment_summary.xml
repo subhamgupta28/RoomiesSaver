@@ -98,72 +98,120 @@
 
 
                 </com.google.android.material.card.MaterialCardView>
+
                 <HorizontalScrollView
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
-                    android:layout_marginEnd="12dp"
-                    android:layout_height="wrap_content">
+                    android:layout_marginEnd="12dp">
+
                     <com.google.android.material.chip.ChipGroup
-                        android:layout_width="wrap_content"
                         android:id="@+id/category"
-                        app:singleSelection="true"
-                        app:singleLine="true"
-                        app:selectionRequired="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         app:checkedChip="@+id/chip_all"
                         app:chipSpacingVertical="0dp"
-                        android:layout_gravity="center"
-                        android:layout_height="wrap_content" >
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_ration"
-                            android:text="Ration"
-                            app:checkedIconVisible="true"
-                            app:checkedIconEnabled="true"
-                            android:checkable="true"
-                            style="@style/Widget.Material3.Chip.Assist.Elevated"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_food"
-                            android:text="Food"
-                            app:checkedIconVisible="true"
-                            app:checkedIconEnabled="true"
-                            android:checkable="true"
-                            style="@style/Widget.Material3.Chip.Assist.Elevated"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_drink"
-                            android:text="Drink"
-                            app:checkedIconVisible="true"
-                            app:checkedIconEnabled="true"
-                            style="@style/Widget.Material3.Chip.Assist.Elevated"
-                            android:checkable="true"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_other"
-                            android:text="Other"
-                            app:checkedIconVisible="true"
-                            style="@style/Widget.Material3.Chip.Assist.Elevated"
-                            app:checkedIconEnabled="true"
-                            android:checkable="true"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                        app:selectionRequired="true"
+                        app:singleLine="true"
+                        app:singleSelection="true">
+
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_all"
-                            android:text="All"
-                            app:checkedIconVisible="true"
-                            app:checkedIconEnabled="true"
+                            style="@style/Widget.Material3.Chip.Assist.Elevated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
 
                             android:checkable="true"
 
+                            android:text="All"
+                            app:checkedIconEnabled="true"
+                            app:checkedIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_ration"
                             style="@style/Widget.Material3.Chip.Assist.Elevated"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="Ration"
+                            app:checkedIconEnabled="true"
+                            app:checkedIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_food"
+                            style="@style/Widget.Material3.Chip.Assist.Elevated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="Food"
+                            app:checkedIconEnabled="true"
+                            app:checkedIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_drink"
+                            style="@style/Widget.Material3.Chip.Assist.Elevated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="Drink"
+                            app:checkedIconEnabled="true"
+                            app:checkedIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_other"
+                            style="@style/Widget.Material3.Chip.Assist.Elevated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="Other"
+                            app:checkedIconEnabled="true"
+                            app:checkedIconVisible="true" />
+
                     </com.google.android.material.chip.ChipGroup>
 
                 </HorizontalScrollView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/search_layout"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="4dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="12dp"
+                            android:layout_marginBottom="8dp"
+                            android:scaleX="1.2"
+                            android:scaleY="1.2"
+                            app:srcCompat="@drawable/ic_baseline_search_24" />
+
+                        <EditText
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="#003C3C3C"
+                            android:hint="Search"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -173,8 +221,8 @@
                     android:clipChildren="false"
                     android:clipToPadding="false"
                     android:paddingStart="6dp"
-                    android:paddingBottom="6dp"
-                    android:paddingEnd="6dp">
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="6dp">
 
                 </androidx.recyclerview.widget.RecyclerView>
             </LinearLayout>

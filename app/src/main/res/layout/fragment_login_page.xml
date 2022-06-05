@@ -40,7 +40,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="18dp"
                     android:text="We are so happy to see you. You can continue to login to Roomies App"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
@@ -106,15 +106,14 @@
                     <Button
                         android:id="@+id/login_btn"
                         style="@style/Widget.Material3.Button"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Login"
-                        app:icon="@drawable/ic_outline_arrow_forward" />
+                        android:text="Login" />
 
                     <Button
                         android:id="@+id/forgot"
-                        style="@style/Widget.Material3.Button"
-                        android:layout_width="wrap_content"
+                        style="@style/Widget.Material3.Button.ElevatedButton"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:text="Forgot" />

@@ -12,7 +12,9 @@
         tools:layout="@layout/fragment_login_page" >
         <action
             android:id="@+id/action_loginPage_to_userAuthFragment"
-            app:destination="@id/userAuthFragment" />
+            app:destination="@id/userAuthFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"/>
     </fragment>
     <fragment
         android:id="@+id/roomCreation"
@@ -26,10 +28,14 @@
         tools:layout="@layout/fragment_register_user" >
         <action
             android:id="@+id/action_registerUserFragment_to_roomCreation"
-            app:destination="@id/roomCreation" />
+            app:destination="@id/roomCreation"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"/>
         <action
             android:id="@+id/action_registerUserFragment_to_userAuthFragment"
-            app:destination="@id/userAuthFragment" />
+            app:destination="@id/userAuthFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/userAuthFragment"
@@ -38,12 +44,18 @@
         tools:layout="@layout/fragment_user_auth" >
         <action
             android:id="@+id/action_userAuthFragment_to_loginPage"
-            app:destination="@id/loginPage" />
+            app:destination="@id/loginPage"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"/>
         <action
             android:id="@+id/action_userAuthFragment_to_registerUserFragment"
-            app:destination="@id/registerUserFragment" />
+            app:destination="@id/registerUserFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
         <action
             android:id="@+id/action_userAuthFragment_to_roomCreation"
-            app:destination="@id/roomCreation" />
+            app:destination="@id/roomCreation"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"/>
     </fragment>
 </navigation>

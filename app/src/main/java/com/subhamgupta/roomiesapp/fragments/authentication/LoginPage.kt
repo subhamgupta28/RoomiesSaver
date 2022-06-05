@@ -70,10 +70,8 @@ class LoginPage: Fragment() {
                         binding.pass.isEnabled = true
                         binding.forgot.isEnabled = true
                         if (it.data.isLoggedIn==true){
-                            val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
                             startActivity(Intent(activity, MainActivity::class.java))
                             activity?.finish()
-//                findNavController().navigate(R.id.action_loginPage_to_userAuthFragment)
                         }
                     }
                     else->Unit

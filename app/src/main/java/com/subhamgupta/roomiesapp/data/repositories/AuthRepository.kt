@@ -81,9 +81,11 @@ object AuthRepository {
         liveData: MutableStateFlow<FirebaseState<UserAuth>>
     ) = coroutineScope{
         liveData.value = FirebaseState.loading()
+
         val result = suspendCoroutine<Task<AuthResult?>> {cont->
             auth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener { task: Task<AuthResult?> ->
+                    Log.e("ERROR"," e.message.toString()")
                     cont.resume(task)
                 }.addOnFailureListener { e: Exception ->
                     Log.e("ERROR", e.message.toString())
@@ -109,12 +111,12 @@ object AuthRepository {
         uuid: String,
         liveData: MutableStateFlow<FirebaseState<UserAuth>>,
         u: UserAuth
-    ) {
-
+    ) = coroutineScope{
         val result = suspendCoroutine<MutableMap<String, Any>> {cont->
             databaseReference.child(uuid).get().addOnCompleteListener {
                 if (it.isSuccessful) {
                     val mp = it.result.value as MutableMap<String, Any>
+                    Log.e("AUTH","$mp")
                     cont.resume(mp)
 
                 }

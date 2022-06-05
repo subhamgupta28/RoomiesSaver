@@ -35,13 +35,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Welcome, let's sign you in"
+                    android:text="Welcome 😊\nlet's sign you in"
                     android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="18dp"
                     android:text="We are so happy to see you. You can continue to login to Roomies App"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
@@ -50,7 +50,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="34dp"
                     android:hint="Name"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
@@ -121,7 +121,7 @@
                 <Button
                     android:id="@+id/create_acc"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:layout_margin="12dp"

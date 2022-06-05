@@ -9,8 +9,8 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        style="@style/Widget.Material3.CardView.Filled">
+        style="@style/Widget.Material3.CardView.Filled"
+        app:cardCornerRadius="16dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -21,10 +21,10 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:hint="Things Bought"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
                 app:helperText="Things you bought?"
                 android:layout_height="wrap_content">
 
@@ -39,12 +39,12 @@
                 android:layout_width="match_parent"
                 android:layout_marginTop="16dp"
                 android:id="@+id/amount_layout"
-                app:boxCornerRadiusTopEnd="8dp"
                 app:errorEnabled="true"
                 app:helperText="Amount you paid?"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
                 app:counterMaxLength="6"
                 app:counterEnabled="true"
                 android:hint="Amount Paid"
@@ -62,12 +62,12 @@
                 android:layout_width="match_parent"
                 android:layout_marginTop="16dp"
                 android:id="@+id/note_layout"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
                 app:counterEnabled="true"
                 app:counterMaxLength="100"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
                 android:hint="Note"
                 android:layout_height="wrap_content">
 
@@ -149,12 +149,11 @@
             </HorizontalScrollView>
             <Button
                 android:id="@+id/save_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:text="Save"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:layout_gravity="end"
                 android:layout_marginBottom="12dp"
-                app:icon="@drawable/ic_baseline_save"
                 style="@style/Widget.Material3.Button"
                 android:layout_height="wrap_content" />
         </LinearLayout>
