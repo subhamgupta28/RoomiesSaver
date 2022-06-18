@@ -35,6 +35,7 @@
                 android:layout_gravity="end"
                 android:id="@+id/roomEnter"
                 android:text="Enter"
+                style="@style/Widget.Material3.FloatingActionButton.Primary"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>

@@ -1,12 +1,14 @@
 package com.subhamgupta.roomiesapp.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -57,15 +59,16 @@ class Summary : Fragment() {
                 if (isChecked) {
                     val text = chip.text.toString()
                     viewModel.fetchSummary(binding.switch1.isChecked, text)
-                    binding.searchLayout.visibility = if (text == "Other") {
-                        View.VISIBLE
-                    } else {
-                        View.GONE
-                    }
+//                    binding.searchLayout.visibility = if (text == "Other") {
+//                        View.VISIBLE
+//                    } else {
+//                        View.GONE
+//                    }
                 }
             }
         }
     }
+
 
     private fun setData() {
         lifecycleScope.launchWhenStarted {

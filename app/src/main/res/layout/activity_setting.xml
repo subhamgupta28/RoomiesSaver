@@ -395,20 +395,18 @@
 
                         <Button
                             android:id="@+id/shareid"
-                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Share Room"
-                            app:icon="@drawable/ic_baseline_share" />
+                            android:text="Share Room"/>
 
                         <Button
                             android:id="@+id/joinRoom"
-                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                            style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Join Room"
-                            app:icon="@drawable/ic_outline_add" />
+                            android:text="Join/Create Room" />
                     </LinearLayout>
 
 
@@ -417,19 +415,17 @@
                         android:layout_height="wrap_content">
 
                         <Button
+                            style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:id="@+id/limit_btn"
-
-                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Edit Room"
-                            app:icon="@drawable/ic_create" />
+                            android:text="Edit Room" />
 
                         <Button
                             android:id="@+id/setDate"
-                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:layout_marginStart="8dp"
                             android:text="Edit Start Day Of Month"
                             app:icon="@drawable/ic_baseline_date_range" />
@@ -437,22 +433,31 @@
 
                     <Button
                         android:id="@+id/generate_excel"
-                        style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+                        style="@style/Widget.Material3.FloatingActionButton.Primary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Generate and share excel sheet"
                         app:icon="@drawable/ic_baseline_print_24" />
 
                     <Button
+                        android:id="@+id/show_qr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.FloatingActionButton.Primary"
+                        android:text="Show QR" />
+
+                    <Button
                         android:id="@+id/leaveroom"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
+
                         android:layout_height="wrap_content"
                         android:layout_below="@id/setDate"
                         android:layout_gravity="end"
                         android:layout_marginStart="16dp"
                         android:text="leave room"
                         android:textColor="@color/colorRed" />
+
                 </LinearLayout>
             </RelativeLayout>
         </RelativeLayout>

@@ -203,6 +203,7 @@
                             app:srcCompat="@drawable/ic_baseline_search_24" />
 
                         <EditText
+                            android:id="@+id/search_text"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"

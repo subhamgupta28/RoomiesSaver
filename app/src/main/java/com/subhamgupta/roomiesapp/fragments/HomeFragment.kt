@@ -1,5 +1,6 @@
 package com.subhamgupta.roomiesapp.fragments
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.util.Log
@@ -20,7 +21,6 @@ import com.subhamgupta.roomiesapp.adapter.HomeAdapter
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentHomeBinding
-import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -32,7 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(), HAdapToHFrag {
+class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragment(), HAdapToHFrag {
 
     private val viewModel: FirebaseViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
@@ -44,9 +44,21 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
         binding.viewModel = viewModel
         binding.pRecycle.setHasFixedSize(true)
         binding.itemRecycle.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
-        binding.pRecycle.layoutManager =
+        binding.pRecycle.layoutManager = if (!isTablet())
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        else
+            StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
+
+
         return binding.root
+    }
+
+    fun isTablet(): Boolean {
+        val xlarge = (this.getResources()
+            .getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) === 4
+        val large = this.getResources()
+            .getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK === Configuration.SCREENLAYOUT_SIZE_LARGE
+        return xlarge || large
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,43 +67,37 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
         val adapter = SummaryAdapter()
         binding.pRecycle.adapter = homeAdapter
         binding.itemRecycle.adapter = adapter
-
+        binding.refresh?.setOnClickListener {
+            viewModel.refreshData()
+        }
         lifecycleScope.launch(Dispatchers.IO) {
-            viewModel.homeData.buffer().collect{
-                withContext(Main){
+            viewModel.homeData.buffer().collect {
+                withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
                             binding.progress.visibility = View.VISIBLE
                             Log.e("HOME", "LOADING")
                         }
-                        is FirebaseState.Empty ->{
-                            binding.progress.visibility = View.GONE
-                            binding.emptytext.visibility = View.VISIBLE
-                            binding.line1.visibility = View.GONE
-                            binding.k.visibility = View.GONE
-                            binding.kt.visibility = View.GONE
+                        is FirebaseState.Empty -> {
                         }
                         is FirebaseState.Failed -> {
-                            binding.progress.visibility = View.GONE
-                            binding.emptytext.visibility = View.VISIBLE
-                            binding.line1.visibility = View.GONE
-                            binding.k.visibility = View.GONE
-                            binding.kt.visibility = View.GONE
+                            visible()
                         }
                         is FirebaseState.Success -> {
-                            Log.e("HOME", "SUCCESS")
+
                             val res = it.data
-                            binding.progress.visibility = View.GONE
-                            binding.emptytext.visibility = View.GONE
-                            binding.line1.visibility = View.VISIBLE
-                            binding.k.visibility = View.VISIBLE
-                            binding.kt.visibility = View.VISIBLE
+                            Log.e("HOME", "${it.data}")
+                            if (res.isEmpty)
+                                visible()
+                            else gone()
+
                             try {
                                 binding.spark.visibility = View.VISIBLE
-                                val data = res?.todayData
+                                val data = res.todayData
                                 adapter.setItems(data)
-                                homeAdapter.setData(res?.userMap, res?.eachPersonAmount)
-                                binding.donutView.submitData(res?.donutList!!)
+
+                                homeAdapter.setData(res.userMap, res.eachPersonAmount)
+                                binding.donutView.submitData(res.donutList!!)
                                 binding.eachAmt.text = res.eachPersonAmount.toString()
                                 "₹${res.todayTotal}".also { binding.todayAmount.text = it }
                                 "₹${res.allTotal}".also { binding.totalSpends.text = it }
@@ -107,7 +113,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
                                 binding.today.text = sdf.format(ed)
 //                                Toast.makeText(requireContext(),  "Room data fetched", Toast.LENGTH_LONG).show()
                             } catch (e: Exception) {
-                                Log.e( "onViewCreated: Home Fragment", e.message.toString())
+                                Log.e("onViewCreated: Home Fragment", e.message.toString())
                             }
                         }
                         else -> Unit
@@ -121,8 +127,27 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink?=null) : Fragment(
         binding.goToAllExpBtn.setOnClickListener {
             homeToMainLink?.goToAllExpenses()
         }
+        binding.goToDiffUser.setOnClickListener {
+            homeToMainLink?.goToDiffUser()
+        }
 
 
+    }
+
+    private fun visible() {
+        binding.progress.visibility = View.GONE
+        binding.emptytext.visibility = View.VISIBLE
+        binding.line1.visibility = View.GONE
+        binding.k.visibility = View.GONE
+        binding.kt.visibility = View.GONE
+    }
+
+    private fun gone() {
+        binding.progress.visibility = View.GONE
+        binding.emptytext.visibility = View.GONE
+        binding.line1.visibility = View.VISIBLE
+        binding.k.visibility = View.VISIBLE
+        binding.kt.visibility = View.VISIBLE
     }
 
     private fun showSnackBar(msg: String) {

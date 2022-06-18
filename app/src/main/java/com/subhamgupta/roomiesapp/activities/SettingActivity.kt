@@ -18,18 +18,22 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.getkeepsafe.taptargetview.TapTarget
+import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.subhamgupta.roomiesapp.BuildConfig
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
-import com.subhamgupta.roomiesapp.data.repositories.FireBaseRepository
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.ActivitySettingBinding
 import com.subhamgupta.roomiesapp.databinding.EditDetailsBinding
 import com.subhamgupta.roomiesapp.databinding.EditUserPopupBinding
+import com.subhamgupta.roomiesapp.databinding.QrcodePopupBinding
 import com.subhamgupta.roomiesapp.fragments.RoomCreation
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
@@ -50,6 +54,7 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var settingDataStore: SettingDataStore
     private lateinit var name: String
+    private lateinit var roomKey: String
     private lateinit var imageView: ImageView
     private lateinit var limit: String
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,6 +103,7 @@ class SettingActivity : AppCompatActivity() {
                             name = it.data.ROOM_NAME.toString()
                             limit = it.data.LIMIT.toString()
                             binding.rId.text = it.data.ROOM_ID
+                            roomKey = it.data.ROOM_ID.toString()
                             try {
                                 val sdf = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
                                 val netDate = Date(it.data.START_DATE_MONTH!!)
@@ -127,7 +133,7 @@ class SettingActivity : AppCompatActivity() {
                     }
                     is FirebaseState.Success -> {
                         if (it.data) {
-                            withContext(Main){
+                            withContext(Main) {
                                 showSnackBar("Excel sheet generated")
                                 shareFile()
                             }
@@ -156,6 +162,9 @@ class SettingActivity : AppCompatActivity() {
         binding.joinRoom.setOnClickListener {
             joinRoomPopUp()
         }
+        binding.showQr.setOnClickListener {
+            generateQR()
+        }
         binding.limitBtn.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.getDataStore().setUpdate(true)
@@ -171,6 +180,7 @@ class SettingActivity : AppCompatActivity() {
         }
 
 
+
         viewModel.getTotalAmount().observe(this) {
             "₹$it".also { binding.totalSpends.text = it }
         }
@@ -179,9 +189,15 @@ class SettingActivity : AppCompatActivity() {
         }
 
 
-
+        viewModel.leaveRoom.observe(this) {
+            if (it)
+                viewModel.refreshData()
+        }
 
         lifecycleScope.launch {
+            if (!viewModel.getDataStore().getDemo2()) {
+                showDemo()
+            }
             binding.nameText.text = settingDataStore.getUserName()
             binding.emailText.text = settingDataStore.getEmail()
             binding.noOfRoom.text = settingDataStore.getRoomCount().toString()
@@ -195,10 +211,8 @@ class SettingActivity : AppCompatActivity() {
             binding.darkModeSwitch.setOnCheckedChangeListener { _, isCheck ->
                 if (isCheck) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-
                 } else {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
                 }
                 lifecycleScope.launch {
                     settingDataStore.setDarkMode(isCheck)
@@ -207,8 +221,9 @@ class SettingActivity : AppCompatActivity() {
             }
             viewModel.userData.buffer().collect {
                 withContext(Main) {
-                    Log.e("URL","${it["IMG_URL"]}")
-                    val requestOptions = RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    Log.e("URL", "${it["IMG_URL"]}")
+                    val requestOptions =
+                        RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     Glide.with(this@SettingActivity)
                         .load(it["IMG_URL"].toString())
                         .circleCrop()
@@ -234,11 +249,119 @@ class SettingActivity : AppCompatActivity() {
             201
         )
     }
-    private fun shareFile(){
+
+    private fun generateQR() {
+        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        val view = QrcodePopupBinding.inflate(layoutInflater)
         try {
-            val file = File(application.filesDir,"sheet.csv")
-            if(file.exists()) {
-                val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap =
+                barcodeEncoder.encodeBitmap(roomKey + "ID", BarcodeFormat.QR_CODE, 500, 500)
+            view.qrImage.setImageBitmap(bitmap)
+        } catch (e: java.lang.Exception) {
+        }
+        materialAlertDialogBuilder.setView(view.root)
+        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+        materialAlertDialogBuilder.show()
+    }
+
+    private fun showDemo() {
+        val tp = TapTargetSequence(this)
+            .targets(
+                TapTarget.forView(binding.joinRoom, "Join room or create one")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(binding.setDate, "Set start date of the month")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(
+                    binding.editProfile,
+                    "Edit Profile",
+                    "Change user name and profile pic"
+                )
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .outerCircleColor(R.color.colorRed)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(binding.shareid, "Share room", "Share the room key to others.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .outerCircleColor(R.color.colorRed)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(
+                    binding.showQr,
+                    "Show QR Code",
+                    "Show QR Code to let other people join your room."
+                )
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .outerCircleColor(R.color.colorRed)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(
+                    binding.limitBtn,
+                    "Edit Room",
+                    "Edit details of the room"
+                )
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .outerCircleColor(R.color.colorRed)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(
+                    binding.generateExcel,
+                    "Generate and share excel sheet",
+                    "All the spending of month converted to excel sheet."
+                )
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .tintTarget(false)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .outerCircleColor(R.color.colorRed)
+                    .textColor(R.color.colorOnPrimary)
+            )
+            .listener(object : TapTargetSequence.Listener {
+                // This listener will tell us when interesting(tm) events happen in regards
+                // to the sequence
+                override fun onSequenceFinish() {
+                    // Yay
+                    lifecycleScope.launch {
+                        viewModel.getDataStore().setDemo2(true)
+                    }
+                }
+
+                override fun onSequenceStep(lastTarget: TapTarget, targetClicked: Boolean) {
+                    // Perform action for the current target
+                    Log.e("target", lastTarget.toString())
+                }
+
+                override fun onSequenceCanceled(lastTarget: TapTarget) {
+                    // Boo
+                }
+            })
+        tp.start()
+    }
+
+    private fun shareFile() {
+        try {
+            val file = File(application.filesDir, "sheet.csv")
+            if (file.exists()) {
+                val uri =
+                    FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 intent.setType("*/*")
@@ -248,7 +371,7 @@ class SettingActivity : AppCompatActivity() {
             }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
-            Log.e("File sharing error","${e.message}")
+            Log.e("File sharing error", "${e.message}")
         }
     }
 
@@ -263,7 +386,7 @@ class SettingActivity : AppCompatActivity() {
                     contentResolver,
                     filePath
                 )
-                imageView.setImageBitmap(bitmap)
+            imageView.setImageBitmap(bitmap)
         }
     }
 
@@ -280,7 +403,7 @@ class SettingActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.editUser.collect {
                 if (it) {
-                    withContext(Main){
+                    withContext(Main) {
                         showSnackBar("Saved")
                     }
 
@@ -290,8 +413,7 @@ class SettingActivity : AppCompatActivity() {
         view.saveBtn.setOnClickListener {
             if (filePath != null && view.userName.text.toString().isNotEmpty()) {
                 viewModel.editUser(filePath!!, view.userName.text.toString())
-            }
-            else{
+            } else {
                 showSnackBar("Enter details")
             }
         }
@@ -380,6 +502,15 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun leaveRoom() {
+        Snackbar.make(binding.root, "Do you want to leave the room?", Snackbar.LENGTH_LONG)
+            .setBackgroundTint(resources.getColor(R.color.colorRed))
+            .setTextColor(resources.getColor(R.color.colorOnSecondary))
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .setDuration(10000)
+            .setAction("Leave") {
+                viewModel.leaveRoom(roomKey)
+            }
+            .show()
     }
 
 

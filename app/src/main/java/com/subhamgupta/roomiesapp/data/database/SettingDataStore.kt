@@ -25,6 +25,8 @@ object SettingDataStore {
     RoomKey
     RoomRef
     clear
+    demo
+    demo2
     */
     private val Context.dataStore by preferencesDataStore(name = "settings")
     private suspend fun save(key: String, value: String) {
@@ -49,6 +51,22 @@ object SettingDataStore {
 
     suspend fun setDarkMode(str: Boolean) {
         save("getDarkMode", str.toString())
+    }
+    suspend fun getDemo(): Boolean {
+        val res = read("demo")?:"false"
+        return res.toBoolean()
+    }
+
+    suspend fun setDemo(str: Boolean) {
+        save("demo", str.toString())
+    }
+    suspend fun getDemo2(): Boolean {
+        val res = read("demo")?:"false"
+        return res.toBoolean()
+    }
+
+    suspend fun setDemo2(str: Boolean) {
+        save("demo", str.toString())
     }
 
     suspend fun isMonth(): Boolean {

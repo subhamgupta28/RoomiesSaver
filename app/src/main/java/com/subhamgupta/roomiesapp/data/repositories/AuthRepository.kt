@@ -27,6 +27,7 @@ object AuthRepository {
         databaseReference.child(uid).child("USER_NAME").setValue(name)
         databaseReference.child(uid).child("UUID").setValue(uid)
         databaseReference.child(uid).child("USER_EMAIL").setValue(email)
+        databaseReference.child(uid).child("IS_ROOM_JOINED").setValue(false)
             .addOnSuccessListener {
 
             }

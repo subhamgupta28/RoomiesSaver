@@ -3,6 +3,7 @@ package com.subhamgupta.roomiesapp.activities
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -20,28 +21,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
+import com.getkeepsafe.taptargetview.TapTarget
+import com.getkeepsafe.taptargetview.TapTargetSequence
+import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
-import com.subhamgupta.roomiesapp.data.Worker
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.DiffUser
 import com.subhamgupta.roomiesapp.fragments.HomeFragment
-import com.subhamgupta.roomiesapp.fragments.RationFragment
 import com.subhamgupta.roomiesapp.fragments.Summary
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +46,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), HomeToMainLink {
@@ -71,8 +67,8 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             finish()
         }
         viewModel.getData()
+//        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
-
         binding.tablayout.setupWithViewPager(binding.viewpager1)
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
@@ -126,7 +122,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         viewModel.fetchAlert()
         lifecycleScope.launch(Dispatchers.IO) {
-
+            viewModel.getDataStore().setDemo2(false)
             viewModel.roomDetail.buffer().collect {
                 withContext(Main) {
                     when (it) {
@@ -160,9 +156,74 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
             }
         }
+        lifecycleScope.launch{
+            if (!viewModel.getDataStore().getDemo()){
+                showDemo()
+            }
+        }
+
         netStat()
         setupClickListener()
     }
+    private fun showDemo() {
+        val tp = TapTargetSequence(this)
+            .targets(
+                TapTarget.forView(binding.floatingbtn, "Add bought items", "Add item which you have bought.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .tintTarget(false)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(findViewById(R.id.logout), "Logout", "Logout.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(findViewById(R.id.info), "Setting","Change app settings, join or create rooms etc.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(findViewById(R.id.changeRoom), "Change room","Select from list of rooms to enter.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary),
+                TapTarget.forView(findViewById(R.id.alert), "Add announcement","Announce to all members of the room about things.")
+                    .dimColor(R.color.colorOnSecondary)
+                    .titleTextSize(25)
+                    .outerCircleColor(R.color.colorRed)
+                    .targetCircleColor(R.color.colorSecondary)
+                    .textColor(R.color.colorOnPrimary)
+            )
+            .listener(object : TapTargetSequence.Listener {
+                // This listener will tell us when interesting(tm) events happen in regards
+                // to the sequence
+                override fun onSequenceFinish() {
+                    // Yay
+                    lifecycleScope.launch {
+                        viewModel.getDataStore().setDemo(true)
+                    }
+                }
+
+                override fun onSequenceStep(lastTarget: TapTarget, targetClicked: Boolean) {
+                    // Perform action for the current target
+                    Log.e("target", lastTarget.toString())
+                }
+
+                override fun onSequenceCanceled(lastTarget: TapTarget) {
+                    // Boo
+                }
+            })
+        tp.start()
+    }
+
+
+
 
     private fun netStat() {
         val connectivityManager = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -366,8 +427,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                 }
             }
         }
-
-
     }
 
 
@@ -385,7 +444,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             View.VISIBLE
         else
             View.GONE
-
     }
 
     override fun goToMain(position: Int, uuid: String) {
@@ -395,7 +453,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
     override fun goToAllExpenses() {
         binding.viewpager1.setCurrentItem(2, true)
+    }
 
+    override fun goToDiffUser() {
+        binding.viewpager1.setCurrentItem(1, true)
     }
 
 

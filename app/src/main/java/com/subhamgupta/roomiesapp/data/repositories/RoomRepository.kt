@@ -34,7 +34,7 @@ object RoomRepository {
 
     suspend fun getUser() {
         val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
-            MyApp.instance.databaseReference.child(FireBaseRepository.uuid!!).get().addOnCompleteListener {
+            MyApp.instance.databaseReference.child(uuid!!).get().addOnCompleteListener {
                 if (it.isSuccessful && it.result.exists()) {
                     val mp = it.result.value as MutableMap<String, Any>
                     cont.resumeWith(Result.success(mp))
@@ -146,7 +146,7 @@ object RoomRepository {
     ) = coroutineScope {
         val room = "ROOM"
         liveData.value = FirebaseState.loading()
-        val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
+        val userData = suspendCoroutine{ cont ->
             databaseReference.child(uuid!!).get().addOnCompleteListener {
                 if (it.isSuccessful) {
                     val mp = it.result.value as MutableMap<String, Any>
@@ -174,7 +174,8 @@ object RoomRepository {
             .addOnFailureListener { e: Exception ->
                 Log.e("ERROR", e.message!!)
             }.addOnSuccessListener {
-                databaseReference.child(uuid!!).child(finalKey).setValue(id)
+                databaseReference.child(uuid!!).child("IS_ROOM_JOINED").setValue(true)
+                databaseReference.child(uuid).child(finalKey).setValue(id)
                     .addOnFailureListener { e: Exception ->
                         liveData.value = FirebaseState.failed(e.message)
                         Log.e("ERROR", e.message!!)

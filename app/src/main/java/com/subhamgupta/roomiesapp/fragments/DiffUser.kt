@@ -1,5 +1,6 @@
 package com.subhamgupta.roomiesapp.fragments
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -39,8 +40,10 @@ class DiffUser: Fragment(), EditPopLink, onClickPerson {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentDiffUserBinding.inflate(layoutInflater)
-        binding.personRecycler.layoutManager =
+        binding.personRecycler.layoutManager = if(!isTablet())
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        else
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         return binding.root
     }
 
@@ -170,7 +173,11 @@ class DiffUser: Fragment(), EditPopLink, onClickPerson {
         mcard.background = ColorDrawable(Color.TRANSPARENT)
         mcard.show()
     }
-
+    fun isTablet(): Boolean {
+        val xlarge = (this.getResources().getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) === 4
+        val large = this.getResources().getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK === Configuration.SCREENLAYOUT_SIZE_LARGE
+        return xlarge || large
+    }
     fun goToUser(position: Int, uuid: String){
         viewModel.getUuidLink()[uuid]?.let { binding.viewpager.setCurrentItem(it, true) }
     }

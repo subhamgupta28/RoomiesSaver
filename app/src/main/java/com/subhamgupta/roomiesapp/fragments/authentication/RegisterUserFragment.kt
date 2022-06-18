@@ -67,7 +67,7 @@ class RegisterUserFragment : Fragment() {
                         if (it.data.isRegistered==true){
                             viewModel.loginUser(email, pass)
                         }
-                        if (it.data.isLoggedIn==true)
+                        if (it.data.isLoggedIn==false)
                             findNavController().navigate(R.id.action_registerUserFragment_to_roomCreation)
                     }
                     else->Unit

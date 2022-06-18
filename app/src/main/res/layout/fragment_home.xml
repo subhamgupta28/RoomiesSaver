@@ -18,11 +18,13 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <ProgressBar
                 android:id="@+id/progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/line1"
                 style="@style/Widget.Material3.CardView.Elevated"
@@ -106,8 +108,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
                         android:layout_margin="8dp"
-                        app:s_gradient_line="true"
                         android:visibility="gone"
+                        app:s_gradient_line="true"
                         app:s_line_color="#fed32c"
                         app:s_line_second_color="@color/colorPrimary"
                         app:s_line_thickness="3dp"
@@ -138,10 +140,18 @@
                             android:text="Ends"
                             android:textAlignment="textEnd"
                             android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+
                     </LinearLayout>
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/refresh"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    app:icon="@drawable/ic_baseline_refresh_24" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -196,7 +206,7 @@
                 android:layout_alignParentBottom="true"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:padding="6dp"/>
+                android:padding="6dp" />
 
 
             <LinearLayout
@@ -204,8 +214,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:layout_width="match_parent"
@@ -235,6 +245,27 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="Go To All Expenses"
+                    app:icon="@drawable/ic_outline_arrow_forward" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="22dp"
+                    android:layout_marginEnd="12dp"
+
+                    android:text="To see each person's spending"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <Button
+                    android:id="@+id/go_to_diff_user"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Go To Roomie Expenses"
                     app:icon="@drawable/ic_outline_arrow_forward" />
             </LinearLayout>
 

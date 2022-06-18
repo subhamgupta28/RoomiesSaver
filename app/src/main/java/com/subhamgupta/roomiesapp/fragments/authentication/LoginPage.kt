@@ -47,28 +47,16 @@ class LoginPage: Fragment() {
                 hideKeyboard()
                 when (it) {
                     is FirebaseState.Loading -> {
-                        binding.progress.visibility = View.VISIBLE
-                        binding.loginBtn.isEnabled = false
-                        binding.email.isEnabled = false
-                        binding.pass.isEnabled = false
-                        binding.forgot.isEnabled = false
+                        visible()
                         hideKeyboard()
                     }
                     is FirebaseState.Failed -> {
-                        binding.progress.visibility = View.GONE
-                        binding.loginBtn.isEnabled = true
-                        binding.email.isEnabled = true
-                        binding.pass.isEnabled = true
-                        binding.forgot.isEnabled = true
+                        gone()
                         showSnackBar(it.message.toString())
                         hideKeyboard()
                     }
                     is FirebaseState.Success -> {
-                        binding.progress.visibility = View.GONE
-                        binding.loginBtn.isEnabled = true
-                        binding.email.isEnabled = true
-                        binding.pass.isEnabled = true
-                        binding.forgot.isEnabled = true
+                        gone()
                         if (it.data.isLoggedIn==true){
                             startActivity(Intent(activity, MainActivity::class.java))
                             activity?.finish()
@@ -84,6 +72,20 @@ class LoginPage: Fragment() {
             findNavController().navigate(R.id.action_loginPage_to_userAuthFragment)
         }
         return binding.root
+    }
+    private fun visible(){
+        binding.progress.visibility = View.VISIBLE
+        binding.loginBtn.isEnabled = false
+        binding.email.isEnabled = false
+        binding.pass.isEnabled = false
+        binding.forgot.isEnabled = false
+    }
+    private fun gone(){
+        binding.progress.visibility = View.GONE
+        binding.loginBtn.isEnabled = true
+        binding.email.isEnabled = true
+        binding.pass.isEnabled = true
+        binding.forgot.isEnabled = true
     }
     private fun showSnackBar(msg: String) {
         Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)

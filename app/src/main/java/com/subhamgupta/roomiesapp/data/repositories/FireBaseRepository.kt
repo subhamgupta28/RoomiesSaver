@@ -4,7 +4,6 @@ package com.subhamgupta.roomiesapp.data.repositories
 import android.content.Context
 import android.graphics.Color
 import android.net.Uri
-import android.os.Environment
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.Toast
@@ -19,7 +18,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.subhamgupta.roomiesapp.MyApp
@@ -64,6 +62,7 @@ object FireBaseRepository {
     val diffData: LiveData<MutableList<MutableMap<String, Any>>> = _diffData
     private val roomMap = MutableLiveData<MutableMap<String, String>>()
     private val tempRoomMap = MutableLiveData<MutableMap<String, String>>()
+    private val roomIDToRef = HashMap<String, String>()
     private val uuidLink = mutableMapOf<String, Int>()
     private val roomMates = MutableLiveData<ArrayList<ROOMMATES>?>()
     private var user_name: String = ""
@@ -185,6 +184,7 @@ object FireBaseRepository {
         liveData: MutableStateFlow<MutableMap<String, Any>>,
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>
     ) {
+        Log.e("IS", "ONLINE")
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
@@ -217,8 +217,13 @@ object FireBaseRepository {
             saveDataToRemote(roomMapWithId, userData)
             update(userData, roomMapWithId)
             dataStore.setLoggedIn(true)
-            roomData.value = FirebaseState.success(roomMapWithId[dataStore.getRoomKey()]!!)
-            liveData.value = userData
+            try {
+                roomData.value = FirebaseState.success(roomMapWithId[dataStore.getRoomKey()]!!)
+                liveData.value = userData
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         }
     }
 
@@ -235,6 +240,7 @@ object FireBaseRepository {
             if (i.key.contains("ROOM_ID")) {
                 val room = roomMapWithId[i.value.toString()]
                 val roomName = room?.ROOM_NAME.toString()
+                roomIDToRef[i.value.toString()] = i.key
                 val roomId = i.key
                 roomMap[roomName] = roomId
                 tempRoomMap[roomId] = roomName
@@ -268,8 +274,6 @@ object FireBaseRepository {
                 dataStore.setRoomSize(room.size)
                 fetchDiffData(room)
             }
-
-
         } catch (e: Exception) {
             Log.e("Update ERROR", "${e.message}")
         }
@@ -305,10 +309,10 @@ object FireBaseRepository {
             }
             update(us, roomMapWithId)
             val room = roomMapWithId[roomKey]
+            Log.e("ROOM", "$roomKey $room")
             roomData.value = FirebaseState.success(room!!)
             userData.value = us
         } else {
-            Log.e("IS", "ONLINE")
             fetchUserRoomData(userData, roomData)
         }
     }
@@ -319,6 +323,10 @@ object FireBaseRepository {
         user = null
         MyApp.instance.workManager.cancelAllWork()
         dataStore.setLoggedIn(false)
+        clearStorage()
+    }
+
+    fun clearStorage() {
         val file = File(application.filesDir, "/user.json")
         val file1 = File(application.filesDir, "/data.json")
         file1.delete()
@@ -439,7 +447,7 @@ object FireBaseRepository {
 
 
     suspend fun fetchHomeData(
-        liveData: MutableStateFlow<FirebaseState<HomeData?>>,
+        liveData: MutableStateFlow<FirebaseState<HomeData>>,
         loadingHome: MutableStateFlow<Boolean>,
     ) = coroutineScope {
         roomKey = dataStore.getRoomKey()
@@ -529,7 +537,8 @@ object FireBaseRepository {
                         allUserAmount,
                         startDate,
                         updatedOn.toString(),
-                        chartList
+                        chartList,
+                        homeDetails.isEmpty()
                     )
 
                     _loading.value = true
@@ -586,10 +595,7 @@ object FireBaseRepository {
                             _diffData.postValue(detailMap)
                         }
                     }
-
-
             }
-
         }
     }
 
@@ -621,7 +627,7 @@ object FireBaseRepository {
             val csvMapper = CsvMapper()
             csvMapper.writerFor(JsonNode::class.java)
                 .with(csvSchema)
-                .writeValue(File(application.filesDir,"sheet.csv"), jsonTree)
+                .writeValue(File(application.filesDir, "sheet.csv"), jsonTree)
             loading.value = FirebaseState.success(true)
         } catch (e: Exception) {
             Log.e("SAVE DATA FILE ERROR", "$e")
@@ -634,14 +640,12 @@ object FireBaseRepository {
             ref.putFile(uri)
                 .addOnCompleteListener {
                     if (it.isComplete) {
-
                         it.result.storage.downloadUrl.addOnCompleteListener {
                             databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
                             databaseReference.child(uuid!!).child("IMG_URL")
                                 .setValue(it.result.toString())
                             editUser.value = true
                         }
-
                     }
                 }
                 .addOnFailureListener {
@@ -659,12 +663,11 @@ object FireBaseRepository {
         query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
         val startDate = dataStore.getStartDate()
         if (isMonth) {
-            sdom =
-                if (startDate == "0") LocalDate.now().withDayOfMonth(1)
-                    .atStartOfDay(
-                        ZoneId.systemDefault()
-                    ).toInstant().epochSecond * 1000
-                else startDate.toLong()
+            sdom = if (startDate == "0") LocalDate.now().withDayOfMonth(1)
+                .atStartOfDay(
+                    ZoneId.systemDefault()
+                ).toInstant().epochSecond * 1000
+            else startDate.toLong()
         }
         state.value = FirebaseState.loading()
         var query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
@@ -674,9 +677,10 @@ object FireBaseRepository {
         query.addSnapshotListener { value, error ->
             if (error != null) {
                 state.value = FirebaseState.failed(error.message)
+                Log.e("SUMMARY ERROR", "$error")
             }
             if (value == null) {
-//                if (value?.documents==null)
+//                if (value?.documents == null)
 //                    state.value = FirebaseState.empty()
 
             } else {
@@ -689,10 +693,29 @@ object FireBaseRepository {
                         }
                         _loading.value = true
                         details.postValue(docs)
+                        Log.e("SUMMARY", "$docs")
                         state.value = FirebaseState.success(docs)
                     }
                 }
             }
+        }
+    }
+
+    suspend fun leaveRoom(leaveRoom: MutableLiveData<Boolean>, key: String) = coroutineScope {
+        val ref = roomIDToRef[key]
+        Log.e("RE", "$ref $key $roomIDToRef")//ROOM_ID1
+        roomIDToRef.remove(key)
+        if (ref != null) {
+            val res = suspendCoroutine<Task<Void>> { con ->
+                databaseReference.child(uuid!!).child(ref).removeValue().addOnCompleteListener {
+                    con.resume(it)
+                }
+            }
+            if (res.isSuccessful){
+                val r = roomIDToRef.keys
+                roomIDToRef[r.first()]?.let { dataStore.setRoomRef(it) }
+            }
+            leaveRoom.postValue(res.isSuccessful)
         }
     }
 

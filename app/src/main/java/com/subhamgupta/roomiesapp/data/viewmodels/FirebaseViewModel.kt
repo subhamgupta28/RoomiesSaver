@@ -23,6 +23,9 @@ class FirebaseViewModel : ViewModel() {
     private val _startDate = MutableLiveData<Boolean>()
     val startDate: LiveData<Boolean> = _startDate
 
+    private val _leaveRoom = MutableLiveData<Boolean>()
+    val leaveRoom: LiveData<Boolean> = _leaveRoom
+
     private val _sheetLoading = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val sheetLoading = _sheetLoading.asStateFlow()
 
@@ -41,7 +44,7 @@ class FirebaseViewModel : ViewModel() {
     private val _userData = MutableStateFlow<MutableMap<String, Any>>(mutableMapOf())
     val userData = _userData.asStateFlow()
 
-    private val _homeData = MutableStateFlow<FirebaseState<HomeData?>>(FirebaseState.loading())
+    private val _homeData = MutableStateFlow<FirebaseState<HomeData>>(FirebaseState.loading())
     val homeData = _homeData.asStateFlow()
 
     private val _summary = MutableStateFlow<FirebaseState<List<Detail?>>>(FirebaseState.loading())
@@ -56,6 +59,9 @@ class FirebaseViewModel : ViewModel() {
     init {
         repository.setFCM()
     }
+    fun clearStorage(){
+        repository.clearStorage()
+    }
 
     fun getRoomMates() = repository.getRoomMates()
     val getLoading = loadingHome
@@ -68,6 +74,9 @@ class FirebaseViewModel : ViewModel() {
         repository.generateExcel(_sheetLoading)
     }
 
+    fun leaveRoom(key:String) = viewModelScope.launch(Dispatchers.IO){
+        repository.leaveRoom(_leaveRoom, key)
+    }
     fun getData() = viewModelScope.launch(Dispatchers.IO) {
         fetchUserData()
         _loading.value = false
@@ -77,6 +86,9 @@ class FirebaseViewModel : ViewModel() {
                 fetchSummary(true, "All")
             }
         }
+    }
+    fun refreshData() = viewModelScope.launch(Dispatchers.IO){
+        repository.fetchUserRoomData(_userData, _roomDetails)
     }
 
     fun editUser(uri: Uri, userName: String) = viewModelScope.launch(Dispatchers.IO) {

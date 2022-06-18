@@ -14,9 +14,3 @@ data class RoomDetail(
     var START_DATE_MONTH: Long? = null
 ):Serializable
 
-data class ROOMMATES(
-    var KEY: String? = null,
-    var MONEY_PAID: Int? = null,
-    var USER_NAME: String? = null,
-    var UUID: String? = null
-):Serializable
