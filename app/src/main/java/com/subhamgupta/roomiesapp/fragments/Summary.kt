@@ -1,14 +1,12 @@
 package com.subhamgupta.roomiesapp.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -18,10 +16,9 @@ import com.google.android.material.chip.Chip
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentSummaryBinding
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.launch
 
 class Summary : Fragment() {
 

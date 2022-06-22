@@ -3,7 +3,6 @@ package com.subhamgupta.roomiesapp.activities
 
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -23,7 +22,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
-import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.CornerFamily
@@ -31,7 +29,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
-import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.di.MyApp
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
@@ -77,6 +75,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         viewPagerAdapter.addFragments(HomeFragment(this@MainActivity), "Home")
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(Summary(), "All Expenses")
+//        viewPagerAdapter.addFragments(AnalyticsFragment(), "Analytics")
 //        viewPagerAdapter.addFragments(RationFragment(), "Items")
         viewModel.addItem.observe(this) {
             if (it) {
@@ -122,7 +121,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         viewModel.fetchAlert()
         lifecycleScope.launch(Dispatchers.IO) {
-            viewModel.getDataStore().setDemo2(false)
             viewModel.roomDetail.buffer().collect {
                 withContext(Main) {
                     when (it) {
@@ -157,7 +155,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             }
         }
         lifecycleScope.launch{
-            if (!viewModel.getDataStore().getDemo()){
+            if (!settingDataStore.getDemo()){
                 showDemo()
             }
         }
@@ -211,8 +209,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                 }
 
                 override fun onSequenceStep(lastTarget: TapTarget, targetClicked: Boolean) {
-                    // Perform action for the current target
-                    Log.e("target", lastTarget.toString())
                 }
 
                 override fun onSequenceCanceled(lastTarget: TapTarget) {

@@ -67,7 +67,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         val adapter = SummaryAdapter()
         binding.pRecycle.adapter = homeAdapter
         binding.itemRecycle.adapter = adapter
-        binding.refresh?.setOnClickListener {
+        binding.refresh.setOnClickListener {
             viewModel.refreshData()
         }
         lifecycleScope.launch(Dispatchers.IO) {
@@ -86,7 +86,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                         is FirebaseState.Success -> {
 
                             val res = it.data
-                            Log.e("HOME", "${it.data}")
                             if (res.isEmpty)
                                 visible()
                             else gone()

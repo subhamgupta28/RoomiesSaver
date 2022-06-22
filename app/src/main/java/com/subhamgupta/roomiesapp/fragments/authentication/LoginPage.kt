@@ -1,6 +1,5 @@
 package com.subhamgupta.roomiesapp.fragments.authentication
 
-import android.app.ActivityOptions
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -35,7 +35,13 @@ class LoginPage: Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentLoginPageBinding.inflate(layoutInflater)
-
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    findNavController().navigate(R.id.action_loginPage_to_userAuthFragment)
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
         binding.loginBtn.setOnClickListener {
             loginUser()
         }

@@ -3,11 +3,11 @@ package com.subhamgupta.roomiesapp.data.repositories
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.di.MyApp
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
-import com.subhamgupta.roomiesapp.models.CreateRoom
-import com.subhamgupta.roomiesapp.models.ROOMMATES
-import com.subhamgupta.roomiesapp.models.RoomDetail
+import com.subhamgupta.roomiesapp.domain.model.CreateRoom
+import com.subhamgupta.roomiesapp.domain.model.ROOMMATES
+import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +56,7 @@ object RoomRepository {
         val map: MutableMap<String?, Any?> = HashMap()
         if (room_id != "") {
             liveData.value = FirebaseState.loading()
-            val result = suspendCoroutine<RoomDetail?> {
+            val result = suspendCoroutine {
                 databaseReference.child("ROOM").child(room_id).get()
                     .addOnCompleteListener { value ->
                         if (value.result != null) {
@@ -75,9 +75,9 @@ object RoomRepository {
                     USER_NAME = user_name
                 )
                 result?.ROOM_MATES?.add(mate)
-                Log.e("ALL Room detail", "$result")
+
                 if (uuid != null) {
-                    val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
+                    val userData = suspendCoroutine{ cont ->
                         databaseReference.child(uuid).get().addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val mp = it.result.value as MutableMap<String, Any>
@@ -105,8 +105,7 @@ object RoomRepository {
                             .addOnSuccessListener {
                                 databaseReference.child(uuid).child("ROOM_NAME").setValue(map["ROOM_NAME"])
                                 databaseReference.child(uuid).child(finalKey).setValue(room_id)
-                                databaseReference.child(uuid).child("IS_ROOM_JOINED")
-                                    .setValue(true)
+                                databaseReference.child(uuid).child("IS_ROOM_JOINED").setValue(true)
                                     .addOnSuccessListener {
                                         databaseReference.child("ROOM").child(room_id)
                                             .child("JOINED_PERSON").setValue(count + 1)
@@ -158,19 +157,24 @@ object RoomRepository {
         val finalKey = ob["F_KEY"].toString()
 //        val flag = ob["IS_JOIN"].toString().toBoolean()
 
-        val roomDetail = RoomDetail(
-            ROOM_ID = id,
-            CREATED_ON = date,
-            ROOM_NAME = name,
-            START_DATE_MONTH = System.currentTimeMillis(),
-            LIMIT = limit,
-            ROOM_MATES = mutableListOf(
-                ROOMMATES(KEY = id,MONEY_PAID = 0, UUID = uuid, USER_NAME = user_name)
-            ) as ArrayList<ROOMMATES>,
-            JOINED_PERSON = 1,
-            CREATED_BY = uuid
+        val map = mutableMapOf(
+            "ROOM_ID" to id,
+            "CREATED_ON" to date,
+            "ROOM_NAME" to name,
+            "START_DATE_MONTH" to System.currentTimeMillis(),
+            "LIMIT" to limit,
+            "ROOM_MATES" to mutableListOf(
+                mutableMapOf(
+                    "KEY" to id,
+                    "MONEY_PAID" to 0,
+                    "UUID" to uuid,
+                    "USER_NAME" to user_name
+                )
+            ),
+            "JOINED_PERSON" to 1,
+            "CREATED_BY" to uuid
         )
-        databaseReference.child(room).child(id).setValue(roomDetail)
+        databaseReference.child(room).child(id).setValue(map)
             .addOnFailureListener { e: Exception ->
                 Log.e("ERROR", e.message!!)
             }.addOnSuccessListener {

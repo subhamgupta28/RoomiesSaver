@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.subhamgupta.roomiesapp.data.repositories.FireBaseRepository
-import com.subhamgupta.roomiesapp.models.Alerts
-import com.subhamgupta.roomiesapp.models.Detail
-import com.subhamgupta.roomiesapp.models.HomeData
-import com.subhamgupta.roomiesapp.models.RoomDetail
+import com.subhamgupta.roomiesapp.domain.model.Alerts
+import com.subhamgupta.roomiesapp.domain.model.Detail
+import com.subhamgupta.roomiesapp.domain.model.HomeData
+import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

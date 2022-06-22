@@ -1,4 +1,4 @@
-package com.subhamgupta.roomiesapp.models
+package com.subhamgupta.roomiesapp.domain.model
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.di.MyApp
 import kotlinx.coroutines.flow.first
 
 

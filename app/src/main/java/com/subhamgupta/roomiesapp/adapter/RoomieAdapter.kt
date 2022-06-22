@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.databinding.RoomItemBinding
-import com.subhamgupta.roomiesapp.models.ROOMMATES
+import com.subhamgupta.roomiesapp.domain.model.ROOMMATES
 import com.subhamgupta.roomiesapp.onClickPerson
 
 class RoomieAdapter(

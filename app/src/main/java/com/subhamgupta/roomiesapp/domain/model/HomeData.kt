@@ -1,4 +1,4 @@
-package com.subhamgupta.roomiesapp.models
+package com.subhamgupta.roomiesapp.domain.model
 
 import app.futured.donut.DonutSection
 import java.io.Serializable

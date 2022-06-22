@@ -6,6 +6,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -26,7 +27,13 @@ class RegisterUserFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRegisterUserBinding.inflate(layoutInflater)
-
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    findNavController().navigate(R.id.action_registerUserFragment_to_userAuthFragment)
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
         binding.email.doOnTextChanged { text, start, before, count ->
             binding.emailLayout.error = if (!isValidEmail(text.toString())) "Enter correct email address" else ""
         }

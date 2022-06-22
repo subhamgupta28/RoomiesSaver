@@ -1,6 +1,6 @@
 package com.subhamgupta.roomiesapp
 
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 
 interface EditPopLink {
     fun onClick(model: Detail)

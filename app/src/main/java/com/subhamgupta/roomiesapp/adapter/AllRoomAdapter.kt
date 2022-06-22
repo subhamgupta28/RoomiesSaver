@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.databinding.SpaceItemBinding
-import com.subhamgupta.roomiesapp.models.RoomDetail
+import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 
 class AllRoomAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val allRoomDetail = mutableListOf<RoomDetail>()

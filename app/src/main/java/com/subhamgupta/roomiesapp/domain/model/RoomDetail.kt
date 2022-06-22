@@ -1,7 +1,8 @@
-package com.subhamgupta.roomiesapp.models
+package com.subhamgupta.roomiesapp.domain.model
 
-import java.io.Serializable
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class RoomDetail(
     var CREATED_BY: String? = null,
     var CREATED_ON: String? = null,
@@ -12,5 +13,5 @@ data class RoomDetail(
     var ROOM_MATES: ArrayList<ROOMMATES> = arrayListOf(),
     var ROOM_NAME: String? = null,
     var START_DATE_MONTH: Long? = null
-):Serializable
+)
 

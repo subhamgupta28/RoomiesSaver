@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.subhamgupta.roomiesapp.EditPopLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.databinding.PersonItemsBinding
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 
 
 class PersonAdapter(

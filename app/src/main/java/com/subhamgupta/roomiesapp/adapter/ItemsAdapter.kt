@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.subhamgupta.roomiesapp.EditPopLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.databinding.SummaryItemBinding
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import java.sql.Timestamp
 import java.text.SimpleDateFormat

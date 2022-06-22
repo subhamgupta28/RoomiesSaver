@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.databinding.SummaryItemBinding
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 import java.sql.Timestamp
 
 class SummaryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

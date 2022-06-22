@@ -20,9 +20,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.di.MyApp
 import com.subhamgupta.roomiesapp.data.database.SettingDataStore
-import com.subhamgupta.roomiesapp.models.*
+import com.subhamgupta.roomiesapp.domain.model.*
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseService
@@ -185,11 +185,12 @@ object FireBaseRepository {
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>
     ) {
         Log.e("IS", "ONLINE")
+        roomData.value = FirebaseState.loading()
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
             //fetching user's data
-            val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
+            val userData = suspendCoroutine { cont ->
                 databaseReference.child(uuid!!).get().addOnCompleteListener {
                     if (it.isSuccessful && it.result.exists()) {
                         val mp = it.result.value as MutableMap<String, Any>
@@ -201,7 +202,7 @@ object FireBaseRepository {
             for (i in userData) {
                 if (i.key.contains("ROOM_ID")) {
                     listOfRooms.add(i.value.toString())
-                    val result = suspendCoroutine<RoomDetail?> { cont ->
+                    val result = suspendCoroutine { cont ->
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.getValue(RoomDetail::class.java)
@@ -213,7 +214,6 @@ object FireBaseRepository {
                 }
             }
             dataStore.setUpdate(false)
-            Log.e("user data", "$userData $roomMapWithId")
             saveDataToRemote(roomMapWithId, userData)
             update(userData, roomMapWithId)
             dataStore.setLoggedIn(true)
@@ -231,7 +231,7 @@ object FireBaseRepository {
     private suspend fun update(
         userData: MutableMap<String, Any>,
         roomMapWithId: MutableMap<String, RoomDetail?>
-    ) {
+    ){
         val roomMap = mutableMapOf<String, String>()
         val tempRoomMap = mutableMapOf<String, String>()
         val allRoom = ArrayList<RoomDetail>()
@@ -257,6 +257,7 @@ object FireBaseRepository {
             dataStore.setRoomKey(key)
             roomKey = key
             val d = roomMapWithId[roomKey]
+            Log.e("JOINED ROOM","$d")
             user_name = userData["USER_NAME"].toString()
             dataStore.setRoomJoined(userData["IS_ROOM_JOINED"].toString().toBoolean())
 
@@ -267,11 +268,13 @@ object FireBaseRepository {
             dataStore.setEmail(userData["USER_EMAIL"].toString())
             dataStore.setUserName(user_name)
             dataStore.setRoomCount(roomMapWithId.size)
-            _loading.value = false
+
             val room = d?.ROOM_MATES
             if (room != null) {
+
                 roomMates.postValue(room)
                 dataStore.setRoomSize(room.size)
+                _loading.value = false
                 fetchDiffData(room)
             }
         } catch (e: Exception) {
@@ -309,7 +312,6 @@ object FireBaseRepository {
             }
             update(us, roomMapWithId)
             val room = roomMapWithId[roomKey]
-            Log.e("ROOM", "$roomKey $room")
             roomData.value = FirebaseState.success(room!!)
             userData.value = us
         } else {
@@ -367,7 +369,6 @@ object FireBaseRepository {
                 if (value != null) {
                     val res = value.toObjects(Alerts::class.java)
                     try {
-                        Log.e("ALERTS", "$res")
                         alert.value = res[0] ?: Alerts()
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -433,7 +434,6 @@ object FireBaseRepository {
             "CATEGORY" to category,
             "NOTE" to note
         )
-        Log.e("DETAIL", "$roomKey $detail")
         db.collection(roomKey).document(ts.toString()).set(detail)
             .addOnFailureListener {
                 Toast.makeText(application, "Error occurred", Toast.LENGTH_LONG).show()
@@ -525,7 +525,6 @@ object FireBaseRepository {
 
                     val updatedOn =
                         if (todayDetail.size != 0) todayDetail[0].TIME_STAMP else System.currentTimeMillis()
-                    Log.e("Updated on", "$updatedOn ${this@FireBaseRepository.updatedOn.value}")
                     totalAmount.postValue(monthTotalAmount)
                     todayAmount.postValue(todayTotalAmount)
                     val home = HomeData(
@@ -540,7 +539,6 @@ object FireBaseRepository {
                         chartList,
                         homeDetails.isEmpty()
                     )
-
                     _loading.value = true
                     loadingHome.value = false
                     liveData.value = FirebaseState.success(home)
@@ -693,7 +691,6 @@ object FireBaseRepository {
                         }
                         _loading.value = true
                         details.postValue(docs)
-                        Log.e("SUMMARY", "$docs")
                         state.value = FirebaseState.success(docs)
                     }
                 }
@@ -703,7 +700,6 @@ object FireBaseRepository {
 
     suspend fun leaveRoom(leaveRoom: MutableLiveData<Boolean>, key: String) = coroutineScope {
         val ref = roomIDToRef[key]
-        Log.e("RE", "$ref $key $roomIDToRef")//ROOM_ID1
         roomIDToRef.remove(key)
         if (ref != null) {
             val res = suspendCoroutine<Task<Void>> { con ->
@@ -711,7 +707,7 @@ object FireBaseRepository {
                     con.resume(it)
                 }
             }
-            if (res.isSuccessful){
+            if (res.isSuccessful) {
                 val r = roomIDToRef.keys
                 roomIDToRef[r.first()]?.let { dataStore.setRoomRef(it) }
             }

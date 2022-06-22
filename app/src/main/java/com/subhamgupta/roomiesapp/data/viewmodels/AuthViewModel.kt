@@ -3,7 +3,7 @@ package com.subhamgupta.roomiesapp.data.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.subhamgupta.roomiesapp.data.repositories.AuthRepository
-import com.subhamgupta.roomiesapp.models.UserAuth
+import com.subhamgupta.roomiesapp.domain.model.UserAuth
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

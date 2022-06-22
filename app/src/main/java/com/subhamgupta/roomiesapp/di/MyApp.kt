@@ -1,7 +1,6 @@
-package com.subhamgupta.roomiesapp
+package com.subhamgupta.roomiesapp.di
 
 import android.app.Application
-import android.util.Log
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
@@ -43,12 +42,6 @@ class MyApp : Application() {
 
 
     private fun initializeFirebase() {
-        try {
-//            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
-        } catch (e: Exception) {
-            Log.e("ERROR", e.message!!)
-        }
-
         db = Firebase.firestore
 //        db.useEmulator("10.0.2.2", 2828)
         val settings = FirebaseFirestoreSettings.Builder()
@@ -69,7 +62,7 @@ class MyApp : Application() {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 30, TimeUnit.MINUTES)
+        val workRequest = PeriodicWorkRequest.Builder(Worker::class.java, 15, TimeUnit.MINUTES)
             .setConstraints(constraint)
             .build()
         workManager = WorkManager.getInstance(this)

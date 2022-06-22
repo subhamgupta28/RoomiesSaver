@@ -27,7 +27,7 @@ import com.subhamgupta.roomiesapp.adapter.RoomieAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentDiffUserBinding
 import com.subhamgupta.roomiesapp.databinding.PopupBinding
-import com.subhamgupta.roomiesapp.models.Detail
+import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.onClickPerson
 import kotlin.math.abs
 
