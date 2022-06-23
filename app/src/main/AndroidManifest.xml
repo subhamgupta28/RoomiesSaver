@@ -13,7 +13,7 @@
         android:name="android.hardware.camera"
         android:required="false"/>
     <application
-        android:name=".di.MyApp"
+        android:name=".MyApp"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"

@@ -20,8 +20,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.subhamgupta.roomiesapp.di.MyApp
-import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.*
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING

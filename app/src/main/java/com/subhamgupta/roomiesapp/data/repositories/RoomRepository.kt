@@ -3,8 +3,8 @@ package com.subhamgupta.roomiesapp.data.repositories
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import com.subhamgupta.roomiesapp.di.MyApp
-import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.CreateRoom
 import com.subhamgupta.roomiesapp.domain.model.ROOMMATES
 import com.subhamgupta.roomiesapp.domain.model.RoomDetail

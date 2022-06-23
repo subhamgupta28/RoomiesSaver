@@ -28,7 +28,7 @@ import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.subhamgupta.roomiesapp.BuildConfig
 import com.subhamgupta.roomiesapp.R
-import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.ActivitySettingBinding
 import com.subhamgupta.roomiesapp.databinding.EditDetailsBinding

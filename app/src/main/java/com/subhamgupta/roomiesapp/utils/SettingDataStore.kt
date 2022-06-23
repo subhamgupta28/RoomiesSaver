@@ -1,10 +1,10 @@
-package com.subhamgupta.roomiesapp.data.database
+package com.subhamgupta.roomiesapp.utils
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.subhamgupta.roomiesapp.di.MyApp
+import com.subhamgupta.roomiesapp.MyApp
 import kotlinx.coroutines.flow.first
 
 
@@ -36,7 +36,7 @@ object SettingDataStore {
         }
     }
     suspend fun isRoomJoined(): Boolean {
-        val res = read("isRoomJoined")?:"false"
+        val res = read("isRoomJoined") ?:"false"
         return res.toBoolean()
     }
 
@@ -45,7 +45,7 @@ object SettingDataStore {
     }
 
     suspend fun getDarkMode(): Boolean {
-        val res = read("getDarkMode")?:"false"
+        val res = read("getDarkMode") ?:"false"
         return res.toBoolean()
     }
 
@@ -53,7 +53,7 @@ object SettingDataStore {
         save("getDarkMode", str.toString())
     }
     suspend fun getDemo(): Boolean {
-        val res = read("demo")?:"false"
+        val res = read("demo") ?:"false"
         return res.toBoolean()
     }
 
@@ -61,7 +61,7 @@ object SettingDataStore {
         save("demo", str.toString())
     }
     suspend fun getDemo2(): Boolean {
-        val res = read("demo")?:"false"
+        val res = read("demo") ?:"false"
         return res.toBoolean()
     }
 
@@ -70,7 +70,7 @@ object SettingDataStore {
     }
 
     suspend fun isMonth(): Boolean {
-        val res = read("isMonth")?:"true"
+        val res = read("isMonth") ?:"true"
         return res.toBoolean()
     }
 
@@ -79,7 +79,7 @@ object SettingDataStore {
     }
 
     suspend fun isLoggedIn(): Boolean {
-        val res = read("isLoggedIn")?:"false"
+        val res = read("isLoggedIn") ?:"false"
         return res.toBoolean()
     }
 
@@ -87,7 +87,7 @@ object SettingDataStore {
         save("isLoggedIn", str.toString())
     }
     suspend fun isUpdate(): Boolean {
-        val res = read("isUpdate")?:"false"
+        val res = read("isUpdate") ?:"false"
         return res.toBoolean()
     }
 
@@ -96,7 +96,7 @@ object SettingDataStore {
     }
 
     suspend fun getEmail(): String {
-        return read("email")?:""
+        return read("email") ?:""
     }
 
     suspend fun setEmail(str: String) {
@@ -104,7 +104,7 @@ object SettingDataStore {
     }
 
     suspend fun getRoomCount(): Int {
-        val res = read("getRoomCount")?:"0"
+        val res = read("getRoomCount") ?:"0"
         return res.toInt()
     }
 
@@ -113,14 +113,14 @@ object SettingDataStore {
     }
 
     suspend fun getUUID(): String {
-        return read("uuid")?:""
+        return read("uuid") ?:""
     }
 
     suspend fun setUUID(str: String) {
         save("uuid", str)
     }
     suspend fun getUserName(): String {
-        return read("userName")?:""
+        return read("userName") ?:""
     }
 
     suspend fun setUserName(str: String) {
@@ -129,7 +129,7 @@ object SettingDataStore {
 
 
     suspend fun getRoomKey(): String {
-        return read("roomKey")?:"0"
+        return read("roomKey") ?:"0"
     }
 
     suspend fun setRoomKey(str: String) {
@@ -137,7 +137,7 @@ object SettingDataStore {
     }
 
     suspend fun getStartDate(): String {
-        return read("startDate")?:"0"
+        return read("startDate") ?:"0"
     }
 
     suspend fun setStartDate(str: String) {
@@ -145,7 +145,7 @@ object SettingDataStore {
     }
 
     suspend fun getRoomSize(): Int {
-        val res = read("roomSize")?:"0"
+        val res = read("roomSize") ?:"0"
         return res.toInt()
     }
 

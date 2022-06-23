@@ -29,10 +29,10 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
-import com.subhamgupta.roomiesapp.di.MyApp
+import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
-import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
 import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.DiffUser

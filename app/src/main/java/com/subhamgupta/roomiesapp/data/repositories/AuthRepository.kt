@@ -4,8 +4,8 @@ import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseUser
-import com.subhamgupta.roomiesapp.di.MyApp
-import com.subhamgupta.roomiesapp.data.database.SettingDataStore
+import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.UserAuth
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope

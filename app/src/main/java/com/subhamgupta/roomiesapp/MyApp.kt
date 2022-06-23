@@ -1,4 +1,4 @@
-package com.subhamgupta.roomiesapp.di
+package com.subhamgupta.roomiesapp
 
 import android.app.Application
 import androidx.work.Constraints
@@ -14,8 +14,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.subhamgupta.roomiesapp.data.Worker
-import java.util.concurrent.TimeUnit
 
+import java.util.concurrent.TimeUnit
 
 class MyApp : Application() {
     lateinit var databaseReference: DatabaseReference
