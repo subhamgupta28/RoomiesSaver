@@ -3,22 +3,29 @@ package com.subhamgupta.roomiesapp.data.repositories
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.UserAuth
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@Singleton
-object AuthRepository {
-    private val databaseReference = MyApp.instance.databaseReference
-    private val auth = MyApp.instance.firebaseAuth
-    private val settingDataStore = SettingDataStore
+
+class AuthRepository @Inject constructor(
+    private val databaseReference: DatabaseReference,
+    private val auth: FirebaseAuth,
+    private val settingDataStore: SettingDataStore
+) {
+
 
     private fun saveUserToRDB(email: String, name: String, user: FirebaseUser) {
         val uid = user.uid
@@ -46,10 +53,10 @@ object AuthRepository {
         liveData: MutableStateFlow<FirebaseState<UserAuth>>
     ) = coroutineScope {
         liveData.value = FirebaseState.loading()
-        val result = suspendCoroutine<Task<AuthResult>> {cont->
+        val result = suspendCoroutine<Task<AuthResult>> { cont ->
             auth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener { task: Task<AuthResult> ->
-                   cont.resume(task)
+                    cont.resume(task)
                 }
                 .addOnFailureListener {
                     Log.e("ERROR_LOGIN_PAGE", it.message.toString())
@@ -78,13 +85,13 @@ object AuthRepository {
         email: String,
         pass: String,
         liveData: MutableStateFlow<FirebaseState<UserAuth>>
-    ) = coroutineScope{
+    ) = coroutineScope {
         liveData.value = FirebaseState.loading()
 
-        val result = suspendCoroutine<Task<AuthResult?>> {cont->
+        val result = suspendCoroutine<Task<AuthResult?>> { cont ->
             auth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener { task: Task<AuthResult?> ->
-                    Log.e("ERROR"," e.message.toString()")
+                    Log.e("ERROR", " e.message.toString()")
                     cont.resume(task)
                 }.addOnFailureListener { e: Exception ->
                     Log.e("ERROR", e.message.toString())
@@ -110,12 +117,12 @@ object AuthRepository {
         uuid: String,
         liveData: MutableStateFlow<FirebaseState<UserAuth>>,
         u: UserAuth
-    ) = coroutineScope{
-        val result = suspendCoroutine<MutableMap<String, Any>> {cont->
+    ) = coroutineScope {
+        val result = suspendCoroutine<MutableMap<String, Any>> { cont ->
             databaseReference.child(uuid).get().addOnCompleteListener {
                 if (it.isSuccessful) {
                     val mp = it.result.value as MutableMap<String, Any>
-                    Log.e("AUTH","$mp")
+                    Log.e("AUTH", "$mp")
                     cont.resume(mp)
 
                 }

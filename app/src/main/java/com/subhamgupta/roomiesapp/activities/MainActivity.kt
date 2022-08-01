@@ -14,12 +14,13 @@ import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import androidx.work.*
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.chip.Chip
@@ -27,25 +28,35 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
-import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
-import com.subhamgupta.roomiesapp.utils.SettingDataStore
+import com.subhamgupta.roomiesapp.data.Worker
 import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
-import com.subhamgupta.roomiesapp.databinding.*
+import com.subhamgupta.roomiesapp.databinding.ActivityMainBinding
+import com.subhamgupta.roomiesapp.databinding.AlertPopupBinding
+import com.subhamgupta.roomiesapp.databinding.ChangeRoomCardBinding
+import com.subhamgupta.roomiesapp.databinding.PopupBinding
 import com.subhamgupta.roomiesapp.fragments.DiffUser
 import com.subhamgupta.roomiesapp.fragments.HomeFragment
+import com.subhamgupta.roomiesapp.fragments.RoomCreation
 import com.subhamgupta.roomiesapp.fragments.Summary
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import com.subhamgupta.roomiesapp.utils.Handler
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: FirebaseViewModel by viewModels()
@@ -53,21 +64,28 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var diffUser: DiffUser
     private lateinit var roomRef: String
     private lateinit var settingDataStore: SettingDataStore
-    private lateinit var loadingDismiss: AlertDialog
+
+    @Inject
+    lateinit var databaseReference: DatabaseReference
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        DynamicColors.applyToActivitiesIfAvailable(application)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val user = MyApp.instance.firebaseAuth.currentUser
-        if (user==null){
-            startActivity(Intent(this, StartActivity::class.java))
-            finish()
-        }
+        checkUser()
         viewModel.getData()
 //        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
         binding.tablayout.setupWithViewPager(binding.viewpager1)
+
+        Thread.setDefaultUncaughtExceptionHandler(Handler(this))
+
+        if(intent.getBooleanExtra("crash",false)){
+            Toast.makeText(this, "After crash", Toast.LENGTH_LONG).show()
+        }
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         diffUser = DiffUser()
@@ -154,19 +172,67 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
             }
         }
-        lifecycleScope.launch{
-            if (!settingDataStore.getDemo()){
+        lifecycleScope.launch {
+            if (!settingDataStore.getDemo()) {
                 showDemo()
             }
         }
 
         netStat()
         setupClickListener()
+        initializeWorker()
     }
+
+    private fun initializeWorker() {
+        val workManager = WorkManager.getInstance(this)
+        val constraint = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<Worker>(15, TimeUnit.MINUTES)
+            .addTag("Periodic")
+            .setConstraints(constraint)
+            .build()
+        workManager.enqueueUniquePeriodicWork(
+            "update",
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
+    }
+
+    private fun checkUser() {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            startActivity(Intent(this, StartActivity::class.java))
+            finish()
+        } else {
+            viewModel.refreshData()
+            lifecycleScope.launchWhenStarted {
+                viewModel.userData.collect {
+                    Log.e("CHECK USER", "$it")
+                    if (!it["IS_ROOM_JOINED"].toString().toBoolean()) {
+                        withContext(Main) {
+                            binding.mainLayout.visibility = View.GONE
+                            binding.settingFragment.visibility = View.VISIBLE
+                            supportFragmentManager.beginTransaction()
+                                .add(R.id.setting_fragment, RoomCreation())
+                                .commit()
+                        }
+                        settingDataStore.setUpdate(true)
+                    }
+                }
+            }
+        }
+    }
+
     private fun showDemo() {
         val tp = TapTargetSequence(this)
             .targets(
-                TapTarget.forView(binding.floatingbtn, "Add bought items", "Add item which you have bought.")
+                TapTarget.forView(
+                    binding.floatingbtn,
+                    "Add bought items",
+                    "Add item which you have bought."
+                )
                     .dimColor(R.color.colorOnSecondary)
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
@@ -179,19 +245,31 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
                     .textColor(R.color.colorOnPrimary),
-                TapTarget.forView(findViewById(R.id.info), "Setting","Change app settings, join or create rooms etc.")
+                TapTarget.forView(
+                    findViewById(R.id.info),
+                    "Setting",
+                    "Change app settings, join or create rooms etc."
+                )
                     .dimColor(R.color.colorOnSecondary)
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
                     .textColor(R.color.colorOnPrimary),
-                TapTarget.forView(findViewById(R.id.changeRoom), "Change room","Select from list of rooms to enter.")
+                TapTarget.forView(
+                    findViewById(R.id.changeRoom),
+                    "Change room",
+                    "Select from list of rooms to enter."
+                )
                     .dimColor(R.color.colorOnSecondary)
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
                     .textColor(R.color.colorOnPrimary),
-                TapTarget.forView(findViewById(R.id.alert), "Add announcement","Announce to all members of the room about things.")
+                TapTarget.forView(
+                    findViewById(R.id.alert),
+                    "Add announcement",
+                    "Announce to all members of the room about things."
+                )
                     .dimColor(R.color.colorOnSecondary)
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
@@ -217,8 +295,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             })
         tp.start()
     }
-
-
 
 
     private fun netStat() {
@@ -262,6 +338,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     true
                 }
                 R.id.changeRoom -> {
+//                    throw Exception("error")
                     changeRoom()
                     true
                 }
@@ -343,7 +420,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         val note = dialogBinding.noteText.text.toString().trim()
                         val tags = ArrayList<String>()
                         dialogBinding.tags.children.forEach { view ->
-                            if((view as Chip).isChecked){
+                            if ((view as Chip).isChecked) {
                                 tags.add(view.text.toString())
                             }
                         }
@@ -373,7 +450,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         materialAlertDialogBuilder.show()
     }
-
 
 
     private fun changeRoom() {

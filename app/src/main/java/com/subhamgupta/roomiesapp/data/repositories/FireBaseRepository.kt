@@ -1,6 +1,7 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Color
 import android.net.Uri
@@ -17,12 +18,15 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
-import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.*
+import com.subhamgupta.roomiesapp.domain.use_case.GetUserUseCase
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseService
@@ -38,21 +42,25 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
 @Singleton
-object FireBaseRepository {
+class FireBaseRepository @Inject constructor(
+    private val storage: FirebaseStorage,
+    private val databaseReference:DatabaseReference,
+    private val db :FirebaseFirestore,
+    private val auth: FirebaseAuth,
+    private val dataStore: SettingDataStore,
+    private val application :Application,
+) {
     private var roomKey: String = ""
-    private val application = MyApp.instance
-    private val dataStore = SettingDataStore
-    private val storage = application.storage
-    private var databaseReference = application.databaseReference
+
     private val _loading = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
-    private var db = application.db
     private val updatedOn = MutableLiveData<String>()
     private val allRoomData = MutableLiveData<MutableList<RoomDetail>>()
     private val details = MutableLiveData<List<Detail?>>()
@@ -68,13 +76,12 @@ object FireBaseRepository {
     private var user_name: String = ""
 
 
-    private var auth: FirebaseAuth = application.firebaseAuth
     var user: FirebaseUser? = auth.currentUser
     var uuid: String? = user?.uid
     private var query: Query? = null
 
     init {
-        Log.e("USER-", "${user?.email}")
+        Log.i("USER-", "${user?.email}")
     }
 
     fun getRoomMaps(): MutableLiveData<MutableMap<String, String>> {
@@ -178,31 +185,37 @@ object FireBaseRepository {
         }
 
     }
+    suspend fun getUser(data: MutableStateFlow<MutableMap<String, Any>>)  {
+        val userData = GetUserUseCase()(databaseReference, uuid!!)
+        data.value = userData
+        try {
+            val userFile = File(application.filesDir, "/user.json")
+            if (!userFile.exists())
+                userFile.createNewFile()
+            userFile.writeText(Gson().toJson(userData))
+        }catch (e:Exception){
+
+        }
+    }
 
 
     suspend fun fetchUserRoomData(
         liveData: MutableStateFlow<MutableMap<String, Any>>,
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>
     ) {
-        Log.e("IS", "ONLINE")
+        Log.i("IS", "ONLINE")
         roomData.value = FirebaseState.loading()
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
             //fetching user's data
-            val userData = suspendCoroutine { cont ->
-                databaseReference.child(uuid!!).get().addOnCompleteListener {
-                    if (it.isSuccessful && it.result.exists()) {
-                        val mp = it.result.value as MutableMap<String, Any>
-                        cont.resumeWith(Result.success(mp))
-                    }
-                }
-            }
+            val userData = GetUserUseCase()(databaseReference, uuid!!)
+
             //fetching rooms data which user has joined
             for (i in userData) {
                 if (i.key.contains("ROOM_ID")) {
                     listOfRooms.add(i.value.toString())
-                    val result = suspendCoroutine { cont ->
+                    val result = suspendCoroutine<RoomDetail?> { cont ->
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.getValue(RoomDetail::class.java)
@@ -231,7 +244,7 @@ object FireBaseRepository {
     private suspend fun update(
         userData: MutableMap<String, Any>,
         roomMapWithId: MutableMap<String, RoomDetail?>
-    ){
+    ) {
         val roomMap = mutableMapOf<String, String>()
         val tempRoomMap = mutableMapOf<String, String>()
         val allRoom = ArrayList<RoomDetail>()
@@ -257,7 +270,7 @@ object FireBaseRepository {
             dataStore.setRoomKey(key)
             roomKey = key
             val d = roomMapWithId[roomKey]
-            Log.e("JOINED ROOM","$d")
+            Log.i("JOINED ROOM", "$d")
             user_name = userData["USER_NAME"].toString()
             dataStore.setRoomJoined(userData["IS_ROOM_JOINED"].toString().toBoolean())
 
@@ -285,7 +298,6 @@ object FireBaseRepository {
     }
 
     fun forceInit() {
-        auth = application.firebaseAuth
         user = auth.currentUser
         uuid = user?.uid
     }
@@ -323,7 +335,7 @@ object FireBaseRepository {
         auth.signOut()
         dataStore.clear()
         user = null
-        MyApp.instance.workManager.cancelAllWork()
+//        MyApp.instance.workManager.cancelAllWork()
         dataStore.setLoggedIn(false)
         clearStorage()
     }
@@ -632,8 +644,9 @@ object FireBaseRepository {
         }
     }
 
-    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<Boolean>) =
+    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<FirebaseState<Boolean>>) =
         coroutineScope {
+            editUser.value = FirebaseState.loading()
             val ref = storage.getReference(uuid!! + "/profile_pic.jpg")
             ref.putFile(uri)
                 .addOnCompleteListener {
@@ -642,12 +655,12 @@ object FireBaseRepository {
                             databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
                             databaseReference.child(uuid!!).child("IMG_URL")
                                 .setValue(it.result.toString())
-                            editUser.value = true
+                            editUser.value = FirebaseState.success(true)
                         }
                     }
                 }
                 .addOnFailureListener {
-                    editUser.value = false
+                    editUser.value = FirebaseState.failed(it.message)
                 }
         }
 

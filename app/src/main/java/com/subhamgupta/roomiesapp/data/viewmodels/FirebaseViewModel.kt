@@ -12,13 +12,17 @@ import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.domain.model.HomeData
 import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FirebaseViewModel : ViewModel() {
-    private var repository: FireBaseRepository = FireBaseRepository
+@HiltViewModel
+class FirebaseViewModel @Inject constructor(
+    private var repository: FireBaseRepository
+) : ViewModel() {
 
     private val _startDate = MutableLiveData<Boolean>()
     val startDate: LiveData<Boolean> = _startDate
@@ -29,19 +33,23 @@ class FirebaseViewModel : ViewModel() {
     private val _sheetLoading = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val sheetLoading = _sheetLoading.asStateFlow()
 
-    private val _editUser = MutableStateFlow<Boolean>(false)
+    private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
     private val _loading = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
 
     private val _loadingHome = MutableStateFlow(false)
-    val loadingHome = _loadingHome.asStateFlow()
+    private val loadingHome = _loadingHome.asStateFlow()
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
 
-    private val _userData = MutableStateFlow<MutableMap<String, Any>>(mutableMapOf())
+    val map = mutableMapOf(
+        "IS_ROOM_JOINED" to true,
+        "UUID" to "h"
+    )
+    private val _userData = MutableStateFlow(map.toMutableMap())
     val userData = _userData.asStateFlow()
 
     private val _homeData = MutableStateFlow<FirebaseState<HomeData>>(FirebaseState.loading())
@@ -168,9 +176,6 @@ class FirebaseViewModel : ViewModel() {
         return repository.getTotalAmount()
     }
 
-    fun getTodayAmount(): MutableLiveData<Int> {
-        return repository.getTodayAmount()
-    }
 
     fun createAlert(msg: String) {
         repository.createAlert(msg)

@@ -21,12 +21,11 @@ import com.subhamgupta.roomiesapp.activities.MainActivity
 import com.subhamgupta.roomiesapp.data.viewmodels.AuthViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentLoginPageBinding
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.buffer
 
-
+@AndroidEntryPoint
 class LoginPage: Fragment() {
-
-
     lateinit var binding: FragmentLoginPageBinding
     private val viewModel: AuthViewModel by activityViewModels()
     override fun onCreateView(

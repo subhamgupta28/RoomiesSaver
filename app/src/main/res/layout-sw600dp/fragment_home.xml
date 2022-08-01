@@ -10,7 +10,8 @@
             type="com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel" />
     </data>
 
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".fragments.HomeFragment">
@@ -258,7 +259,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="22dp"
                     android:layout_marginEnd="12dp"
-
+                    android:id="@+id/msg"
                     android:text="No new purchase this month\nEmpty! Add items by clicking on + button\n You can go to All Expense to see previous month's spending"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
@@ -297,6 +298,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true" />
-        </RelativeLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </layout>

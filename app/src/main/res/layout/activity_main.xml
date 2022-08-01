@@ -12,9 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".activities.MainActivity">
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/setting_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
+            android:id="@+id/main_layout"
             android:layout_height="match_parent">
 
             <RelativeLayout

@@ -1,7 +1,11 @@
 package com.subhamgupta.roomiesapp.fragments
 
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
+import android.text.TextPaint
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
@@ -70,13 +74,16 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.refresh.setOnClickListener {
             viewModel.refreshData()
         }
+        binding.swipe.setOnRefreshListener {
+            viewModel.refreshData()
+        }
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.homeData.buffer().collect {
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
-                            binding.progress.visibility = View.VISIBLE
-                            Log.e("HOME", "LOADING")
+//                            binding.progress.visibility = View.VISIBLE
+
                         }
                         is FirebaseState.Empty -> {
                         }
@@ -94,7 +101,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                                 binding.spark.visibility = View.VISIBLE
                                 val data = res.todayData
                                 adapter.setItems(data)
-
+                                binding.swipe.isRefreshing = false
                                 homeAdapter.setData(res.userMap, res.eachPersonAmount)
                                 binding.donutView.submitData(res.donutList!!)
                                 binding.eachAmt.text = res.eachPersonAmount.toString()
@@ -129,7 +136,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.goToDiffUser.setOnClickListener {
             homeToMainLink?.goToDiffUser()
         }
-
 
     }
 

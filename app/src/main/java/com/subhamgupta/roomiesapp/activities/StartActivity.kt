@@ -8,15 +8,17 @@ import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.color.DynamicColors
 import com.google.firebase.auth.FirebaseAuth
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.data.repositories.FireBaseRepository
 import com.subhamgupta.roomiesapp.databinding.ActivityStartBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
-
+@AndroidEntryPoint
 class StartActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStartBinding
@@ -26,7 +28,7 @@ class StartActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
-//        DynamicColors.applyToActivitiesIfAvailable(application)
+        DynamicColors.applyToActivitiesIfAvailable(application)
         binding = ActivityStartBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this

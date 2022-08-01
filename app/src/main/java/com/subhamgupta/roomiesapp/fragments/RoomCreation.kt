@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.budiyev.android.codescanner.AutoFocusMode
@@ -23,6 +24,7 @@ import com.subhamgupta.roomiesapp.data.viewmodels.RoomViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentRoomCreationBinding
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
@@ -32,19 +34,19 @@ import java.util.*
 
 private const val CAMERA_REQUEST_CODE = 101
 
+
+@AndroidEntryPoint
 class RoomCreation: Fragment() {
     lateinit var map: HashMap<String, Any?>
     lateinit var user_name: String
     lateinit var binding: FragmentRoomCreationBinding
-    lateinit var viewModel: RoomViewModel
+    private val viewModel: RoomViewModel by viewModels()
     private lateinit var codeScanner: CodeScanner
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRoomCreationBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this)[RoomViewModel::class.java]
-
         return binding.root
     }
 

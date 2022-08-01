@@ -10,10 +10,12 @@
             type="com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel" />
     </data>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
+        android:id="@+id/swipe"
         android:layout_height="match_parent"
         tools:context=".fragments.HomeFragment">
+
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -245,8 +247,8 @@
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="22dp"
                     android:layout_marginEnd="12dp"
-
-                    android:text="No new purchase this month\nEmpty! Add items by clicking on + button\n You can go to All Expense to see previous month's spending"
+                    android:id="@+id/msg"
+                    android:text="No new purchase this month?\nEmpty! Add items by clicking on + button\n You can go to All Expense to see previous month's spending"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
@@ -280,8 +282,7 @@
                     android:text="Go To Roomie Expenses"
                     app:icon="@drawable/ic_outline_arrow_forward" />
             </LinearLayout>
-
         </RelativeLayout>
 
-    </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>

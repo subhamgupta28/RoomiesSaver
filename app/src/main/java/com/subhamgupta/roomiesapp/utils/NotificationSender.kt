@@ -16,7 +16,7 @@ class NotificationSender {
             { _ ->
             },
             Response.ErrorListener { error ->
-                Log.e("Error", error.message.toString())
+                Log.e("Notification Error", error.message.toString())
 
             }) {
             override fun getHeaders(): Map<String, String> {

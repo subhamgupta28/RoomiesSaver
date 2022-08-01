@@ -1,8 +1,11 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.util.Log
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.CreateRoom
@@ -11,30 +14,37 @@ import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@Singleton
-object RoomRepository {
-    private val databaseReference = MyApp.instance.databaseReference
+
+class RoomRepository @Inject constructor(
+    private val databaseReference: DatabaseReference,
+    private val auth: FirebaseAuth,
+    private val settingsStorage: SettingDataStore,
+    private val application : Application
+) {
+
     private var roomKey: String = ""
     private var user_name: String = ""
-    private val auth = MyApp.instance.firebaseAuth
+
     private val user = auth.currentUser
     private val uuid = user?.uid
-    @SuppressLint("StaticFieldLeak")
-    private val settingsStorage: SettingDataStore
+
+
+
 
     init {
         Log.e("INIT", "ROOM-REPO")
-        settingsStorage = SettingDataStore
+
 
     }
 
     suspend fun getUser() {
         val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
-            MyApp.instance.databaseReference.child(uuid!!).get().addOnCompleteListener {
+            databaseReference.child(uuid!!).get().addOnCompleteListener {
                 if (it.isSuccessful && it.result.exists()) {
                     val mp = it.result.value as MutableMap<String, Any>
                     cont.resumeWith(Result.success(mp))
@@ -56,7 +66,7 @@ object RoomRepository {
         val map: MutableMap<String?, Any?> = HashMap()
         if (room_id != "") {
             liveData.value = FirebaseState.loading()
-            val result = suspendCoroutine {
+            val result = suspendCoroutine<RoomDetail?> {
                 databaseReference.child("ROOM").child(room_id).get()
                     .addOnCompleteListener { value ->
                         if (value.result != null) {
@@ -77,7 +87,7 @@ object RoomRepository {
                 result?.ROOM_MATES?.add(mate)
 
                 if (uuid != null) {
-                    val userData = suspendCoroutine{ cont ->
+                    val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
                         databaseReference.child(uuid).get().addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val mp = it.result.value as MutableMap<String, Any>
@@ -103,7 +113,8 @@ object RoomRepository {
                                 )
                             }
                             .addOnSuccessListener {
-                                databaseReference.child(uuid).child("ROOM_NAME").setValue(map["ROOM_NAME"])
+                                databaseReference.child(uuid).child("ROOM_NAME")
+                                    .setValue(map["ROOM_NAME"])
                                 databaseReference.child(uuid).child(finalKey).setValue(room_id)
                                 databaseReference.child(uuid).child("IS_ROOM_JOINED").setValue(true)
                                     .addOnSuccessListener {
@@ -133,7 +144,7 @@ object RoomRepository {
     }
 
     private fun showToast(msg: String) {
-        Toast.makeText(MyApp.instance, msg, Toast.LENGTH_LONG).show()
+        Toast.makeText(application, msg, Toast.LENGTH_LONG).show()
     }
 
     suspend fun createRoom(
@@ -145,7 +156,7 @@ object RoomRepository {
     ) = coroutineScope {
         val room = "ROOM"
         liveData.value = FirebaseState.loading()
-        val userData = suspendCoroutine{ cont ->
+        val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
             databaseReference.child(uuid!!).get().addOnCompleteListener {
                 if (it.isSuccessful) {
                     val mp = it.result.value as MutableMap<String, Any>
@@ -189,6 +200,7 @@ object RoomRepository {
                     }
             }
     }
+
     private fun getNewKey(mp: MutableMap<*, *>, room_id: String): MutableMap<String, Any> {
         val kys = mp.keys
         val nxt = java.util.ArrayList<Int>()
