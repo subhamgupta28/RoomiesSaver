@@ -1,6 +1,7 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Color
 import android.net.Uri
@@ -17,12 +18,15 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
-import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.*
+import com.subhamgupta.roomiesapp.domain.use_case.GetUserUseCase
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseService
@@ -30,7 +34,6 @@ import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NotificationSender
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 import java.io.File
 import java.nio.charset.Charset
@@ -38,43 +41,55 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
 @Singleton
-object FireBaseRepository {
+class MainRepository @Inject constructor(
+    private val storage: FirebaseStorage,
+    private val databaseReference: DatabaseReference,
+    private val db: FirebaseFirestore,
+    val auth: FirebaseAuth,
+    private val dataStore: SettingDataStore,
+    private val application: Application,
+) {
     private var roomKey: String = ""
-    private val application = MyApp.instance
-    private val dataStore = SettingDataStore
-    private val storage = application.storage
-    private var databaseReference = application.databaseReference
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
-    private var db = application.db
+
+//    val ff = db.useEmulator("10.0.2.2", 8080)
+//    val a = auth.useEmulator("10.0.2.2", 9099)
+//
+//    @Inject
+//    lateinit var database:FirebaseDatabase
+//    val d = database.useEmulator("10.0.2.2", 9000)
+
+//    val fg = AppModule.firebaseStorage.useEmulator("10.0.2.2", 9199)
+
     private val updatedOn = MutableLiveData<String>()
     private val allRoomData = MutableLiveData<MutableList<RoomDetail>>()
     private val details = MutableLiveData<List<Detail?>>()
     private val totalAmount = MutableLiveData<Int>()
     private val todayAmount = MutableLiveData<Int>()
+
     private val _diffData = MutableLiveData<MutableList<MutableMap<String, Any>>>()
     val diffData: LiveData<MutableList<MutableMap<String, Any>>> = _diffData
+
     private val roomMap = MutableLiveData<MutableMap<String, String>>()
     private val tempRoomMap = MutableLiveData<MutableMap<String, String>>()
     private val roomIDToRef = HashMap<String, String>()
     private val uuidLink = mutableMapOf<String, Int>()
     private val roomMates = MutableLiveData<ArrayList<ROOMMATES>?>()
-    private var user_name: String = ""
+    private var userName: String = ""
 
 
-    private var auth: FirebaseAuth = application.firebaseAuth
     var user: FirebaseUser? = auth.currentUser
     var uuid: String? = user?.uid
     private var query: Query? = null
 
     init {
-        Log.e("USER-", "${user?.email}")
+        Log.i("USER-", "${user?.email}")
     }
 
     fun getRoomMaps(): MutableLiveData<MutableMap<String, String>> {
@@ -118,16 +133,8 @@ object FireBaseRepository {
     }
 
 
-    fun setFCM() {
-        FirebaseService.sharedPref =
-            application.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        FirebaseService.uid = uuid
-        FirebaseMessaging.getInstance()
-            .subscribeToTopic("/topics/${roomKey}")
-            .addOnCompleteListener {
 
-            }
-    }
+
 
     fun getAllRoomDetail(): MutableLiveData<MutableList<RoomDetail>> {
         return allRoomData
@@ -135,44 +142,82 @@ object FireBaseRepository {
 
     fun getDataStore() = dataStore
 
+    suspend fun getUser(
+        data: MutableStateFlow<MutableMap<String, Any>>,
+        userDataLoading: MutableStateFlow<Boolean>
+    ) {
+        Log.e("Called","getUser")
+        var userData = readUserDataFromRemote()
+        data.value =
+            if (!dataStore.isUpdate() && dataStore.isLoggedIn() && userData != null && userData.isNotEmpty()) {
+                Log.e("USER DATA", "local")
+
+                userData as MutableMap<String, Any>
+            } else {
+                userData = GetUserUseCase()(databaseReference, uuid!!)
+                Log.e("USER DATA", "remote")
+                saveUserToLocal(userData)
+                userData
+            }
+        userDataLoading.value = false
+    }
+
+    private fun saveUserToLocal(
+        userData: MutableMap<String, Any>
+    ){
+        try {
+            val userFile = File(application.filesDir, "/user.json")
+            if (!userFile.exists())
+                userFile.createNewFile()
+            userFile.writeText(Gson().toJson(userData))
+
+        } catch (e: Exception) {
+            Log.e("ERROR", "Saving user data ${e.message}")
+        }
+    }
+
     private fun saveDataToRemote(
         map: MutableMap<String, RoomDetail?>,
-        user: MutableMap<String, Any>
     ) {
         try {
             val file = File(application.filesDir, "/data.json")
-            val userFile = File(application.filesDir, "/user.json")
             if (!file.exists())
                 file.createNewFile()
-            if (!userFile.exists())
-                file.createNewFile()
-            userFile.writeText(Gson().toJson(user))
             file.writeText(Gson().toJson(map))
+            Log.e("file save", "$map")
         } catch (e: Exception) {
             Log.e("SAVE DATA FILE ERROR", "$e")
         }
     }
 
-    private fun readDataFromRemote(): Map<*, *>? {
+
+     fun readDataFromRemote(): Map<*, *>? {
         return try {
             val file = File(application.filesDir, "/data.json")
             val json = file.readText(Charset.defaultCharset())
             val map = Gson().fromJson(json, Map::class.java)
+//            Log.e("file", "$map \n $json")
             map
         } catch (e: Exception) {
+//            dataStore.setUpdate(false)
             Log.e("READ ROOM FILE ERROR", "$e")
             null
         }
-
     }
 
-    private fun readUserDataFromRemote(): Map<*, *>? {
+     fun readUserDataFromRemote(): Map<*, *>? {
         return try {
             val file = File(application.filesDir, "/user.json")
-            val json = file.readText(Charset.defaultCharset())
-            val map = Gson().fromJson(json, Map::class.java)
-            map
+            if(file.exists()){
+                val json = file.readText(Charset.defaultCharset())
+                val map = Gson().fromJson(json, Map::class.java)
+                map
+            }
+            else
+                null
         } catch (e: Exception) {
+
+//            dataStore.setUpdate(false)
             Log.e("READ USER FILE ERROR", "$e")
             null
         }
@@ -182,27 +227,24 @@ object FireBaseRepository {
 
     suspend fun fetchUserRoomData(
         liveData: MutableStateFlow<MutableMap<String, Any>>,
-        roomData: MutableStateFlow<FirebaseState<RoomDetail>>
+        roomData: MutableStateFlow<FirebaseState<RoomDetail>>,
+        roomDataLoading: MutableStateFlow<Boolean>
     ) {
         Log.e("IS", "ONLINE")
+        Log.e("Called","fetchUserRoomData")
         roomData.value = FirebaseState.loading()
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
             //fetching user's data
-            val userData = suspendCoroutine { cont ->
-                databaseReference.child(uuid!!).get().addOnCompleteListener {
-                    if (it.isSuccessful && it.result.exists()) {
-                        val mp = it.result.value as MutableMap<String, Any>
-                        cont.resumeWith(Result.success(mp))
-                    }
-                }
-            }
+            val userData = GetUserUseCase()(databaseReference, uuid!!)
+            saveUserToLocal(userData)
+            liveData.value = userData
             //fetching rooms data which user has joined
             for (i in userData) {
                 if (i.key.contains("ROOM_ID")) {
                     listOfRooms.add(i.value.toString())
-                    val result = suspendCoroutine { cont ->
+                    val result = suspendCoroutine<RoomDetail?> { cont ->
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.getValue(RoomDetail::class.java)
@@ -214,12 +256,12 @@ object FireBaseRepository {
                 }
             }
             dataStore.setUpdate(false)
-            saveDataToRemote(roomMapWithId, userData)
-            update(userData, roomMapWithId)
+            saveDataToRemote(roomMapWithId)
+            update(userData, roomMapWithId, roomDataLoading)
             dataStore.setLoggedIn(true)
             try {
                 roomData.value = FirebaseState.success(roomMapWithId[dataStore.getRoomKey()]!!)
-                liveData.value = userData
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -230,8 +272,9 @@ object FireBaseRepository {
 
     private suspend fun update(
         userData: MutableMap<String, Any>,
-        roomMapWithId: MutableMap<String, RoomDetail?>
-    ){
+        roomMapWithId: MutableMap<String, RoomDetail?>,
+        roomDataLoading: MutableStateFlow<Boolean>
+    ) {
         val roomMap = mutableMapOf<String, String>()
         val tempRoomMap = mutableMapOf<String, String>()
         val allRoom = ArrayList<RoomDetail>()
@@ -252,52 +295,47 @@ object FireBaseRepository {
         this.allRoomData.postValue(allRoom)
 
         try {
-
             val key = userData[dataStore.getRoomRef()].toString()
             dataStore.setRoomKey(key)
             roomKey = key
             val d = roomMapWithId[roomKey]
-            Log.e("JOINED ROOM","$d")
-            user_name = userData["USER_NAME"].toString()
+            userName = userData["USER_NAME"].toString()
             dataStore.setRoomJoined(userData["IS_ROOM_JOINED"].toString().toBoolean())
-
             updatedOn.postValue(d?.LAST_UPDATED.toString())
             val sd = d?.START_DATE_MONTH ?: 0
             dataStore.setStartDate(sd.toString())
             dataStore.setUUID(userData["UUID"].toString())
             dataStore.setEmail(userData["USER_EMAIL"].toString())
-            dataStore.setUserName(user_name)
+            dataStore.setUserName(userName)
             dataStore.setRoomCount(roomMapWithId.size)
 
             val room = d?.ROOM_MATES
             if (room != null) {
-
                 roomMates.postValue(room)
                 dataStore.setRoomSize(room.size)
-                _loading.value = false
+                roomDataLoading.value = false
                 fetchDiffData(room)
             }
         } catch (e: Exception) {
             Log.e("Update ERROR", "${e.message}")
         }
-
-
     }
 
-    fun forceInit() {
-        auth = application.firebaseAuth
+    suspend fun forceInit() {
         user = auth.currentUser
         uuid = user?.uid
     }
 
     suspend fun prepareRoom(
         userData: MutableStateFlow<MutableMap<String, Any>>,
-        roomData: MutableStateFlow<FirebaseState<RoomDetail>>
+        roomData: MutableStateFlow<FirebaseState<RoomDetail>>,
+        roomDataLoading: MutableStateFlow<Boolean>
     ) = coroutineScope {
         roomData.value = FirebaseState.loading()
         val user = readUserDataFromRemote()
         val map = readDataFromRemote()
-        if (!dataStore.isUpdate() && dataStore.isLoggedIn() && user != null && map != null) {
+//        Log.e("prepare room","$user \n $map")
+        if (!dataStore.isUpdate() && dataStore.isLoggedIn() && user != null && map != null && map.isNotEmpty()) {
             Log.e("IS", "OFFLINE")
             val roomMapWithId = mutableMapOf<String, RoomDetail?>()
             val us = user as MutableMap<String, Any>
@@ -310,12 +348,15 @@ object FireBaseRepository {
                     roomMapWithId[i.value.toString()] = d
                 }
             }
-            update(us, roomMapWithId)
+            update(us, roomMapWithId, roomDataLoading)
             val room = roomMapWithId[roomKey]
-            roomData.value = FirebaseState.success(room!!)
-            userData.value = us
+            try {
+                roomData.value = FirebaseState.success(room!!)
+            } catch (e: Exception) {
+
+            }
         } else {
-            fetchUserRoomData(userData, roomData)
+            fetchUserRoomData(userData, roomData, roomDataLoading)
         }
     }
 
@@ -323,16 +364,15 @@ object FireBaseRepository {
         auth.signOut()
         dataStore.clear()
         user = null
-        MyApp.instance.workManager.cancelAllWork()
+        dataStore.setUpdate(false)
+//        MyApp.instance.workManager.cancelAllWork()
         dataStore.setLoggedIn(false)
         clearStorage()
     }
 
     fun clearStorage() {
-        val file = File(application.filesDir, "/user.json")
-        val file1 = File(application.filesDir, "/data.json")
-        file1.delete()
-        file.delete()
+        File(application.filesDir, "/user.json").delete()
+        File(application.filesDir, "/data.json").delete()
     }
 
     fun createAlert(text: String?) {
@@ -344,7 +384,7 @@ object FireBaseRepository {
         map1["UUID"] = uuid
         map1["TIME"] = time
         map1["TIME_STAMP"] = ts
-        map1["BY"] = user_name
+        map1["BY"] = userName
         map1["IS_COMPLETED"] = false
         if (text != null) {
             sendNotify("Alert", text)
@@ -429,7 +469,7 @@ object FireBaseRepository {
             "TIME_STAMP" to ts,
             "AMOUNT_PAID" to amount.toLong(),
             "ITEM_BOUGHT" to item,
-            "BOUGHT_BY" to user_name,
+            "BOUGHT_BY" to userName,
             "TAGS" to tags,
             "CATEGORY" to category,
             "NOTE" to note
@@ -454,7 +494,7 @@ object FireBaseRepository {
         loadingHome.value = true
         liveData.value = FirebaseState.loading()
         val startDate = dataStore.getStartDate()
-
+        Log.e("Called","fetchHomeData")
         val roomSize = dataStore.getRoomSize()
         val som =
             if (startDate == "0") LocalDate.now().withDayOfMonth(1)
@@ -539,7 +579,6 @@ object FireBaseRepository {
                         chartList,
                         homeDetails.isEmpty()
                     )
-                    _loading.value = true
                     loadingHome.value = false
                     liveData.value = FirebaseState.success(home)
                 }
@@ -558,7 +597,7 @@ object FireBaseRepository {
 
     suspend fun fetchDiffData(roomMates: ArrayList<ROOMMATES>) {
         roomKey = dataStore.getRoomKey()
-
+        Log.e("Called","fetchDiffData")
         val detailMap = mutableListOf<MutableMap<String, Any>>()
         val rmp =
             if (roomMates.isEmpty())
@@ -632,8 +671,13 @@ object FireBaseRepository {
         }
     }
 
-    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<Boolean>) =
+    suspend fun uploadPic(
+        uri: Uri,
+        userName: String,
+        editUser: MutableStateFlow<FirebaseState<Boolean>>
+    ) =
         coroutineScope {
+            editUser.value = FirebaseState.loading()
             val ref = storage.getReference(uuid!! + "/profile_pic.jpg")
             ref.putFile(uri)
                 .addOnCompleteListener {
@@ -642,12 +686,12 @@ object FireBaseRepository {
                             databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
                             databaseReference.child(uuid!!).child("IMG_URL")
                                 .setValue(it.result.toString())
-                            editUser.value = true
+                            editUser.value = FirebaseState.success(true)
                         }
                     }
                 }
                 .addOnFailureListener {
-                    editUser.value = false
+                    editUser.value = FirebaseState.failed(it.message)
                 }
         }
 
@@ -658,6 +702,7 @@ object FireBaseRepository {
     ) = coroutineScope {
         roomKey = dataStore.getRoomKey()
         var sdom = 0L
+        Log.e("Called","fetchSummary")
         query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
         val startDate = dataStore.getStartDate()
         if (isMonth) {
@@ -689,7 +734,6 @@ object FireBaseRepository {
                         val docs = it.map {
                             it.toObject(Detail::class.java)
                         }
-                        _loading.value = true
                         details.postValue(docs)
                         state.value = FirebaseState.success(docs)
                     }

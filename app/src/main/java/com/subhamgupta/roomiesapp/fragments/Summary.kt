@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.chip.Chip
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
-import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentSummaryBinding
 import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.utils.FirebaseState
@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.buffer
 class Summary : Fragment() {
 
     lateinit var binding: FragmentSummaryBinding
-    private val viewModel: FirebaseViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     lateinit var adapter: SummaryAdapter
     private val currMonth = MutableLiveData(true)
     override fun onCreateView(

@@ -14,7 +14,9 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
+            android:id="@+id/layout"
             android:layout_height="match_parent">
+
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/setting_fragment"
@@ -33,10 +35,18 @@
                     style="@style/Widget.Material3.CardView.Elevated"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="12dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="12dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="12dp">
-
+                    <ImageView
+                        android:id="@+id/bg_img"
+                        android:layout_width="match_parent"
+                        android:scaleType="centerCrop"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center" />
                     <Button
                         android:id="@+id/edit_profile"
                         style="@style/Widget.Material3.Button.IconButton"
@@ -54,16 +64,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:paddingTop="22dp"
-                            android:paddingBottom="8dp">
+                            android:paddingTop="14dp"
+                            android:paddingBottom="14dp">
 
                             <com.google.android.material.card.MaterialCardView
-                                style="@style/Widget.Material3.CardView.Elevated"
-                                android:layout_width="120dp"
-                                android:layout_height="120dp"
+                                style="@style/Widget.Material3.CardView.Filled"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
                                 android:layout_marginStart="16dp"
-                                app:cardCornerRadius="60dp"
-                                app:strokeColor="@color/colorOnPrimary"
+                                app:cardCornerRadius="50dp"
+                                app:strokeColor="@color/colorDayPopup"
                                 app:strokeWidth="3dp">
 
                                 <ImageView
@@ -71,8 +81,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:layout_gravity="center_horizontal"
-                                    android:contentDescription="profile picture"
-                                    android:src="@drawable/ic_person" />
+                                    android:contentDescription="profile picture" />
                             </com.google.android.material.card.MaterialCardView>
 
                             <LinearLayout
@@ -101,82 +110,6 @@
                         </LinearLayout>
 
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="12dp"
-                            android:baselineAligned="false"
-                            android:orientation="horizontal">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/this_month_amount"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                                    android:textColor="#0F9D58" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Today's\nspending"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/total_spends"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                                    android:textColor="#0F9D58" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="This month's\nSpending"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/no_of_room"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                                    android:textColor="#0F9D58" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Rooms\njoined"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
-
-                            </LinearLayout>
-                        </LinearLayout>
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
@@ -358,6 +291,8 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp">
 
+
+
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/dark_mode_switch"
                         android:layout_width="match_parent"
@@ -427,8 +362,7 @@
                             android:layout_height="wrap_content"
                             style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:layout_marginStart="8dp"
-                            android:text="Edit Start Day Of Month"
-                            app:icon="@drawable/ic_baseline_date_range" />
+                            android:text="Edit Start Day Of Month" />
                     </LinearLayout>
 
                     <Button
@@ -436,8 +370,7 @@
                         style="@style/Widget.Material3.FloatingActionButton.Primary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Generate and share excel sheet"
-                        app:icon="@drawable/ic_baseline_print_24" />
+                        android:text="Generate and share excel sheet"/>
 
                     <Button
                         android:id="@+id/show_qr"
@@ -459,6 +392,14 @@
                         android:textColor="@color/colorRed" />
 
                 </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="match_parent"
+                    android:elevation="20dp"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_height="wrap_content"/>
             </RelativeLayout>
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>

@@ -24,7 +24,7 @@ import com.subhamgupta.roomiesapp.EditPopLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.PersonAdapter
 import com.subhamgupta.roomiesapp.adapter.RoomieAdapter
-import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentDiffUserBinding
 import com.subhamgupta.roomiesapp.databinding.PopupBinding
 import com.subhamgupta.roomiesapp.domain.model.Detail
@@ -34,7 +34,7 @@ import kotlin.math.abs
 class DiffUser: Fragment(), EditPopLink, onClickPerson {
 
     private lateinit var binding: FragmentDiffUserBinding
-    private val viewModel: FirebaseViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

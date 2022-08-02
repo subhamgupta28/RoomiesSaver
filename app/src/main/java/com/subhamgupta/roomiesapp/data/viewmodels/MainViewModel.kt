@@ -1,24 +1,33 @@
 package com.subhamgupta.roomiesapp.data.viewmodels
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.subhamgupta.roomiesapp.data.repositories.FireBaseRepository
+import com.google.firebase.messaging.FirebaseMessaging
+import com.subhamgupta.roomiesapp.data.repositories.MainRepository
 import com.subhamgupta.roomiesapp.domain.model.Alerts
 import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.domain.model.HomeData
 import com.subhamgupta.roomiesapp.domain.model.RoomDetail
+import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FirebaseViewModel : ViewModel() {
-    private var repository: FireBaseRepository = FireBaseRepository
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private var repository: MainRepository
+) : ViewModel() {
 
     private val _startDate = MutableLiveData<Boolean>()
     val startDate: LiveData<Boolean> = _startDate
@@ -29,19 +38,23 @@ class FirebaseViewModel : ViewModel() {
     private val _sheetLoading = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val sheetLoading = _sheetLoading.asStateFlow()
 
-    private val _editUser = MutableStateFlow<Boolean>(false)
+    private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
-
-    private val _loadingHome = MutableStateFlow(false)
-    val loadingHome = _loadingHome.asStateFlow()
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
 
-    private val _userData = MutableStateFlow<MutableMap<String, Any>>(mutableMapOf())
+    val map = mutableMapOf(
+        "IS_ROOM_JOINED" to true,
+        "UUID" to "h"
+    )
+    private val _userDataLoading = MutableStateFlow(true)
+    private val _roomDataLoading = MutableStateFlow(true)
+    private val _homeDataLoading = MutableStateFlow(true)
+    private val _summaryDataLoading = MutableStateFlow(true)
+
+    private val _userData = MutableStateFlow(map.toMutableMap())
     val userData = _userData.asStateFlow()
 
     private val _homeData = MutableStateFlow<FirebaseState<HomeData>>(FirebaseState.loading())
@@ -56,15 +69,33 @@ class FirebaseViewModel : ViewModel() {
     private val _addItem = MutableLiveData<Boolean>(false)
     val addItem: LiveData<Boolean> = _addItem
 
-    init {
-        repository.setFCM()
-    }
+
     fun clearStorage(){
         repository.clearStorage()
     }
 
+     private fun setFCM() = viewModelScope.launch(Dispatchers.IO){
+        val data = repository.getDataStore()
+        FirebaseService.token = ""
+        FirebaseService.uid = data.getUUID()
+        FirebaseMessaging.getInstance()
+            .subscribeToTopic("/topics/${data.getRoomKey()}")
+            .addOnCompleteListener {
+
+                Log.e("FCM","${it.isSuccessful} ${it.exception} ${it.result}")
+            }
+    }
+
+    fun getUserDataFromLocal(): Map<*, *>? {
+        return repository.readUserDataFromRemote()
+    }
+
+    fun getRoomDataFromLocal(): Map<*, *>? {
+        return repository.readDataFromRemote()
+    }
+
     fun getRoomMates() = repository.getRoomMates()
-    val getLoading = loadingHome
+    val getLoading = _homeDataLoading
 
     fun fetchAlert() {
         repository.fetchAlert(_alert)
@@ -78,26 +109,41 @@ class FirebaseViewModel : ViewModel() {
         repository.leaveRoom(_leaveRoom, key)
     }
     fun getData() = viewModelScope.launch(Dispatchers.IO) {
-        fetchUserData()
-        _loading.value = false
-        repository.loading.collect {
-            if (!it) {
-                fetchHomeData()
-                fetchSummary(true, "All")
+
+            getUserData()
+            _userDataLoading.buffer().collect{
+                if(!it) {
+                    fetchRoomData()
+                    setFCM()
+                    _roomDataLoading.buffer().collect {it1->
+                        if (!it1) {
+                            fetchHomeData()
+                            fetchSummary(true, "All")
+                            _roomDataLoading.value = true
+                        }
+                    }
+                    _userDataLoading.value = true
+                }
             }
-        }
+
+
+
     }
     fun refreshData() = viewModelScope.launch(Dispatchers.IO){
-        repository.fetchUserRoomData(_userData, _roomDetails)
+        repository.fetchUserRoomData(_userData, _roomDetails, _roomDataLoading)
+    }
+
+    private fun getUserData() = viewModelScope.launch(Dispatchers.IO) {
+        repository.getUser(_userData, _userDataLoading)
     }
 
     fun editUser(uri: Uri, userName: String) = viewModelScope.launch(Dispatchers.IO) {
         repository.uploadPic(uri, userName, _editUser)
     }
 
-    fun fetchUserData() = viewModelScope.launch(Dispatchers.IO) {
+    private fun fetchRoomData() = viewModelScope.launch(Dispatchers.IO) {
         repository.forceInit()
-        repository.prepareRoom(_userData, _roomDetails)
+        repository.prepareRoom(_userData, _roomDetails, _roomDataLoading)
     }
 
     fun getUuidLink(): MutableMap<String, Int> {
@@ -111,8 +157,8 @@ class FirebaseViewModel : ViewModel() {
         repository.signOut()
     }
 
-    fun sendNotification(title: String, message: String) {
-        repository.sendNotify(title, message)
+    fun sendNotification(title: String, message: String) = viewModelScope.launch(Dispatchers.IO){
+        repository.sendNotify("${repository.getDataStore().getUserName()} $title", message)
     }
 
     fun getRoomMap(): MutableLiveData<MutableMap<String, String>> {
@@ -161,16 +207,13 @@ class FirebaseViewModel : ViewModel() {
     }
 
     private fun fetchHomeData() = viewModelScope.launch(Dispatchers.IO) {
-        repository.fetchHomeData(_homeData, _loadingHome)
+        repository.fetchHomeData(_homeData, _homeDataLoading)
     }
 
     fun getTotalAmount(): MutableLiveData<Int> {
         return repository.getTotalAmount()
     }
 
-    fun getTodayAmount(): MutableLiveData<Int> {
-        return repository.getTodayAmount()
-    }
 
     fun createAlert(msg: String) {
         repository.createAlert(msg)

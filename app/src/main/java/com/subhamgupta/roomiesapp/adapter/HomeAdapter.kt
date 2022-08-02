@@ -55,7 +55,7 @@ class HomeAdapter(
                val amount = data["AMOUNT"].toString().toInt()
                if (amnt<amount){
                    (" ↑${String.format("%.1f", amount.toDouble()-amnt)}").also { binding.eachAmt.text = it }
-                   binding.eachAmt.setTextColor(Color.parseColor("#FF6D00"))
+                   binding.eachAmt.setTextColor(Color.parseColor("#0F9D58"))
                }
                else{
                    (" ↓${String.format("%.1f", amnt-amount.toDouble())}").also { binding.eachAmt.text = it }

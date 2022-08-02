@@ -25,5 +25,12 @@
         android:title="Announce"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/text"
+        android:title="Room Name"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.TextView"
+        />
+
 
 </menu>

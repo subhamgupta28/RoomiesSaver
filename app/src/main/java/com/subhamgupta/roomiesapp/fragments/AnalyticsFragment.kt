@@ -1,28 +1,21 @@
 package com.subhamgupta.roomiesapp.fragments
 
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
-import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentAnalyticsBinding
-import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
-import com.subhamgupta.roomiesapp.utils.FirebaseState
 import im.dacer.androidcharts.LineView
-import kotlinx.coroutines.flow.buffer
-import java.text.SimpleDateFormat
 
 
 class AnalyticsFragment : Fragment() {
 
     private lateinit var binding: FragmentAnalyticsBinding
-    private val viewModel: FirebaseViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

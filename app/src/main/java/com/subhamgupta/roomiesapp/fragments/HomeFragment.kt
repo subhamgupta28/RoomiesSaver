@@ -14,12 +14,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.subhamgupta.roomiesapp.HAdapToHFrag
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.HomeAdapter
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
-import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentHomeBinding
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +36,7 @@ import java.util.*
 
 class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragment(), HAdapToHFrag {
 
-    private val viewModel: FirebaseViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +55,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         return binding.root
     }
 
-    fun isTablet(): Boolean {
+    private fun isTablet(): Boolean {
         val xlarge = (this.getResources()
             .getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) === 4
         val large = this.getResources()
@@ -70,13 +72,16 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.refresh.setOnClickListener {
             viewModel.refreshData()
         }
+        binding.swipe.setOnRefreshListener {
+            viewModel.refreshData()
+        }
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.homeData.buffer().collect {
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
-                            binding.progress.visibility = View.VISIBLE
-                            Log.e("HOME", "LOADING")
+//                            binding.progress.visibility = View.VISIBLE
+
                         }
                         is FirebaseState.Empty -> {
                         }
@@ -94,7 +99,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                                 binding.spark.visibility = View.VISIBLE
                                 val data = res.todayData
                                 adapter.setItems(data)
-
+                                binding.swipe.isRefreshing = false
                                 homeAdapter.setData(res.userMap, res.eachPersonAmount)
                                 binding.donutView.submitData(res.donutList!!)
                                 binding.eachAmt.text = res.eachPersonAmount.toString()
@@ -130,7 +135,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             homeToMainLink?.goToDiffUser()
         }
 
-
     }
 
     private fun visible() {
@@ -139,6 +143,17 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.line1.visibility = View.GONE
         binding.k.visibility = View.GONE
         binding.kt.visibility = View.GONE
+        lifecycleScope.launchWhenStarted {
+            val roomKey = viewModel.getDataStore().getRoomKey()
+            try {
+                val barcodeEncoder = BarcodeEncoder()
+                val bitmap =
+                    barcodeEncoder.encodeBitmap(  roomKey+"ID", BarcodeFormat.QR_CODE, 700, 700)
+                binding.qrImage.setImageBitmap(bitmap)
+            } catch (e: java.lang.Exception) {
+            }
+        }
+
     }
 
     private fun gone() {

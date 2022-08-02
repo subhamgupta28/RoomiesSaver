@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ShareCompat
@@ -29,7 +30,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.subhamgupta.roomiesapp.BuildConfig
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
-import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.ActivitySettingBinding
 import com.subhamgupta.roomiesapp.databinding.EditDetailsBinding
 import com.subhamgupta.roomiesapp.databinding.EditUserPopupBinding
@@ -37,6 +38,7 @@ import com.subhamgupta.roomiesapp.databinding.QrcodePopupBinding
 import com.subhamgupta.roomiesapp.fragments.RoomCreation
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
@@ -47,16 +49,17 @@ import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+@AndroidEntryPoint
 class SettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingBinding
-    private val viewModel: FirebaseViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var settingDataStore: SettingDataStore
     private lateinit var name: String
     private lateinit var roomKey: String
     private lateinit var imageView: ImageView
     private lateinit var limit: String
+    private lateinit var alertDialog: AlertDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingBinding.inflate(layoutInflater)
@@ -85,43 +88,30 @@ class SettingActivity : AppCompatActivity() {
                 binding.chips.addView(chip)
             }
         }
-        viewModel.fetchUserData()
         lifecycleScope.launchWhenStarted {
-            viewModel.roomDetail.collect() {
-                withContext(Main) {
-                    when (it) {
-                        is FirebaseState.Loading -> {
 
-                        }
-                        is FirebaseState.Failed -> {
-                            showSnackBar("Something went failed")
-                        }
-                        is FirebaseState.Success -> {
-                            binding.rName.text = it.data.ROOM_NAME
-                            binding.cDate.text = it.data.CREATED_ON
-                            binding.limit.text = it.data.LIMIT.toString()
-                            name = it.data.ROOM_NAME.toString()
-                            limit = it.data.LIMIT.toString()
-                            binding.rId.text = it.data.ROOM_ID
-                            roomKey = it.data.ROOM_ID.toString()
-                            try {
-                                val sdf = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
-                                val netDate = Date(it.data.START_DATE_MONTH!!)
-                                val date = sdf.format(netDate)
-                                binding.setDText.text = date
-                            } catch (e: Exception) {
 
-                            }
-                        }
-                        else -> Unit
-                    }
+            val it = viewModel.getRoomDataFromLocal()?.get(settingDataStore.getRoomKey()) as MutableMap<*,*>
 
-                }
-
+            name = it["ROOM_NAME"].toString()
+            limit = it["LIMIT"].toString()
+            roomKey = it["ROOM_ID"].toString()
+            binding.rId.text = roomKey
+            binding.rName.text = name
+            binding.cDate.text = it["CREATED_ON"].toString()
+            binding.limit.text = limit
+            try {
+                val sdf = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
+                val netDate = Date(it["START_DATE_MONTH"].toString().toLong())
+                val date = sdf.format(netDate)
+                binding.setDText.text = date
+            } catch (e: Exception) {
 
             }
-
         }
+
+
+
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.sheetLoading.buffer().collect {
                 when (it) {
@@ -149,7 +139,6 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun init() {
-
         binding.leaveroom.setOnClickListener {
             leaveRoom()
         }
@@ -180,15 +169,6 @@ class SettingActivity : AppCompatActivity() {
         }
 
 
-
-        viewModel.getTotalAmount().observe(this) {
-            "₹$it".also { binding.totalSpends.text = it }
-        }
-        viewModel.getTodayAmount().observe(this) {
-            "₹$it".also { binding.thisMonthAmount.text = it }
-        }
-
-
         viewModel.leaveRoom.observe(this) {
             if (it)
                 viewModel.refreshData()
@@ -200,7 +180,6 @@ class SettingActivity : AppCompatActivity() {
             }
             binding.nameText.text = settingDataStore.getUserName()
             binding.emailText.text = settingDataStore.getEmail()
-            binding.noOfRoom.text = settingDataStore.getRoomCount().toString()
             binding.thisMonthData.isChecked = settingDataStore.isMonth()
             binding.darkModeSwitch.isChecked = settingDataStore.getDarkMode()
             binding.thisMonthData.setOnCheckedChangeListener { _, isCheck ->
@@ -219,19 +198,19 @@ class SettingActivity : AppCompatActivity() {
                 }
 
             }
-            viewModel.userData.buffer().collect {
-                withContext(Main) {
-                    Log.e("URL", "${it["IMG_URL"]}")
-                    val requestOptions =
-                        RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    Glide.with(this@SettingActivity)
-                        .load(it["IMG_URL"].toString())
-                        .circleCrop()
-                        .apply(requestOptions)
-                        .placeholder(R.drawable.ic_person)
-                        .into(binding.profileImg)
-                }
-            }
+            val data = viewModel.getUserDataFromLocal()
+//            Log.e("URL", "${data?.get("IMG_URL")}")
+            val requestOptions =
+                RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            val glide = Glide.with(this@SettingActivity)
+                .load(data?.get("IMG_URL")?.toString())
+                .apply(requestOptions)
+                .placeholder(R.drawable.ic_person)
+            glide.into(binding.bgImg)
+            binding.bgImg.imageAlpha = 100
+            glide.circleCrop().into(binding.profileImg)
+
+
         }
 
 
@@ -402,11 +381,23 @@ class SettingActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             viewModel.editUser.collect {
-                if (it) {
-                    withContext(Main) {
-                        showSnackBar("Saved")
+                when (it) {
+                    is FirebaseState.Loading -> {
+                        binding.progress.visibility = View.VISIBLE
                     }
-
+                    is FirebaseState.Failed -> {
+                        binding.progress.visibility = View.GONE
+                    }
+                    is FirebaseState.Success -> {
+                        withContext(Main) {
+                            showSnackBar("Saved")
+                            binding.progress.visibility = View.GONE
+                            alertDialog.dismiss()
+                        }
+                    }
+                    is FirebaseState.Empty -> {
+                        binding.progress.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -419,7 +410,7 @@ class SettingActivity : AppCompatActivity() {
         }
         materialAlertDialogBuilder.setView(view.root)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-        materialAlertDialogBuilder.show()
+        alertDialog = materialAlertDialogBuilder.show()
     }
 
     private fun editLimit() {
@@ -437,9 +428,7 @@ class SettingActivity : AppCompatActivity() {
                 val map = HashMap<String, Any>()
                 map["LIMIT"] = view.rlimit.text.toString().toInt()
                 map["ROOM_NAME"] = view.rname.text.toString()
-
             }
-
         }
         materialAlertDialogBuilder.setView(view.root)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)

@@ -12,9 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".activities.MainActivity">
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/setting_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
+            android:id="@+id/main_layout"
             android:layout_height="match_parent">
 
             <RelativeLayout
@@ -29,6 +35,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#00000000"
+                    android:visibility="gone"
                     android:hapticFeedbackEnabled="true"
                     app:shapeAppearance="?attr/shapeAppearanceSmallComponent"
                     app:tabGravity="start"
@@ -117,7 +124,8 @@
                         android:id="@+id/id_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_margin="6dp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:contextClickable="true"
                         android:textIsSelectable="true"
                         android:textStyle="bold" />
@@ -143,6 +151,7 @@
                 style="@style/Widget.Material3.FloatingActionButton.Tertiary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:maxImageSize="35dp"
                 android:src="@drawable/ic_outline_add"
                 app:layout_anchor="@id/bottombar" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
