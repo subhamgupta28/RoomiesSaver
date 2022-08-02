@@ -1,7 +1,11 @@
 package com.subhamgupta.roomiesapp.fragments
 
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
+import android.text.TextPaint
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater

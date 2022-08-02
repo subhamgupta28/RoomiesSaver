@@ -15,7 +15,11 @@ import com.subhamgupta.roomiesapp.databinding.ActivityStartBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.withContext
+<<<<<<< HEAD
 
+=======
+import java.io.File
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 @AndroidEntryPoint
 class StartActivity : AppCompatActivity() {
 

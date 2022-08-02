@@ -59,7 +59,11 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var roomKey: String
     private lateinit var imageView: ImageView
     private lateinit var limit: String
+<<<<<<< HEAD
     private lateinit var alertDialog: AlertDialog
+=======
+    private lateinit var alertDialog:AlertDialog
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingBinding.inflate(layoutInflater)
@@ -198,6 +202,7 @@ class SettingActivity : AppCompatActivity() {
                 }
 
             }
+<<<<<<< HEAD
             val data = viewModel.getUserDataFromLocal()
 //            Log.e("URL", "${data?.get("IMG_URL")}")
             val requestOptions =
@@ -211,6 +216,22 @@ class SettingActivity : AppCompatActivity() {
             glide.circleCrop().into(binding.profileImg)
 
 
+=======
+            viewModel.userData.buffer().collect {
+                withContext(Main) {
+                    Log.e("URL", "${it["IMG_URL"]}")
+                    val requestOptions =
+                        RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    val glide = Glide.with(this@SettingActivity)
+                        .load(it["IMG_URL"].toString())
+                        .apply(requestOptions)
+                        .placeholder(R.drawable.ic_person)
+                    glide.into(binding.bgImg)
+                    binding.bgImg.imageAlpha = 100
+                    glide.circleCrop().into(binding.profileImg)
+                }
+            }
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
         }
 
 

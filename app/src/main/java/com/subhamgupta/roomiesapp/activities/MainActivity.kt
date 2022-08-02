@@ -37,20 +37,40 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
+<<<<<<< HEAD
 import com.subhamgupta.roomiesapp.utils.Worker
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
+=======
+import com.subhamgupta.roomiesapp.data.Worker
+import com.subhamgupta.roomiesapp.data.viewmodels.FirebaseViewModel
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 import com.subhamgupta.roomiesapp.databinding.ActivityMainBinding
 import com.subhamgupta.roomiesapp.databinding.AlertPopupBinding
 import com.subhamgupta.roomiesapp.databinding.ChangeRoomCardBinding
 import com.subhamgupta.roomiesapp.databinding.PopupBinding
+<<<<<<< HEAD
 import com.subhamgupta.roomiesapp.fragments.*
+=======
+import com.subhamgupta.roomiesapp.fragments.DiffUser
+import com.subhamgupta.roomiesapp.fragments.HomeFragment
+import com.subhamgupta.roomiesapp.fragments.RoomCreation
+import com.subhamgupta.roomiesapp.fragments.Summary
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.Handler
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.hilt.android.AndroidEntryPoint
+<<<<<<< HEAD
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
+=======
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -69,12 +89,20 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+<<<<<<< HEAD
         DynamicColors.applyToActivitiesIfAvailable(application)
+=======
+//        DynamicColors.applyToActivitiesIfAvailable(application)
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         checkUser()
+<<<<<<< HEAD
 
+=======
+        viewModel.getData()
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 //        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
         binding.tablayout.setupWithViewPager(binding.viewpager1)
@@ -92,6 +120,12 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         Thread.setDefaultUncaughtExceptionHandler(Handler(this, application, pendingIntent))
 
         if (intent.getBooleanExtra("crash", false)) {
+            Toast.makeText(this, "After crash", Toast.LENGTH_LONG).show()
+        }
+
+        Thread.setDefaultUncaughtExceptionHandler(Handler(this))
+
+        if(intent.getBooleanExtra("crash",false)){
             Toast.makeText(this, "After crash", Toast.LENGTH_LONG).show()
         }
 
@@ -214,7 +248,11 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             startActivity(Intent(this, StartActivity::class.java))
             finish()
         } else {
+<<<<<<< HEAD
 //            viewModel.refreshData()
+=======
+            viewModel.refreshData()
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
             lifecycleScope.launchWhenStarted {
                 viewModel.userData.collect {
                     Log.e("CHECK USER", "$it")
@@ -227,8 +265,11 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                                 .commit()
                         }
                         settingDataStore.setUpdate(true)
+<<<<<<< HEAD
                     }else{
                         viewModel.getData()
+=======
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
                     }
                 }
             }
@@ -349,6 +390,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     true
                 }
                 R.id.changeRoom -> {
+//                    throw Exception("error")
                     changeRoom()
                     true
                 }

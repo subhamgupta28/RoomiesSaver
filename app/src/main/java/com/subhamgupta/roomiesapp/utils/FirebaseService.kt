@@ -32,6 +32,7 @@ class FirebaseService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+<<<<<<< HEAD
         Log.e("SERVICE_UID", message.data["uid"].toString())
         Log.e("SERVICE_UUID", uid.toString())
         if (!message.data["uid"].equals(uid)) {
@@ -41,18 +42,27 @@ class FirebaseService : FirebaseMessagingService() {
             Log.e("TOPICS_SUB", "$keys")
             Log.e("MESSAGE_RECEIVED_FROM", message.from.toString())
             val intent = Intent(this, SettingActivity::class.java)
+=======
+        if (!message.data["uid"].equals(uid)) {
+            val intent = Intent(this, MainActivity::class.java)
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val notificationID = Random.nextInt()
 
             createNotificationChannel(notificationManager)
 
+<<<<<<< HEAD
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
             val pendingIntent = PendingIntent.getActivity(this, 0, intent, FLAG_ONE_SHOT or FLAG_IMMUTABLE)
 
 //            val mgr = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 //            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent)
 
+=======
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            val pendingIntent = PendingIntent.getActivity(this, 0, intent, FLAG_ONE_SHOT or FLAG_IMMUTABLE)
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(message.data["title"])
                 .setContentText(message.data["message"])

@@ -25,8 +25,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
 class MainViewModel @Inject constructor(
     private var repository: MainRepository
+=======
+class FirebaseViewModel @Inject constructor(
+    private var repository: FireBaseRepository
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
 ) : ViewModel() {
 
     private val _startDate = MutableLiveData<Boolean>()
@@ -41,6 +46,14 @@ class MainViewModel @Inject constructor(
     private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
+<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
+=======
+    private val _loading = MutableStateFlow(true)
+    val loading = _loading.asStateFlow()
+
+    private val _loadingHome = MutableStateFlow(false)
+    private val loadingHome = _loadingHome.asStateFlow()
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
@@ -49,11 +62,14 @@ class MainViewModel @Inject constructor(
         "IS_ROOM_JOINED" to true,
         "UUID" to "h"
     )
+<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
     private val _userDataLoading = MutableStateFlow(true)
     private val _roomDataLoading = MutableStateFlow(true)
     private val _homeDataLoading = MutableStateFlow(true)
     private val _summaryDataLoading = MutableStateFlow(true)
 
+=======
+>>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
     private val _userData = MutableStateFlow(map.toMutableMap())
     val userData = _userData.asStateFlow()
 
