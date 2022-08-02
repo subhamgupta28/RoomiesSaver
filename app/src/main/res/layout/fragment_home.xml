@@ -265,11 +265,8 @@
                     android:layout_marginTop="22dp"
                     android:layout_marginEnd="12dp"
                     android:id="@+id/msg"
-<<<<<<< HEAD
                     android:text="No new purchase this month?\nAdd items by clicking on + button\nYou can go to All Expense to see\nprevious month's spending"
-=======
-                    android:text="No new purchase this month?\nEmpty! Add items by clicking on + button\n You can go to All Expense to see previous month's spending"
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
+
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 

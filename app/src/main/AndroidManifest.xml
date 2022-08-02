@@ -10,10 +10,6 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false"/>
@@ -23,7 +19,6 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:persistent="true"
-        android:usesCleartextTraffic="true"
         android:directBootAware="true"
         android:label="@string/app_name"
         android:resizeableActivity="true"

@@ -16,8 +16,8 @@ android {
         applicationId "com.subhamgupta.roomiesapp"
         minSdk 26
         targetSdk 31
-        versionCode 11
-        versionName "2.7"
+        versionCode 13
+        versionName "3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

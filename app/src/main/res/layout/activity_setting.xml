@@ -70,17 +70,11 @@
 
                             <com.google.android.material.card.MaterialCardView
                                 style="@style/Widget.Material3.CardView.Filled"
-<<<<<<< HEAD
+
                                 android:layout_width="100dp"
                                 android:layout_height="100dp"
                                 android:layout_marginStart="16dp"
                                 app:cardCornerRadius="50dp"
-=======
-                                android:layout_width="120dp"
-                                android:layout_height="120dp"
-                                android:layout_marginStart="16dp"
-                                app:cardCornerRadius="60dp"
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
                                 app:strokeColor="@color/colorDayPopup"
                                 app:strokeWidth="3dp">
 

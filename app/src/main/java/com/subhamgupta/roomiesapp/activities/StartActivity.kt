@@ -15,11 +15,7 @@ import com.subhamgupta.roomiesapp.databinding.ActivityStartBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.withContext
-<<<<<<< HEAD
 
-=======
-import java.io.File
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 @AndroidEntryPoint
 class StartActivity : AppCompatActivity() {
 
@@ -34,36 +30,5 @@ class StartActivity : AppCompatActivity() {
         binding = ActivityStartBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this
-
-
-//        if (viewModel.getSettings().darkMode == true)
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//        else
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
-
     }
-
-    override fun onStart() {
-        super.onStart()
-//        binding.fragmentContainerView.isVisible = true
-
-        val user = FirebaseAuth.getInstance()
-        lifecycleScope.launchWhenStarted {
-            val animZoomIn = AnimationUtils.loadAnimation(this@StartActivity, R.anim.zoom_in)
-            binding.logo.startAnimation(animZoomIn)
-            binding.logo.visibility = View.GONE
-            withContext(Main) {
-                if (user.currentUser != null) {
-                    startActivity(Intent(this@StartActivity, MainActivity::class.java))
-                    finish()
-                } else {
-                    binding.fragmentContainerView.isVisible = true
-                }
-            }
-
-        }
-    }
-
-
 }

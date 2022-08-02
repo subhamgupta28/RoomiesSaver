@@ -44,18 +44,9 @@ class RoomRepository @Inject constructor(
     }
 
     suspend fun getUser() {
-<<<<<<< HEAD
+
         val userData = GetUserUseCase()(databaseReference, uuid!!)
-=======
-        val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
-            databaseReference.child(uuid!!).get().addOnCompleteListener {
-                if (it.isSuccessful && it.result.exists()) {
-                    val mp = it.result.value as MutableMap<String, Any>
-                    cont.resumeWith(Result.success(mp))
-                }
-            }
-        }
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
+
         user_name = userData["USER_NAME"].toString()
     }
 
@@ -92,18 +83,9 @@ class RoomRepository @Inject constructor(
                 result?.ROOM_MATES?.add(mate)
 
                 if (uuid != null) {
-<<<<<<< HEAD
+
                     val userData = GetUserUseCase()(databaseReference, uuid)
-=======
-                    val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
-                        databaseReference.child(uuid).get().addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                val mp = it.result.value as MutableMap<String, Any>
-                                cont.resume(mp)
-                            }
-                        }
-                    }
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
+
                     val ob = getNewKey(userData, room_id)
                     val finalKey = ob["F_KEY"].toString()
                     val flag = ob["IS_JOIN"].toString().toBoolean()

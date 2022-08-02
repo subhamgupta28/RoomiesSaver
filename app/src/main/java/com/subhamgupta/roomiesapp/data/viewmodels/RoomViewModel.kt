@@ -11,20 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-<<<<<<< HEAD
+
 
 @HiltViewModel
 class RoomViewModel @Inject constructor(
     private val repository : RoomRepository
 ) : ViewModel() {
-=======
-
-@HiltViewModel
-class RoomViewModel @Inject constructor(
-    private val repository : RoomRepository
-) : ViewModel() {
-
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b
 
     private val _createRoom = MutableStateFlow<FirebaseState<CreateRoom>>(FirebaseState.empty())
     val createRoom = _createRoom.asStateFlow()

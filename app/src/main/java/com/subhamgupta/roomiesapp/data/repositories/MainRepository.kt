@@ -48,7 +48,6 @@ import kotlin.coroutines.suspendCoroutine
 
 
 @Singleton
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
 class MainRepository @Inject constructor(
     private val storage: FirebaseStorage,
     private val databaseReference: DatabaseReference,
@@ -68,20 +67,6 @@ class MainRepository @Inject constructor(
 
 //    val fg = AppModule.firebaseStorage.useEmulator("10.0.2.2", 9199)
 
-=======
-class FireBaseRepository @Inject constructor(
-    private val storage: FirebaseStorage,
-    private val databaseReference:DatabaseReference,
-    private val db :FirebaseFirestore,
-    private val auth: FirebaseAuth,
-    private val dataStore: SettingDataStore,
-    private val application :Application,
-) {
-    private var roomKey: String = ""
-
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
     private val updatedOn = MutableLiveData<String>()
     private val allRoomData = MutableLiveData<MutableList<RoomDetail>>()
     private val details = MutableLiveData<List<Detail?>>()
@@ -257,25 +242,20 @@ class FireBaseRepository @Inject constructor(
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>,
         roomDataLoading: MutableStateFlow<Boolean>
     ) {
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
+
         Log.e("IS", "ONLINE")
         Log.e("Called","fetchUserRoomData")
-=======
-        Log.i("IS", "ONLINE")
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
+
         roomData.value = FirebaseState.loading()
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
             //fetching user's data
             val userData = GetUserUseCase()(databaseReference, uuid!!)
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
+
             saveUserToLocal(userData)
             liveData.value = userData
-=======
 
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
-            //fetching rooms data which user has joined
             for (i in userData) {
                 if (i.key.contains("ROOM_ID")) {
                     listOfRooms.add(i.value.toString())
@@ -307,12 +287,8 @@ class FireBaseRepository @Inject constructor(
 
     private suspend fun update(
         userData: MutableMap<String, Any>,
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
         roomMapWithId: MutableMap<String, RoomDetail?>,
         roomDataLoading: MutableStateFlow<Boolean>
-=======
-        roomMapWithId: MutableMap<String, RoomDetail?>
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
     ) {
         val roomMap = mutableMapOf<String, String>()
         val tempRoomMap = mutableMapOf<String, String>()
@@ -338,12 +314,7 @@ class FireBaseRepository @Inject constructor(
             dataStore.setRoomKey(key)
             roomKey = key
             val d = roomMapWithId[roomKey]
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
             userName = userData["USER_NAME"].toString()
-=======
-            Log.i("JOINED ROOM", "$d")
-            user_name = userData["USER_NAME"].toString()
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
             dataStore.setRoomJoined(userData["IS_ROOM_JOINED"].toString().toBoolean())
             updatedOn.postValue(d?.LAST_UPDATED.toString())
             val sd = d?.START_DATE_MONTH ?: 0
@@ -365,11 +336,7 @@ class FireBaseRepository @Inject constructor(
         }
     }
 
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
     suspend fun forceInit() {
-=======
-    fun forceInit() {
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
         user = auth.currentUser
         uuid = user?.uid
     }
@@ -412,11 +379,7 @@ class FireBaseRepository @Inject constructor(
         auth.signOut()
         dataStore.clear()
         user = null
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
         dataStore.setUpdate(false)
-=======
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
-//        MyApp.instance.workManager.cancelAllWork()
         dataStore.setLoggedIn(false)
         clearStorage()
     }
@@ -722,16 +685,11 @@ class FireBaseRepository @Inject constructor(
         }
     }
 
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/MainRepository.kt
     suspend fun uploadPic(
         uri: Uri,
         userName: String,
         editUser: MutableStateFlow<FirebaseState<Boolean>>
-    ) =
-=======
-    suspend fun uploadPic(uri: Uri, userName: String, editUser: MutableStateFlow<FirebaseState<Boolean>>) =
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/repositories/FireBaseRepository.kt
-        coroutineScope {
+    ) = coroutineScope {
             editUser.value = FirebaseState.loading()
             val ref = storage.getReference(uuid!! + "/profile_pic.jpg")
             ref.putFile(uri)

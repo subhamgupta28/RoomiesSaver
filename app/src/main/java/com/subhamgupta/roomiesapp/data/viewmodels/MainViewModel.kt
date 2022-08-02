@@ -18,20 +18,18 @@ import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
 class MainViewModel @Inject constructor(
     private var repository: MainRepository
-=======
-class FirebaseViewModel @Inject constructor(
-    private var repository: FireBaseRepository
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
 ) : ViewModel() {
 
     private val _startDate = MutableLiveData<Boolean>()
@@ -46,14 +44,6 @@ class FirebaseViewModel @Inject constructor(
     private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
-=======
-    private val _loading = MutableStateFlow(true)
-    val loading = _loading.asStateFlow()
-
-    private val _loadingHome = MutableStateFlow(false)
-    private val loadingHome = _loadingHome.asStateFlow()
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
@@ -62,14 +52,11 @@ class FirebaseViewModel @Inject constructor(
         "IS_ROOM_JOINED" to true,
         "UUID" to "h"
     )
-<<<<<<< HEAD:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/MainViewModel.kt
     private val _userDataLoading = MutableStateFlow(true)
     private val _roomDataLoading = MutableStateFlow(true)
     private val _homeDataLoading = MutableStateFlow(true)
     private val _summaryDataLoading = MutableStateFlow(true)
 
-=======
->>>>>>> bc028885d2fc69567c10e880a1180fc67f3a028b:app/src/main/java/com/subhamgupta/roomiesapp/data/viewmodels/FirebaseViewModel.kt
     private val _userData = MutableStateFlow(map.toMutableMap())
     val userData = _userData.asStateFlow()
 
@@ -136,6 +123,15 @@ class FirebaseViewModel @Inject constructor(
                             fetchHomeData()
                             fetchSummary(true, "All")
                             _roomDataLoading.value = true
+                            _homeDataLoading.buffer().collect{it2->
+                                if (it2){
+                                    viewModelScope.launch(Dispatchers.IO) {
+                                        delay(5000)
+                                        Log.e("fun","started")
+                                        _homeDataLoading.value = true
+                                    }
+                                }
+                            }
                         }
                     }
                     _userDataLoading.value = true
