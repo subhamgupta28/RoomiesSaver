@@ -11,10 +11,12 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.data.repositories.AuthRepository
 import com.subhamgupta.roomiesapp.data.repositories.MainRepository
 
 import com.subhamgupta.roomiesapp.data.repositories.RoomRepository
+import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.Module
 import dagger.Provides
@@ -85,9 +87,11 @@ object AppModule {
     fun provideAuthRepository(
         databaseReference: DatabaseReference,
         auth: FirebaseAuth,
-        settingDataStore: SettingDataStore
+        settingDataStore: SettingDataStore,
+        application: Application,
+        storage: FirebaseStorage
     ): AuthRepository = AuthRepository(
-        databaseReference, auth, settingDataStore
+        databaseReference, auth, settingDataStore, application, storage
     )
 
     @Singleton
@@ -106,6 +110,12 @@ object AppModule {
     fun provideSettingStorage(
         application: Application
     ): SettingDataStore = SettingDataStore(application)
+
+    @Singleton
+    @Provides
+    fun provideNetworkObserver(
+        application: Application
+    ): NetworkObserver = NetworkObserver(application)
 
 
 

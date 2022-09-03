@@ -49,53 +49,35 @@
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <com.google.android.material.card.MaterialCardView
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/signup"
-            style="@style/Widget.Material3.CardView.Elevated"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/message2"
             android:layout_marginStart="24dp"
             android:layout_marginTop="50dp"
             android:layout_marginEnd="24dp"
-            android:checkable="true"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardCornerRadius="12dp">
+            android:text="New user! Sign up with Email"
+            app:cornerRadius="10dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:text="New user! Sign up with Email"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                android:textStyle="bold" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        </com.google.android.material.button.MaterialButton>
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/signin"
-            style="@style/Widget.Material3.CardView.Elevated"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/signup"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
-            android:checkable="true"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardCornerRadius="12dp">
+            android:layout_marginTop="10dp"
+            app:cornerRadius="10dp"
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:text="Already a User! Login"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                android:textStyle="bold" />
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_marginEnd="24dp"
+            android:text="Already a User! Login">
+
+        </com.google.android.material.button.MaterialButton>
+
 
 
     </RelativeLayout>

@@ -2,10 +2,12 @@ package com.subhamgupta.roomiesapp.fragments.authentication
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -16,8 +18,11 @@ import com.google.android.material.snackbar.Snackbar
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.data.viewmodels.AuthViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentRegisterUserBinding
+import com.subhamgupta.roomiesapp.domain.model.CountryCode
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.withContext
 
 class RegisterUserFragment : Fragment() {
     lateinit var binding: FragmentRegisterUserBinding
@@ -51,6 +56,24 @@ class RegisterUserFragment : Fragment() {
         binding.createAcc.setOnClickListener {
             createUser()
         }
+        viewModel.getCodes()
+        lifecycleScope.launchWhenStarted {
+            viewModel.countryCode.buffer().collect{
+                val country = ArrayList<String>()
+                val map = LinkedHashMap<String, MutableList<String>>()
+                for (c in it){
+                    if (map.containsKey(c.currencyCode))
+                        map[c.currencyCode]?.add(c.countryName)
+                    else
+                        map[c.currencyCode] = mutableListOf(c.countryName)
+                }
+                Log.e("c","$map")
+//                val arrayAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_menu, R.id.textView, country)
+//                withContext(Dispatchers.Main){
+//                    binding.country.setAdapter(arrayAdapter)
+//                }
+            }
+        }
 
     }
     private fun createUser(){
@@ -58,7 +81,8 @@ class RegisterUserFragment : Fragment() {
         val pass = binding.pass.text.toString()
         val name = binding.name.text.toString()
 
-        viewModel.registerUser(name, email, pass)
+        val countryCode = CountryCode()
+        viewModel.registerUser(name, email, pass, countryCode)
         lifecycleScope.launchWhenStarted {
             viewModel.userAuth.buffer().collect {
                 when (it) {

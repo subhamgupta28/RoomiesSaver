@@ -115,9 +115,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="4dp"
+
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginBottom="18dp"
                     app:cardBackgroundColor="#92F4B400">
 
                     <TextView
@@ -125,8 +126,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="6dp"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:contextClickable="true"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textIsSelectable="true"
                         android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
@@ -140,7 +141,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 app:fabAlignmentMode="end"
-                app:fabAnimationMode="slide"
                 app:menu="@menu/bottomappbar"
                 app:navigationContentDescription="Logout"
                 app:shapeAppearance="?attr/shapeAppearanceSmallComponent" />

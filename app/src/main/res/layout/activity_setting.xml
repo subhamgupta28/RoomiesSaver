@@ -295,13 +295,13 @@
 
 
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/dark_mode_switch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Dark Mode" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/this_month_data"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -330,16 +330,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/shareid"
-                            style="@style/Widget.Material3.FloatingActionButton.Primary"
+                            app:cornerRadius="10dp"
+
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Share Room"/>
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/joinRoom"
-                            style="@style/Widget.Material3.FloatingActionButton.Primary"
+                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
@@ -351,47 +352,46 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <Button
-                            style="@style/Widget.Material3.FloatingActionButton.Primary"
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/limit_btn"
+                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Edit Room" />
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/setDate"
+                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/Widget.Material3.FloatingActionButton.Primary"
                             android:layout_marginStart="8dp"
                             android:text="Edit Start Day Of Month" />
                     </LinearLayout>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/generate_excel"
-                        style="@style/Widget.Material3.FloatingActionButton.Primary"
+                        app:cornerRadius="10dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Generate and share excel sheet"/>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/show_qr"
+                        app:cornerRadius="10dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.Material3.FloatingActionButton.Primary"
                         android:text="Show QR" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/leaveroom"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.FloatingActionButton.Tertiary"
                         android:layout_width="wrap_content"
-
+                        app:cornerRadius="10dp"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/setDate"
                         android:layout_gravity="end"
                         android:layout_marginStart="16dp"
-                        android:text="leave room"
-                        android:textColor="@color/colorRed" />
+                        android:text="Leave Room" />
 
                 </LinearLayout>
                 <ProgressBar

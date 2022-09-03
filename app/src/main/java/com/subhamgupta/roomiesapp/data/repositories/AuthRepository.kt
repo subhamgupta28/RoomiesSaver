@@ -1,21 +1,21 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
+import android.app.Application
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.subhamgupta.roomiesapp.MyApp
+import com.subhamgupta.roomiesapp.domain.model.CountryCode
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.UserAuth
+import com.subhamgupta.roomiesapp.domain.use_case.GetCountryCodes
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -23,15 +23,18 @@ import kotlin.coroutines.suspendCoroutine
 class AuthRepository @Inject constructor(
     private val databaseReference: DatabaseReference,
     private val auth: FirebaseAuth,
-    private val settingDataStore: SettingDataStore
+    private val settingDataStore: SettingDataStore,
+    private val application: Application,
+    private val storage: FirebaseStorage
 ) {
 
 
-    private fun saveUserToRDB(email: String, name: String, user: FirebaseUser) {
+    private fun saveUserToRDB(email: String, name: String, user: FirebaseUser, country: CountryCode) {
         val uid = user.uid
         databaseReference.child(uid).child("USER_NAME").setValue(name)
         databaseReference.child(uid).child("UUID").setValue(uid)
         databaseReference.child(uid).child("USER_EMAIL").setValue(email)
+        databaseReference.child(uid).child("COUNTRY").setValue(country)
         databaseReference.child(uid).child("IS_ROOM_JOINED").setValue(false)
             .addOnSuccessListener {
 
@@ -50,6 +53,7 @@ class AuthRepository @Inject constructor(
         name: String,
         email: String,
         pass: String,
+        country:CountryCode,
         liveData: MutableStateFlow<FirebaseState<UserAuth>>
     ) = coroutineScope {
         liveData.value = FirebaseState.loading()
@@ -69,7 +73,7 @@ class AuthRepository @Inject constructor(
                 val u = result.result.user
                 val user = UserAuth(false, u, true, u?.isEmailVerified)
                 if (u != null) {
-                    saveUserToRDB(email, name, u)
+                    saveUserToRDB(email, name, u, country)
                 }
                 storeUserData(u!!.uid, liveData, user)
             } catch (e: Exception) {
@@ -134,6 +138,11 @@ class AuthRepository @Inject constructor(
         settingDataStore.setEmail(result["USER_EMAIL"].toString())
         liveData.value = FirebaseState.success(u)
 
+    }
+    suspend fun getCountryCodes(countryCodes: MutableStateFlow<List<CountryCode>>) {
+        val data = GetCountryCodes()(storage, application)
+        countryCodes.value = data
+        Log.e("Result","$data")
     }
 
 

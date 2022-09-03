@@ -7,5 +7,7 @@ class Constant {
         const val CONTENT_TYPE = "application/json"
         const val DATE_STRING = "yyyy-MM-dd hh:mm:ss.SSS a"
         const val TIME_STRING = "EEE, dd MMM yyyy hh:mm a"
+        const val ITEM_BOUGHT_CHANNEL = "ITEM_BOUGHT_CHANNEL"
+        const val UPDATE_CHANNEL = "UPDATE_CHANNEL"
     }
 }

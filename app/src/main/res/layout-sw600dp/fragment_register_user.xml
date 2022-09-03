@@ -115,7 +115,24 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/country_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:hint="Select Country"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    android:layout_marginBottom="12dp"
+                    app:boxCornerRadiusTopStart="8dp">
 
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/country"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </com.google.android.material.textfield.TextInputLayout>
                 <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progress"
                     android:layout_width="match_parent"

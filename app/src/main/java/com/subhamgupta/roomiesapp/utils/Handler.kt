@@ -4,11 +4,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.os.Process.killProcess
 import android.util.Log
-import com.subhamgupta.roomiesapp.MyApp
-import com.subhamgupta.roomiesapp.activities.MainActivity
 import kotlin.system.exitProcess
 
 
@@ -23,9 +19,7 @@ class Handler(
             .getSystemService(Context.ALARM_SERVICE) as AlarmManager
         mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent)
         activity?.finish()
-        Log.e("error","${p1.message}")
-//        killProcess(android.os.Process.myPid());
+        Log.e("APP ERROR","${p1.message}")
         exitProcess(0)
-
     }
 }

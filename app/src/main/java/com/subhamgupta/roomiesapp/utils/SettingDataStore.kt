@@ -31,6 +31,7 @@ class SettingDataStore @Inject constructor(
     clear
     demo
     demo2
+    deviceId
     */
     private val Context.dataStore by preferencesDataStore(name = "settings")
     private suspend fun save(key: String, value: String) {
@@ -43,6 +44,7 @@ class SettingDataStore @Inject constructor(
         val res = read("isRoomJoined") ?:"false"
         return res.toBoolean()
     }
+
 
     suspend fun setRoomJoined(str: Boolean) {
         save("isRoomJoined", str.toString())
@@ -105,6 +107,14 @@ class SettingDataStore @Inject constructor(
 
     suspend fun setEmail(str: String) {
         save("email", str)
+    }
+
+    suspend fun getDeviceId(): String {
+        return read("device-id") ?:""
+    }
+
+    suspend fun setDeviceId(str: String) {
+        save("device-id", str)
     }
 
     suspend fun getRoomCount(): Int {

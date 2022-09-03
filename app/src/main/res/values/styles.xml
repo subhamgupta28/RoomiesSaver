@@ -49,4 +49,8 @@
     <style name="ThemeOverlay.App.CircularProgressIndicator" parent="Widget.Material3.CircularProgressIndicator">
         <item name="colorPrimary">#4B4285F4</item>
     </style>
+
+    <style name="Widget.App.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_background</item>
+    </style>
 </resources>

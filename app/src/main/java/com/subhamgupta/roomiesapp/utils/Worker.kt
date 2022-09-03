@@ -1,11 +1,9 @@
 package com.subhamgupta.roomiesapp.utils
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -19,12 +17,12 @@ import com.subhamgupta.roomiesapp.domain.model.RoomDetail
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 
-private const val CHANNEL_ID = "roomies.app.notification"
 @HiltWorker
 class Worker @AssistedInject constructor(
     private val repository: MainRepository,
@@ -34,13 +32,13 @@ class Worker @AssistedInject constructor(
     private val _userData = MutableStateFlow<MutableMap<String, Any>>(mutableMapOf())
     private val _roomDetails = MutableStateFlow<FirebaseState<RoomDetail>>(FirebaseState.loading())
     private val _roomDataLoading = MutableStateFlow(true)
-
+    private lateinit var notificationManagerCompat:NotificationManagerCompat
+    private val notificationID = 1
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
-//            showNotification()
+            showNotification()
             repository.fetchUserRoomData(_userData, _roomDetails, _roomDataLoading)
-            Log.e("Background task", "done..")
-
+            dismissNotification()
         }
         return Result.success()
     }
@@ -49,7 +47,7 @@ class Worker @AssistedInject constructor(
         val notifyIntent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val notificationID = Random.nextInt()
+
         notifyIntent.putExtra("NOTIFICATION_EXTRA", true)
         notifyIntent.putExtra("NOTIFICATION_ID", notificationID)
         val notifyPendingIntent = PendingIntent.getActivity(
@@ -57,9 +55,9 @@ class Worker @AssistedInject constructor(
         )
 
         val builder = NotificationCompat
-            .Builder(context, CHANNEL_ID)
-            .setContentTitle("Updating")
-            .setContentText("Update")
+            .Builder(context, Constant.UPDATE_CHANNEL)
+            .setContentTitle("Refreshing databases")
+            .setContentText("Background tasks are running")
             .setSmallIcon(R.drawable.roomies)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(notifyPendingIntent)
@@ -67,8 +65,12 @@ class Worker @AssistedInject constructor(
 
         with(NotificationManagerCompat.from(context)) {
             notify(notificationID, builder.build())
+            notificationManagerCompat = this
         }
+    }
 
+    private fun dismissNotification(){
+        notificationManagerCompat.cancel(notificationID)
     }
 
 }

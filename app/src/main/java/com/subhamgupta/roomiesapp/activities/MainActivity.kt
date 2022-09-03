@@ -12,11 +12,12 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.transition.ChangeBounds
+import android.transition.Explode
+import android.transition.Fade
 import android.transition.TransitionManager
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -55,7 +56,7 @@ import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -75,13 +76,13 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        DynamicColors.applyToActivitiesIfAvailable(application)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        Log.e("fun","waiting")
-
+//        viewModel.getData()
         checkUser()
+
+
 
 //        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
@@ -100,12 +101,9 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         Thread.setDefaultUncaughtExceptionHandler(Handler(this, application, pendingIntent))
 
         if (intent.getBooleanExtra("crash", false)) {
-            Toast.makeText(this, "After crash", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Sorry for inconvenience.", Toast.LENGTH_LONG).show()
         }
 
-        if(intent.getBooleanExtra("crash",false)){
-            Toast.makeText(this, "After crash", Toast.LENGTH_LONG).show()
-        }
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         diffUser = DiffUser()
@@ -129,8 +127,9 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         val bottomBarBackground = binding.bottombar.background as MaterialShapeDrawable
         bottomBarBackground.shapeAppearanceModel = bottomBarBackground.shapeAppearanceModel
             .toBuilder()
-            .setTopRightCorner(CornerFamily.ROUNDED, 30f)
-            .setTopLeftCorner(CornerFamily.ROUNDED, 30f)
+//            .setTopRightCorner(CornerFamily.ROUNDED, 30f)
+//            .setTopLeftCorner(CornerFamily.ROUNDED, 30f)
+            .setAllCorners(CornerFamily.ROUNDED, 30f)
             .build()
 
         binding.viewpager1.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -159,7 +158,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         viewModel.fetchAlert()
         lifecycleScope.launch(Dispatchers.IO) {
-            viewModel.roomDetail.buffer().collect {
+            viewModel.roomDetail.collectLatest {
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
@@ -173,7 +172,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                             binding.idText.text = it.data.ROOM_NAME.toString()
                             binding.progress.visibility = View.GONE
                             lifecycleScope.launchWhenStarted {
-                                viewModel.alert.buffer().collect { alert ->
+                                viewModel.alert.collectLatest { alert ->
                                     if (alert.IS_COMPLETED == false) {
                                         binding.alertLayout.visibility = View.VISIBLE
                                         binding.alertText.text = alert.ALERT
@@ -223,14 +222,15 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private fun checkUser() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
+            viewModel.clearStorage()
             startActivity(Intent(this, StartActivity::class.java))
             finish()
         } else {
-//            viewModel.refreshData()
+            viewModel.getData()
             lifecycleScope.launchWhenStarted {
-                viewModel.userData.collect {
+                viewModel.userData.collectLatest {
                     Log.e("CHECK USER", "$it")
-                    if (!it["IS_ROOM_JOINED"].toString().toBoolean()) {
+                    if (it.isNotEmpty() && !it["IS_ROOM_JOINED"].toString().toBoolean()) {
                         withContext(Main) {
                             binding.mainLayout.visibility = View.GONE
                             binding.settingFragment.visibility = View.VISIBLE
@@ -239,8 +239,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                                 .commit()
                         }
                         settingDataStore.setUpdate(true)
-                    }else{
-                        viewModel.getData()
                     }
                 }
             }
@@ -320,12 +318,9 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
 
     private fun netStat() {
-        val connectivityManager = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
-        } else {
-            showSnackBar("No Internet")
-        }
+        viewModel.getNetworkObserver().observe().onEach {
+            showSnackBar("Network ${it.name}")
+        }.launchIn(lifecycleScope)
     }
 
     private fun logOut() {
@@ -348,12 +343,41 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         materialAlertDialogBuilder.show()
     }
+    private fun showMenu(v: View) {
+        val popup = PopupMenu(this, v)
+        popup.menuInflater.inflate(R.menu.main_menu, popup.menu)
+        popup.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.menu_alert -> {
+                    newAlert()
+                }
+                R.id.menu_logout -> {
+                    logOut()
+                }
+                R.id.menu_setting -> {
+                    startActivity(Intent(this@MainActivity, SettingActivity::class.java))
+                }
+                R.id.menu_change_room -> {
+                    changeRoom()
+                }
+            }
+            true
+        }
+        popup.setOnDismissListener {
+            // Respond to popup being dismissed.
+        }
+        popup.show()
+    }
 
     private fun setupClickListener() {
+//        binding.bottombar.setNavigationOnClickListener {
+//            showMenu(binding.bottombar)
+//        }
         binding.bottombar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.logout -> {
                     logOut()
+
                     true
                 }
                 R.id.info -> {
@@ -369,7 +393,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     newAlert()
                     true
                 }
-                R.id.text->{
+                R.id.text -> {
 
                     true
                 }
@@ -391,7 +415,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         materialAlertDialogBuilder.show()
     }
-
 
 
     private fun addItems() {
@@ -461,7 +484,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                             category = category
                         )
 
-                        viewModel.sendNotification("bought $text for $amount", "Go to app to see details")
+                        viewModel.sendNotification(
+                            "bought $text for $amount",
+                            "Go to app to see details"
+                        )
 
                         dialogBinding.tags.removeAllViews()
                         dialogBinding.noteText.text = null
@@ -485,10 +511,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private fun changeRoom() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
         val binding = ChangeRoomCardBinding.inflate(layoutInflater)
-
-//        binding.recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        val adapter = RoomChangeAdapter()
-//        binding.recycler.adapter = adapter
         binding.allRoomChip.isSingleSelection = true
         val temp = viewModel.getTempRoomMaps()
         materialAlertDialogBuilder.setView(binding.root)

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/menu_setting"
+        android:icon="@drawable/ic_outline_settings"
+        android:title="Setting" />
+    <item android:id="@+id/menu_alert"
+        android:icon="@drawable/ic_outline_alert"
+        android:title="Alert" />
+    <item android:id="@+id/menu_change_room"
+        android:icon="@drawable/ic_outline_change_room"
+        android:title="Change Room" />
+    <item android:id="@+id/menu_logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Logout" />
+
+
+</menu>

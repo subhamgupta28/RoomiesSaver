@@ -41,6 +41,8 @@
         <item name="android:windowEnterTransition">@transition/transition_in</item>
         <item name="android:windowExitTransition">@transition/transition_in</item>
         <item name="circularProgressIndicatorStyle">@style/Widget.App.CircularProgressIndicator</item>
+
+        <item name="listPopupWindowStyle">@style/Widget.App.PopupMenu</item>
     </style>
     <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/ModalBottomSheetDialog</item>

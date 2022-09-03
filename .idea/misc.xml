@@ -61,6 +61,7 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_icon.xml" value="0.244" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_necon.xml" value="0.2105" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/ic_outline_food.xml" value="0.2165" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/menu_background.xml" value="0.227" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/drawable/splash_background.xml" value="0.2105" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout-sw600dp/fragment_diff_user.xml" value="0.136" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout-sw600dp/fragment_home.xml" value="0.2" />
@@ -72,7 +73,7 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout-sw600dp/summary_item.xml" value="0.16799999999999998" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_account_creation.xml" value="0.15953177257525084" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_home.xml" value="0.16148648648648647" />
-        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_qrcapture.xml" value="0.193859649122807" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_ration.xml" value="0.16148648648648647" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_room_details.xml" value="0.2" />
@@ -81,6 +82,7 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/activity_start.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/alert_popup.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/change_room_card.xml" value="0.22" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/layout/dropdown_menu.xml" value="0.1956140350877193" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_details.xml" value="0.2" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/edit_user_popup.xml" value="0.23020833333333332" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/fragment_analytics.xml" value="0.18201754385964913" />
@@ -111,6 +113,7 @@
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/space_item.xml" value="0.2" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/layout/summary_item.xml" value="0.4" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/menu/bottomappbar.xml" value="0.264" />
+        <entry key="..\:/RoomiesSaver/app/src/main/res/menu/main_menu.xml" value="0.1956140350877193" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2365" />
         <entry key="..\:/RoomiesSaver/app/src/main/res/xml/file_provider.xml" value="0.23020833333333332" />
       </map>
