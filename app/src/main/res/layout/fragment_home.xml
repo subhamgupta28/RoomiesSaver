@@ -170,6 +170,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         android:layout_gravity="end|bottom"
                         app:icon="@drawable/ic_baseline_refresh_24" />
                 </com.google.android.material.card.MaterialCardView>

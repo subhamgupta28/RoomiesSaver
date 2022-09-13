@@ -31,14 +31,16 @@ class MyApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        DynamicColors.applyToActivitiesIfAvailable(this)
-//        GlobalScope.launch(Dispatchers.IO) {
-//            val dm = settingDataStore.getDarkMode()
+        GlobalScope.launch(Dispatchers.IO) {
+            val dynamicTheme = settingDataStore.getDarkMode()
+            if (dynamicTheme){
+                DynamicColors.applyToActivitiesIfAvailable(this@MyApp)
+            }
 //            if (dm)
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 //            else
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//        }
+        }
         createChannel()
     }
 

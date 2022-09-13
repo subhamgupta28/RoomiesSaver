@@ -13,8 +13,8 @@
         tools:context=".activities.SettingActivity">
 
         <RelativeLayout
-            android:layout_width="match_parent"
             android:id="@+id/layout"
+            android:layout_width="match_parent"
             android:layout_height="match_parent">
 
 
@@ -41,12 +41,14 @@
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="12dp">
+
                     <ImageView
                         android:id="@+id/bg_img"
                         android:layout_width="match_parent"
-                        android:scaleType="centerCrop"
                         android:layout_height="match_parent"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:scaleType="centerCrop" />
+
                     <Button
                         android:id="@+id/edit_profile"
                         style="@style/Widget.Material3.Button.IconButton"
@@ -294,7 +296,6 @@
                     android:paddingEnd="16dp">
 
 
-
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/dark_mode_switch"
                         android:layout_width="match_parent"
@@ -306,6 +307,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Show this month data" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dynamic_theme"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Dynamic Theme" />
                 </LinearLayout>
 
                 <TextView
@@ -332,19 +339,19 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/shareid"
-                            app:cornerRadius="10dp"
-
                             android:layout_width="wrap_content"
+
                             android:layout_height="wrap_content"
-                            android:text="Share Room"/>
+                            android:text="Share Room"
+                            app:cornerRadius="10dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/joinRoom"
-                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Join/Create Room" />
+                            android:text="Join/Create Room"
+                            app:cornerRadius="10dp" />
                     </LinearLayout>
 
 
@@ -354,54 +361,55 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/limit_btn"
-                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Edit Room" />
+                            android:text="Edit Room"
+                            app:cornerRadius="10dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/setDate"
-                            app:cornerRadius="10dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Edit Start Day Of Month" />
+                            android:text="Edit Start Day Of Month"
+                            app:cornerRadius="10dp" />
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/generate_excel"
-                        app:cornerRadius="10dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Generate and share excel sheet"/>
+                        android:text="Generate and share excel sheet"
+                        app:cornerRadius="10dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/show_qr"
-                        app:cornerRadius="10dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Show QR" />
+                        android:text="Show QR"
+                        app:cornerRadius="10dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/leaveroom"
                         style="@style/Widget.Material3.FloatingActionButton.Tertiary"
                         android:layout_width="wrap_content"
-                        app:cornerRadius="10dp"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/setDate"
                         android:layout_gravity="end"
                         android:layout_marginStart="16dp"
-                        android:text="Leave Room" />
+                        android:text="Leave Room"
+                        app:cornerRadius="10dp" />
 
                 </LinearLayout>
+
                 <ProgressBar
                     android:id="@+id/progress"
+                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:elevation="20dp"
                     android:indeterminate="true"
-                    android:visibility="gone"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_height="wrap_content"/>
+                    android:visibility="gone" />
             </RelativeLayout>
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>

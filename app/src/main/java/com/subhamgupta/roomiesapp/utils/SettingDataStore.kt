@@ -32,6 +32,7 @@ class SettingDataStore @Inject constructor(
     demo
     demo2
     deviceId
+    dynamicTheme
     */
     private val Context.dataStore by preferencesDataStore(name = "settings")
     private suspend fun save(key: String, value: String) {
@@ -185,5 +186,14 @@ class SettingDataStore @Inject constructor(
         val dataStoreKey = stringPreferencesKey(key)
         val preferences = context.dataStore.data.first()
         return preferences[dataStoreKey]
+    }
+
+    suspend fun isDynamicTheme(): Boolean {
+        val res = read("isDynamicTheme") ?:"false"
+        return res.toBoolean()
+    }
+
+    suspend fun setDynamicTheme(str: Boolean) {
+        save("isDynamicTheme", str.toString())
     }
 }

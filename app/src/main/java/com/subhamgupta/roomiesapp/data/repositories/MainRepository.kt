@@ -60,16 +60,6 @@ class MainRepository @Inject constructor(
     private val application: Application,
 ) {
     private var roomKey: String = ""
-
-//    val ff = db.useEmulator("10.0.2.2", 8080)
-//    val a = auth.useEmulator("10.0.2.2", 9099)
-//
-//    @Inject
-//    lateinit var database:FirebaseDatabase
-//    val d = database.useEmulator("10.0.2.2", 9000)
-
-//    val fg = AppModule.firebaseStorage.useEmulator("10.0.2.2", 9199)
-
     private val updatedOn = MutableLiveData<String>()
     private val allRoomData = MutableLiveData<MutableList<RoomDetail>>()
     private val details = MutableLiveData<List<Detail?>>()
@@ -120,9 +110,6 @@ class MainRepository @Inject constructor(
 
 
     fun getRoomMates() = roomMates
-
-
-
 
     fun sendNotify(title: String, msg: String) {
         val notification = JSONObject()

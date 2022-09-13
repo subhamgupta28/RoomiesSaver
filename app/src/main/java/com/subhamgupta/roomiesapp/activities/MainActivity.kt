@@ -72,18 +72,12 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     @Inject
     lateinit var databaseReference: DatabaseReference
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 //        viewModel.getData()
         checkUser()
-
-
-
 //        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
         binding.tablayout.setupWithViewPager(binding.viewpager1)
@@ -124,13 +118,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         binding.viewpager1.offscreenPageLimit = 3
         binding.viewpager1.adapter = viewPagerAdapter
-        val bottomBarBackground = binding.bottombar.background as MaterialShapeDrawable
-        bottomBarBackground.shapeAppearanceModel = bottomBarBackground.shapeAppearanceModel
-            .toBuilder()
-//            .setTopRightCorner(CornerFamily.ROUNDED, 30f)
-//            .setTopLeftCorner(CornerFamily.ROUNDED, 30f)
-            .setAllCorners(CornerFamily.ROUNDED, 30f)
-            .build()
 
         binding.viewpager1.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
@@ -153,7 +140,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             }
 
         })
-        binding.floatingbtn.setOnClickListener {
+        binding.addItem.setOnClickListener {
             addItems()
         }
         viewModel.fetchAlert()
@@ -197,7 +184,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             }
         }
 
-        netStat()
+//        netStat()
         setupClickListener()
         initializeWorker()
     }
@@ -208,7 +195,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<Worker>(15, TimeUnit.MINUTES)
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<Worker>(1, TimeUnit.HOURS)
             .addTag("Periodic")
             .setConstraints(constraint)
             .build()
@@ -249,7 +236,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         val tp = TapTargetSequence(this)
             .targets(
                 TapTarget.forView(
-                    binding.floatingbtn,
+                    binding.addItem,
                     "Add bought items",
                     "Add item which you have bought."
                 )
@@ -320,6 +307,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private fun netStat() {
         viewModel.getNetworkObserver().observe().onEach {
             showSnackBar("Network ${it.name}")
+
         }.launchIn(lifecycleScope)
     }
 
@@ -370,35 +358,17 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     }
 
     private fun setupClickListener() {
-//        binding.bottombar.setNavigationOnClickListener {
-//            showMenu(binding.bottombar)
-//        }
-        binding.bottombar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.logout -> {
-                    logOut()
-
-                    true
-                }
-                R.id.info -> {
-                    startActivity(Intent(this@MainActivity, SettingActivity::class.java))
-                    true
-                }
-                R.id.changeRoom -> {
-//                    throw Exception("error")
-                    changeRoom()
-                    true
-                }
-                R.id.alert -> {
-                    newAlert()
-                    true
-                }
-                R.id.text -> {
-
-                    true
-                }
-                else -> false
-            }
+        binding.logoutBtn.setOnClickListener {
+            logOut()
+        }
+        binding.settingBtn.setOnClickListener{
+            startActivity(Intent(this@MainActivity, SettingActivity::class.java))
+        }
+        binding.changeRoom.setOnClickListener {
+            changeRoom()
+        }
+        binding.alertBtn.setOnClickListener {
+            newAlert()
         }
     }
 

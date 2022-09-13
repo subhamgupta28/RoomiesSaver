@@ -89,11 +89,17 @@ class SettingActivity : AppCompatActivity() {
                 binding.chips.addView(chip)
             }
         }
+        binding.dynamicTheme.setOnCheckedChangeListener { compoundButton, b ->
+            lifecycleScope.launch {
+                settingDataStore.setDynamicTheme(b)
+            }
+        }
         lifecycleScope.launchWhenStarted {
 
+            val dt = settingDataStore.isDynamicTheme()
+            binding.dynamicTheme.isChecked = dt
 
             val it = viewModel.getRoomDataFromLocal()?.get(settingDataStore.getRoomKey()) as MutableMap<*,*>
-
             name = it["ROOM_NAME"].toString()
             limit = it["LIMIT"].toString()
             roomKey = it["ROOM_ID"].toString()

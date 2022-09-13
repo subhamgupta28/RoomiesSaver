@@ -12,149 +12,188 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".activities.MainActivity">
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/setting_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:layout_width="match_parent"
+        <RelativeLayout
             android:id="@+id/main_layout"
-            android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/l">
 
-            <RelativeLayout
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tablayout"
+                style="@style/Widget.Material3.TabLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="?attr/actionBarSize">
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:hapticFeedbackEnabled="true"
+                android:visibility="gone"
+                app:shapeAppearance="?attr/shapeAppearanceSmallComponent"
+                app:tabGravity="start"
+                app:tabIndicatorAnimationMode="elastic"
+                app:tabMode="scrollable">
 
+            </com.google.android.material.tabs.TabLayout>
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tablayout"
-                    style="@style/Widget.Material3.TabLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#00000000"
-                    android:visibility="gone"
-                    android:hapticFeedbackEnabled="true"
-                    app:shapeAppearance="?attr/shapeAppearanceSmallComponent"
-                    app:tabGravity="start"
-                    app:tabIndicatorAnimationMode="elastic"
-                    app:tabMode="scrollable">
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/alertLayout"
+                style="@style/Widget.Material3.CardView.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tablayout"
+                android:layout_margin="12dp"
+                android:minHeight="50dp"
+                android:visibility="gone"
+                app:cardElevation="20dp">
 
-                </com.google.android.material.tabs.TabLayout>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/alertLayout"
-                    style="@style/Widget.Material3.CardView.Elevated"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tablayout"
-                    app:cardElevation="20dp"
-                    android:layout_margin="12dp"
-                    android:minHeight="50dp"
-                    android:visibility="gone">
-
-                    <Button
-                        android:id="@+id/alert_cancel"
-                        style="@style/Widget.Material3.Button.IconButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        app:icon="@drawable/ic_outline_close" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_marginTop="12dp"
-                            android:drawablePadding="6dp"
-                            android:text="Alert"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                            android:textColor="@color/colorRed"
-                            app:drawableEndCompat="@drawable/ic_outline_alert"
-                            app:drawableTint="@color/colorRed" />
-
-                        <TextView
-                            android:id="@+id/alert_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="12dp"
-                            android:text="Message"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                            android:textColor="@color/colorPrimary" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/viewpager1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_above="@id/ml"
-                    android:layout_below="@id/alertLayout" />
-
-                <ProgressBar
-                    android:id="@+id/progress"
-                    android:layout_width="wrap_content"
-                    android:visibility="gone"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true" />
-
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/ml"
-                    style="@style/Widget.Material3.CardView.Filled"
+                <Button
+                    android:id="@+id/alert_cancel"
+                    style="@style/Widget.Material3.Button.IconButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
+                    android:layout_gravity="end"
+                    app:icon="@drawable/ic_outline_close" />
 
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="18dp"
-                    app:cardBackgroundColor="#92F4B400">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/id_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="6dp"
-                        android:contextClickable="true"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                        android:textIsSelectable="true"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
-            </RelativeLayout>
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="12dp"
+                        android:drawablePadding="6dp"
+                        android:text="Alert"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                        android:textColor="@color/colorRed"
+                        app:drawableEndCompat="@drawable/ic_outline_alert"
+                        app:drawableTint="@color/colorRed" />
 
+                    <TextView
+                        android:id="@+id/alert_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_margin="12dp"
+                        android:text="Message"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                        android:textColor="@color/colorPrimary" />
 
-            <com.google.android.material.bottomappbar.BottomAppBar
-                android:id="@+id/bottombar"
-                style="@style/Widget.Material3.BottomAppBar"
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewpager1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                app:fabAlignmentMode="end"
-                app:menu="@menu/bottomappbar"
-                app:navigationContentDescription="Logout"
-                app:shapeAppearance="?attr/shapeAppearanceSmallComponent" />
+                android:layout_above="@id/ml"
+                android:layout_below="@id/alertLayout" />
 
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/floatingbtn"
-                style="@style/Widget.Material3.FloatingActionButton.Tertiary"
+            <ProgressBar
+                android:id="@+id/progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:maxImageSize="35dp"
-                android:src="@drawable/ic_outline_add"
-                app:layout_anchor="@id/bottombar" />
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ml"
+                style="@style/Widget.Material3.CardView.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                app:cardCornerRadius="6dp"
+                app:cardBackgroundColor="#92F4B400">
+
+                <TextView
+                    android:id="@+id/id_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:contextClickable="true"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                    android:textIsSelectable="true"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+        </RelativeLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/l"
+            style="@style/Widget.Material3.CardView.Elevated"
+            app:cardElevation="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="6dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/logout_btn"
+                    style="?attr/materialIconButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_logout" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+
+                    <com.google.android.material.button.MaterialButton
+                        style="?attr/materialIconButtonFilledStyle"
+                        android:id="@+id/setting_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_outline_settings" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/change_room"
+                        style="?attr/materialIconButtonFilledStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_outline_change_room" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/alert_btn"
+                        style="?attr/materialIconButtonFilledStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_outline_alert" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Widget.Material3.FloatingActionButton.Tertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ADD"
+                    android:layout_marginEnd="2dp"
+                    android:id="@+id/add_item"
+                    app:cornerRadius="10dp"
+                    app:icon="@drawable/ic_outline_add" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
 
     </RelativeLayout>

@@ -17,7 +17,7 @@ class Handler(
     override fun uncaughtException(p0: Thread, p1: Throwable) {
         val mgr = context
             .getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent)
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 200, pendingIntent)
         activity?.finish()
         Log.e("APP ERROR","${p1.message}")
         exitProcess(0)
