@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.subhamgupta.roomiessaver",
+  "applicationId": "com.subhamgupta.roomiesapp",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 2,
-      "versionName": "1.2",
+      "versionCode": 14,
+      "versionName": "3.5",
       "outputFile": "app-release.apk"
     }
   ],

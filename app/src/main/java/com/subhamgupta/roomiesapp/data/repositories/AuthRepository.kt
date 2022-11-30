@@ -32,6 +32,9 @@ class AuthRepository @Inject constructor(
     private fun saveUserToRDB(email: String, name: String, user: FirebaseUser, country: CountryCode) {
         val uid = user.uid
         databaseReference.child(uid).child("USER_NAME").setValue(name)
+        databaseReference.child(uid).child("ROLE").child("BETA_ENABLED").setValue(false)
+        databaseReference.child(uid).child("ROLE").child("ADMIN").setValue(false)
+        databaseReference.child(uid).child("ROLE").child("USER").setValue(true)
         databaseReference.child(uid).child("UUID").setValue(uid)
         databaseReference.child(uid).child("USER_EMAIL").setValue(email)
         databaseReference.child(uid).child("COUNTRY").setValue(country)
@@ -95,10 +98,9 @@ class AuthRepository @Inject constructor(
         val result = suspendCoroutine<Task<AuthResult?>> { cont ->
             auth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener { task: Task<AuthResult?> ->
-                    Log.e("ERROR", " e.message.toString()")
                     cont.resume(task)
                 }.addOnFailureListener { e: Exception ->
-                    Log.e("ERROR", e.message.toString())
+                    Log.e("ERROR", "$e")
                     liveData.value = FirebaseState.failed(e.message.toString())
                 }
 
@@ -108,9 +110,8 @@ class AuthRepository @Inject constructor(
             val u = UserAuth(true, user, false, user.isEmailVerified)
             if (!user.isEmailVerified) {
                 user.sendEmailVerification()
-
             }
-
+            liveData.value = FirebaseState.success(u)
             storeUserData(user.uid, liveData, u)
 
         }
@@ -143,6 +144,16 @@ class AuthRepository @Inject constructor(
         val data = GetCountryCodes()(storage, application)
         countryCodes.value = data
         Log.e("Result","$data")
+    }
+
+    suspend fun resetPassword(email:String, forgetPass: MutableStateFlow<Boolean>) {
+        forgetPass.value = false
+        auth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {
+            forgetPass.value = true
+        }.addOnFailureListener {
+            forgetPass.value = false
+            }
     }
 
 

@@ -4,19 +4,25 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.TextPaint
 import android.text.format.DateUtils
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -27,6 +33,7 @@ import com.subhamgupta.roomiesapp.adapter.HomeAdapter
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentHomeBinding
+import com.subhamgupta.roomiesapp.databinding.LoadingPopupBinding
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -42,6 +49,8 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
 
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,8 +65,11 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
 
 
+
         return binding.root
     }
+
+
 
     private fun isTablet(): Boolean {
         val xlarge = (this.getResources()
@@ -93,7 +105,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                             visible()
                         }
                         is FirebaseState.Success -> {
-
                             val res = it.data
                             if (res.isEmpty)
                                 visible()
@@ -124,7 +135,6 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                                 Log.e("onViewCreated: Home Fragment", e.message.toString())
                             }
                         }
-                        else -> Unit
                     }
 
                 }
@@ -169,9 +179,14 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
     }
 
     private fun showSnackBar(msg: String) {
-        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(resources.getColor(R.color.md_theme_dark_primary))
-            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val view = snackBarView.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        view.layoutParams = params
+        snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
+        snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
+            .setTextColor(resources.getColor(R.color.colorOnSecondary))
             .show()
     }
 

@@ -49,8 +49,8 @@ class HomeAdapter(
                if (color != null) {
                    val hexColor = String.format("#%08X", 0xB3FFFFFF and color)
                    val newColor = Color.parseColor(hexColor)
-                   binding.homeLayout.strokeWidth = 4
-                   binding.homeLayout.strokeColor = (newColor)
+//                   binding.homeLayout.strokeWidth = 4
+//                   binding.homeLayout.strokeColor = (newColor)
                }
                val amount = data["AMOUNT"].toString().toInt()
                if (amnt<amount){

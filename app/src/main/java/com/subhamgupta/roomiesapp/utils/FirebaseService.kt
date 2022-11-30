@@ -1,5 +1,6 @@
 package com.subhamgupta.roomiesapp.utils
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
@@ -23,12 +24,16 @@ class FirebaseService : FirebaseMessagingService() {
         var uid: String? = null
     }
 
+    override fun onNewToken(p0: String) {
+        super.onNewToken(p0)
+    }
+
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        Log.e("SERVICE_UID", message.data["uid"].toString())
-        Log.e("SERVICE_UUID", uid.toString())
+        Log.e("RECEIVED_UUID", message.data["uid"].toString())
+        Log.e("MY_UUID", uid.toString())
         if (!message.data["uid"].equals(uid)) {
 
             Log.e("SERVICE_UID", message.data["uid"].toString())

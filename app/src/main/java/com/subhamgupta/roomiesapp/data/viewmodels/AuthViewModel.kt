@@ -24,6 +24,9 @@ class AuthViewModel @Inject constructor(
     private val _countryCodes = MutableStateFlow<List<CountryCode>>(emptyList())
     val countryCode = _countryCodes.asStateFlow()
 
+    private val _forgetPass = MutableStateFlow(false)
+    val forgetPass = _forgetPass.asStateFlow()
+
     fun registerUser(name: String, email: String, pass: String, country:CountryCode) =
         viewModelScope.launch(Dispatchers.IO) {
             repository.registerUser(name, email, pass, country, _userAuth)
@@ -36,5 +39,9 @@ class AuthViewModel @Inject constructor(
     }
     fun getCodes() = viewModelScope.launch(Dispatchers.IO){
         repository.getCountryCodes(_countryCodes)
+    }
+
+    fun resetPassword(email:String) = viewModelScope.launch (Dispatchers.IO){
+        repository.resetPassword(email, _forgetPass)
     }
 }

@@ -5,16 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.activities.MainActivity
@@ -48,6 +51,7 @@ class LoginPage: Fragment() {
             binding.emailLayout.error = if (!isValidEmail(text.toString())) "Enter correct email address" else ""
         }
         lifecycleScope.launchWhenStarted {
+
             viewModel.userAuth.buffer().collect {
                 hideKeyboard()
                 when (it) {
@@ -62,6 +66,7 @@ class LoginPage: Fragment() {
                     }
                     is FirebaseState.Success -> {
                         gone()
+                        hideKeyboard()
                         if (it.data.isLoggedIn==true){
                             startActivity(Intent(activity, MainActivity::class.java))
                             activity?.finish()
@@ -71,6 +76,13 @@ class LoginPage: Fragment() {
                 }
 
             }
+            viewModel.forgetPass.buffer().collect{
+                if (it)
+                    showSnackBar("Password reset link is sent to your mail")
+            }
+        }
+        binding.forgot.setOnClickListener {
+            viewModel.resetPassword(binding.email.text.toString())
         }
 
         binding.back.setOnClickListener {
@@ -93,8 +105,15 @@ class LoginPage: Fragment() {
         binding.forgot.isEnabled = true
     }
     private fun showSnackBar(msg: String) {
-        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val view = snackBarView.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        params.topMargin = 100
+        view.layoutParams = params
+        snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
+        snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
+            .setTextColor(resources.getColor(R.color.colorOnSecondary))
             .show()
     }
     private fun loginUser() {

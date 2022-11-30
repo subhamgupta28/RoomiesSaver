@@ -7,8 +7,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.app
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.subhamgupta.roomiesapp.MyApp
@@ -34,23 +36,28 @@ object AppModule {
     private val database = Firebase.database
     private val databaseReference = database.getReference("ROOMIES")
 
-
+    val settings = FirebaseFirestoreSettings.Builder()
+        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+        .build()
 
     @Singleton
     @Provides
     fun provideFirestore(): FirebaseFirestore {
+        firebaseFirestore.firestoreSettings = settings
         return firebaseFirestore
     }
 
     @Singleton
     @Provides
     fun provideDatabase(): FirebaseDatabase {
+        database.setPersistenceEnabled(true)
         return database
     }
 
     @Singleton
     @Provides
     fun provideDatabaseReference(): DatabaseReference {
+        databaseReference.keepSynced(true)
         return databaseReference
     }
 

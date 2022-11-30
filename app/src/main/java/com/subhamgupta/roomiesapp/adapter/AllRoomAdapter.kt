@@ -34,7 +34,7 @@ class AllRoomAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val binding = SpaceItemBinding.bind(itemView)
         fun onBind(detail: RoomDetail) {
            binding.sRoomName.text = detail.ROOM_NAME
-            binding.sTotalSpends.text = detail.JOINED_PERSON.toString()
+            binding.sTotalSpends.text = "1000"
             binding.sUpdatedOn.text = detail.CREATED_ON
             Log.e("d","h")
             binding.sSpark.setData(arrayListOf(1,12,0,0,4,100))

@@ -235,6 +235,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
+                    android:layout_marginTop="50dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -248,7 +249,6 @@
                         android:text="Scan this QR from other device to\nlet other person join this room"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/colorSecondaryVariant"
                         android:textStyle="bold" />
 
                     <com.google.android.material.card.MaterialCardView
@@ -276,7 +276,6 @@
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
 
-                        android:textColor="@color/colorSecondaryVariant"
                         android:textStyle="bold" />
 
                     <Button
@@ -297,8 +296,7 @@
                         android:layout_marginEnd="12dp"
                         android:text="To see each person's spending"
                         android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/colorSecondaryVariant" />
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                     <Button
                         android:id="@+id/go_to_diff_user"

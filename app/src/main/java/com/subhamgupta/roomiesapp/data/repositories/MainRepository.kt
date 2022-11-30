@@ -2,7 +2,6 @@ package com.subhamgupta.roomiesapp.data.repositories
 
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Color
 import android.net.Uri
 import android.provider.Settings
@@ -19,23 +18,21 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
-import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.*
-import com.subhamgupta.roomiesapp.domain.use_case.GetCountryCodes
-import com.subhamgupta.roomiesapp.domain.use_case.GetUserUseCase
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
-import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NotificationSender
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import java.io.File
@@ -46,6 +43,8 @@ import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -77,16 +76,19 @@ class MainRepository @Inject constructor(
     private var userName: String = ""
     private var deviceId: String = ""
 
+    private val userData = MutableStateFlow<MutableMap<String, Any>>(mutableMapOf())
 
     var user: FirebaseUser? = auth.currentUser
     var uuid: String? = user?.uid
     private var query: Query? = null
-
     init {
-        deviceId = Settings.Secure.getString(application.contentResolver, Settings.Secure.ANDROID_ID)
-        Log.e("ID Email", "$deviceId ${user?.email}")
+
+        deviceId =
+            Settings.Secure.getString(application.contentResolver, Settings.Secure.ANDROID_ID)
+        Log.e("ID Email uuid", "$uuid")
 
     }
+
 
     fun getRoomMaps(): MutableLiveData<MutableMap<String, String>> {
         return roomMap
@@ -119,15 +121,13 @@ class MainRepository @Inject constructor(
             notifyBody.put("message", msg)
             notifyBody.put("uid", uuid.toString())
             notifyBody.put("time", time)
-            notification.put("to", "/topics/${roomKey}")
+            notification.put("to", "/topics/$roomKey")
             notification.put("data", notifyBody)
         } catch (e: Exception) {
-
+            Log.e("TAG", "sendNotify: ", e)
         }
         NotificationSender().sendNotification(notification, application)
     }
-
-
 
 
     fun getAllRoomDetail(): MutableLiveData<MutableList<RoomDetail>> {
@@ -140,20 +140,39 @@ class MainRepository @Inject constructor(
         data: MutableStateFlow<MutableMap<String, Any>>,
         userDataLoading: MutableStateFlow<Boolean>
     ) {
-        var userData = readUserDataFromRemote()
-        data.value =
-            if (!dataStore.isUpdate() && dataStore.isLoggedIn() && userData != null && userData.isNotEmpty()) {
-                Log.e("USER DATA", "local")
-                userData as MutableMap<String, Any>
-            } else {
+        Log.e( "getUser: ", "fired ${data.value} ${userDataLoading.value}")
+        var flag = true
+        val offlineUserData = readUserDataFromRemote()
+        if (!dataStore.isUpdate() && dataStore.isLoggedIn() && offlineUserData != null && offlineUserData.isNotEmpty()) {
+            data.value = offlineUserData as MutableMap<String, Any>
+            Log.e("getUser: OFFLINE", "$user")
+            userDataLoading.value = false
+            flag = false
+        }
+        uuid = user?.uid
+        databaseReference.child(uuid!!).addValueEventListener(
+            object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if(dataSnapshot.exists()) {
+                        val user = dataSnapshot.value as MutableMap<String, Any>
+                        Log.e( "getUser: ONLINE", "fired $user")
+                        val onlineUserData = user
+                        saveUserToLocal(onlineUserData)
+                        userData.value = onlineUserData
+                        Log.e("USER DATA cloud", "$user")
+                        data.value = onlineUserData
+                        if (flag) {
+                            userDataLoading.value = false
+                        }
+                    }
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
 
-                userData = GetUserUseCase()(databaseReference, uuid!!)
-                Log.e("USER DATA", "remote")
-                saveUserToLocal(userData)
-                userData
+                }
             }
+        )
         dataStore.setDeviceId(deviceId)
-        userDataLoading.value = false
+
     }
 
     private fun saveUserToLocal(
@@ -218,46 +237,45 @@ class MainRepository @Inject constructor(
 
 
     suspend fun fetchUserRoomData(
-        liveData: MutableStateFlow<MutableMap<String, Any>>,
+        userData: MutableStateFlow<MutableMap<String, Any>>,
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>,
         roomDataLoading: MutableStateFlow<Boolean>
     ) {
 
-        Log.e("IS", "ONLINE")
+        Log.e("fetchUserRoomData", "ONLINE")
 
         roomData.value = FirebaseState.loading()
         val listOfRooms = ArrayList<String>()
         val roomMapWithId = mutableMapOf<String, RoomDetail?>()
         if (uuid != null) {
-            //fetching user's data
-            val userData = GetUserUseCase()(databaseReference, uuid!!)
-
-            saveUserToLocal(userData)
-            liveData.value = userData
-
-            for (i in userData) {
+            for (i in userData.value) {
                 if (i.key.contains("ROOM_ID")) {
                     listOfRooms.add(i.value.toString())
-                    val result = suspendCoroutine<RoomDetail?> { cont ->
+                    val result = suspendCancellableCoroutine { cont ->
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.getValue(RoomDetail::class.java)
+
                                 cont.resumeWith(Result.success(result))
                             }
+                            .addOnFailureListener{
+                                Log.e("fetchUserRoomData", "$it")
+                                cont.resumeWith(Result.failure(it))
+                            }
                     }
+                    Log.e("fetchUserRoomData", "$result")
                     roomMapWithId[i.value.toString()] = result
                     // roomId to it's data
                 }
             }
             dataStore.setUpdate(false)
             saveDataToRemote(roomMapWithId)
-            update(userData, roomMapWithId, roomDataLoading)
+            update(userData.value, roomMapWithId, roomDataLoading)
             dataStore.setLoggedIn(true)
             try {
                 roomData.value = FirebaseState.success(roomMapWithId[dataStore.getRoomKey()]!!)
-
             } catch (e: Exception) {
-                Log.e("ERROR REPO fetchUserRoomData", "${e.message}")
+                Log.e("fetchUserRoomData", "${e.message}")
             }
 
         }
@@ -326,28 +344,28 @@ class MainRepository @Inject constructor(
         roomDataLoading: MutableStateFlow<Boolean>
     ) = coroutineScope {
         roomData.value = FirebaseState.loading()
-        val user = readUserDataFromRemote()
-        val map = readDataFromRemote()
-//        Log.e("prepare room","$user \n $map")
-        if (!dataStore.isUpdate() && dataStore.isLoggedIn() && user != null && map != null && map.isNotEmpty()) {
+        val user = userData.value
+        val roomDataLocal = readDataFromRemote()
+        Log.e("prepareRoom: ","$user \n $roomDataLocal")
+        if (!dataStore.isUpdate() && dataStore.isLoggedIn() && roomDataLocal != null && roomDataLocal.isNotEmpty()) {
             Log.e("IS", "OFFLINE")
             val roomMapWithId = mutableMapOf<String, RoomDetail?>()
-            val us = user as MutableMap<String, Any>
             for (i in user) {
                 if (i.key.contains("ROOM_ID")) {
                     val d = Gson().fromJson(
-                        Gson().toJson(map[i.value.toString()]),
+                        Gson().toJson(roomDataLocal[i.value.toString()]),
                         RoomDetail::class.java
                     )
                     roomMapWithId[i.value.toString()] = d
                 }
             }
-            update(us, roomMapWithId, roomDataLoading)
+            update(user, roomMapWithId, roomDataLoading)
             val room = roomMapWithId[roomKey]
             try {
                 roomData.value = FirebaseState.success(room!!)
             } catch (e: Exception) {
-                Log.e("ERROR REPO prepareRoom", "${e.message}")
+                roomData.value = FirebaseState.failed("Something went wrong")
+                Log.e("prepareRoom", "${e.message}")
             }
         } else {
             fetchUserRoomData(userData, roomData, roomDataLoading)
@@ -394,20 +412,22 @@ class MainRepository @Inject constructor(
         val som =
             LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond * 1000
 
-        db.collection(roomKey + "_ALERT")
-            .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+        val query = db.collection(roomKey + "_ALERT")
             .whereGreaterThanOrEqualTo("TIME_STAMP", som)
-            .whereEqualTo("IS_COMPLETED", false)
-            .addSnapshotListener { value, _ ->
-                if (value != null && !value.isEmpty) {
-                    val res = value.toObjects(Alerts::class.java)
-                    try {
-                        alert.value = res[0] ?: Alerts()
-                    } catch (e: Exception) {
-                        Log.e("ERROR REPO", "${e.message}")
-                    }
+            .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+
+//            .whereEqualTo("IS_COMPLETED", false)
+        query.addSnapshotListener { value, _ ->
+            if (value != null && !value.isEmpty) {
+                val res = value.toObjects(Alerts::class.java)
+                try {
+                    alert.value = res[0] ?: Alerts()
+                    Log.e("alert $roomKey", "$res")
+                } catch (e: Exception) {
+                    Log.e("ERROR REPO", "${e.message}")
                 }
             }
+        }
     }
 
 
@@ -507,6 +527,7 @@ class MainRepository @Inject constructor(
                     val userMap = mutableMapOf<String, HashMap<String, Any?>>()
                     val homeDetails = query.toObjects(Detail::class.java)
 
+                    chartList.add(1)
                     homeDetails.forEach { detail ->
                         if (DateUtils.isToday(detail.TIME_STAMP ?: 0)) {
                             todayTotalAmount += detail.AMOUNT_PAID.toInt()
@@ -603,32 +624,37 @@ class MainRepository @Inject constructor(
         val query = db.collection(roomKey)
             .orderBy("TIME_STAMP", Query.Direction.DESCENDING)
             .whereGreaterThanOrEqualTo("TIME_STAMP", som)
-        coroutineScope {
+
+        supervisorScope {
             var i = 0
             rmp?.forEach { roommates ->
                 uuidLink[roommates.UUID.toString()] = i
                 i++
-                val job = suspendCancellableCoroutine<List<Detail>> {
-                    query.whereEqualTo("UUID", roommates.UUID.toString())
-                        .addSnapshotListener { value, _ ->
-                            if (value != null) {
-                                val v = value.toObjects(Detail::class.java)
 
-                                it.resume(v)
+                    val job = suspendCoroutine<List<Detail>> {
+                        query.whereEqualTo("UUID", roommates.UUID.toString())
+                            .addSnapshotListener { value, _ ->
+                                if (value != null) {
+                                    try{
+                                        val v = value.toObjects(Detail::class.java)
+                                        it.resumeWith(Result.success(v))
+                                    }catch (e : Exception){
+                                        Log.e("fetchDiffData", "${e.message}")
+                                    }
+                                }
                             }
-                        }
-                }
-                Log.e("do","$job")
-                val map = mutableMapOf(
-                    "UUID" to roommates.UUID.toString(),
-                    "DATA" to job
-                )
-                detailMap.add(
-                    map
-                )
+                    }
+                    detailMap.add(
+                        mutableMapOf(
+                            "UUID" to roommates.UUID.toString(),
+                            "DATA" to job
+                        )
+                    )
             }
+            Log.e("detailMap", "$detailMap")
             _diffData.postValue(detailMap)
         }
+
     }
 
     private fun getColor(v: String): Int {
@@ -650,6 +676,7 @@ class MainRepository @Inject constructor(
             loading.value = FirebaseState.loading()
             val json = Gson().toJson(details.value)
             val jsonTree = ObjectMapper().readTree(json)
+            Log.e("generateExcel: ", "$jsonTree")
             val builder = CsvSchema.builder()
             val fst = jsonTree.elements().next()
             fst.fieldNames().forEachRemaining {
@@ -720,11 +747,11 @@ class MainRepository @Inject constructor(
 //                    state.value = FirebaseState.empty()
 
             } else {
-                value.documents.let {
-                    if (it.isEmpty()) {
+                value.documents.let { snapshots ->
+                    if (snapshots.isEmpty()) {
                         state.value = FirebaseState.empty()
                     } else {
-                        val docs = it.map {
+                        val docs = snapshots.map {
                             it.toObject(Detail::class.java)
                         }
                         details.postValue(docs)
@@ -752,4 +779,70 @@ class MainRepository @Inject constructor(
         }
     }
 
+    suspend fun getStoredItemCards(
+        data: MutableStateFlow<FirebaseState<MutableList<MutableMap<String, Any>>>>
+    ) = coroutineScope {
+        val result = ArrayList<MutableMap<String, Any>>()
+        val query: Query = db.collection(roomKey + "_RATION")
+        query.orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+            .addSnapshotListener { value, _ ->
+                data.value = FirebaseState.loading()
+                if (value != null && !value.isEmpty) {
+                    for (ds in value) {
+                        val d = ds.data as MutableMap<String, Any>
+                        result.add(d)
+                        Log.e( "getStoredItemCards: ","$d" )
+                    }
+                    data.value = FirebaseState.success(result)
+                } else {
+                    data.value = FirebaseState.empty()
+                }
+
+            }
+
+    }
+
+    fun uploadCard(
+        data: MutableStateFlow<FirebaseState<Boolean>>,
+        date: String,
+        note: String,
+        byt: ByteArray
+    ) {
+        val n = note.ifEmpty { "" }
+        val ts = System.currentTimeMillis()
+        val ref = storage.getReference("ration_images/$roomKey")
+        val task = ref.child("$ts.jpg").putBytes(byt)
+        data.value = FirebaseState.loading()
+        task.addOnCompleteListener { t ->
+            if (t.isSuccessful)
+                ref.child("$ts.jpg").downloadUrl.addOnSuccessListener {
+                    val map = HashMap<String, Any>()
+                    println(Uri.parse(it.toString()))
+                    map["DATE"] = date
+                    map["NOTE"] = n
+                    map["UUID"] = uuid.toString()
+                    map["TIME_STAMP"] = ts
+                    map["IMG_NAME"] = "$ts.jpg"
+                    map["IMG_URL"] = Uri.parse(it.toString()).toString()
+                    db.collection(roomKey+"_RATION").document(ts.toString()).set(map)
+                        .addOnCompleteListener {
+                            data.value = FirebaseState.success(true)
+                        }.addOnFailureListener{
+                            Log.e( "uploadCard: ","${it.message}" )
+                        }
+                }.addOnFailureListener {
+                    Log.e( "uploadCard: ", "${it.message}")
+                }
+
+
+        }.addOnProgressListener {
+            val p: Double =
+                100.0 * it.bytesTransferred / it.totalByteCount
+
+        }.addOnFailureListener{
+            data.value = FirebaseState.failed(it.message)
+        }
+
+
+    }
 }

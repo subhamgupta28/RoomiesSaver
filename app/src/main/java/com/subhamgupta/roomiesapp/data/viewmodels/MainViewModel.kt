@@ -18,11 +18,8 @@ import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +42,11 @@ class MainViewModel @Inject constructor(
     private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
+    private val _storedCards = MutableStateFlow<FirebaseState<MutableList<MutableMap<String, Any>>>>(FirebaseState.empty())
+    val storedCards = _storedCards.asStateFlow()
+
+    private val _uploadStoreCard = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
+    val uploadStoreCard = _uploadStoreCard.asStateFlow()
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
@@ -75,6 +77,11 @@ class MainViewModel @Inject constructor(
     private val _addItem = MutableLiveData<Boolean>(false)
     val addItem: LiveData<Boolean> = _addItem
 
+    private val supervisor = SupervisorJob()
+
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        Log.e("MainViewModel", "$throwable")
+    }
 
     fun clearStorage() {
         repository.clearStorage()
@@ -87,7 +94,6 @@ class MainViewModel @Inject constructor(
         FirebaseMessaging.getInstance()
             .subscribeToTopic("/topics/${data.getRoomKey()}")
             .addOnCompleteListener {
-
                 Log.e("FCM", "${it.isSuccessful} ${it.exception} ${it.result}")
             }
     }
@@ -105,7 +111,7 @@ class MainViewModel @Inject constructor(
     fun getRoomMates() = repository.getRoomMates()
     val getLoading = _homeDataLoading
 
-    fun fetchAlert() {
+    fun fetchAlert() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
         repository.fetchAlert(_alert)
     }
 
@@ -113,40 +119,47 @@ class MainViewModel @Inject constructor(
         repository.generateExcel(_sheetLoading)
     }
 
-    fun leaveRoom(key: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun leaveRoom(key: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.leaveRoom(_leaveRoom, key)
     }
 
-    fun getData() = viewModelScope.launch(Dispatchers.IO) {
-        repository.getUser(_userData, _userDataLoading)
-        _userDataLoading.collectLatest {
-            if (!it) {
-                fetchRoomData()
-                setFCM()
-                _roomDataLoading.collectLatest { it1 ->
-                    if (!it1) {
-                        fetchHomeData()
-                        fetchSummary(true, "All")
-                        _roomDataLoading.value = true
-                    }
+    fun initializeStore() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+        supervisorScope {
+            repository.getUser(_userData, _userDataLoading)
+            _userDataLoading.collectLatest {
+                if (!it) {
+                    getData()
+                    _userDataLoading.value = true
                 }
-                _userDataLoading.value = true
+            }
+        }
+    }
+
+    fun getData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+        fetchRoomData()
+        setFCM()
+        _roomDataLoading.collectLatest { it1 ->
+            if (!it1) {
+                fetchHomeData()
+                fetchSummary(true, "All")
+                _roomDataLoading.value = true
+                fetchAlert()
+                getStoredCards()
             }
         }
 
-
     }
 
-    fun refreshData() = viewModelScope.launch(Dispatchers.IO) {
+    fun refreshData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.fetchUserRoomData(_userData, _roomDetails, _roomDataLoading)
     }
 
 
-    fun editUser(uri: Uri, userName: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun editUser(uri: Uri, userName: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.uploadPic(uri, userName, _editUser)
     }
 
-    private fun fetchRoomData() = viewModelScope.launch(Dispatchers.IO) {
+    private fun fetchRoomData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.forceInit()
         repository.prepareRoom(_userData, _roomDetails, _roomDataLoading)
     }
@@ -158,11 +171,11 @@ class MainViewModel @Inject constructor(
     fun getDataStore() = repository.getDataStore()
 
 
-    fun logout() = viewModelScope.launch(Dispatchers.IO) {
+    fun logout() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.signOut()
     }
 
-    fun sendNotification(title: String, message: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun sendNotification(title: String, message: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.sendNotify("${repository.getDataStore().getUserName()} $title", message)
     }
 
@@ -177,7 +190,7 @@ class MainViewModel @Inject constructor(
         return repository.diffData
     }
 
-    fun modifyStartDate(timeStamp: Long) = viewModelScope.launch(Dispatchers.IO) {
+    fun modifyStartDate(timeStamp: Long) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.modifyStartDate(timeStamp, _startDate)
         getDataStore().setStartDate(timeStamp.toString())
     }
@@ -197,7 +210,7 @@ class MainViewModel @Inject constructor(
         return repository.user
     }
 
-    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.fetchSummary(currMonth, category, _summary)
     }
 
@@ -210,7 +223,7 @@ class MainViewModel @Inject constructor(
         tags: List<String>,
         category: String
     ) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
             repository.updateItem(item, amount, timeStamp, _addItem, note, tags, category)
         }
 
@@ -218,7 +231,7 @@ class MainViewModel @Inject constructor(
         return repository.getAllRoomDetail()
     }
 
-    private fun fetchHomeData() = viewModelScope.launch(Dispatchers.IO) {
+    private fun fetchHomeData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
         repository.fetchHomeData(_homeData, _homeDataLoading)
     }
 
@@ -231,5 +244,15 @@ class MainViewModel @Inject constructor(
         repository.createAlert(msg)
     }
 
+    fun getStoredCards() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+        repository.getStoredItemCards(_storedCards)
+    }
+
+    fun uploadCard(
+        date: String,
+        note: String,
+        byteArray: ByteArray) = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+        repository.uploadCard(_uploadStoreCard, date, note, byteArray)
+    }
 
 }

@@ -21,6 +21,13 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:padding="16dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                    android:text="Add things you bought"
+                    android:layout_marginBottom="12dp"
+                    android:layout_height="wrap_content"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
@@ -59,7 +66,7 @@
                         android:id="@+id/amount_paid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
+                        android:inputType="numberDecimal"
                         android:maxLength="6" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -168,7 +175,7 @@
                     android:layout_height="?attr/actionBarSize"
                     android:layout_gravity="end"
                     android:layout_marginTop="12dp"
-                    android:layout_marginBottom="18dp"
+                    android:layout_marginBottom="4dp"
                     android:text="Save"
                     android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                     app:cornerRadius="10dp" />

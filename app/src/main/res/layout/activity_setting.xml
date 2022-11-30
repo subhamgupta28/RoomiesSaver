@@ -57,22 +57,17 @@
                         android:layout_gravity="end"
                         app:icon="@drawable/ic_create" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="18dp"
-                        android:orientation="vertical">
+
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:paddingTop="14dp"
+                            android:paddingTop="24dp"
                             android:paddingBottom="14dp">
 
                             <com.google.android.material.card.MaterialCardView
                                 style="@style/Widget.Material3.CardView.Filled"
-
                                 android:layout_width="100dp"
                                 android:layout_height="100dp"
                                 android:layout_marginStart="16dp"
@@ -83,6 +78,7 @@
                                 <ImageView
                                     android:id="@+id/profile_img"
                                     android:layout_width="match_parent"
+
                                     android:layout_height="match_parent"
                                     android:layout_gravity="center_horizontal"
                                     android:contentDescription="profile picture" />
@@ -114,7 +110,6 @@
                         </LinearLayout>
 
 
-                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -291,6 +286,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/chips"
+                    android:visibility="gone"
                     android:orientation="vertical"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp">
@@ -338,20 +334,22 @@
                         android:layout_height="wrap_content">
 
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/joinRoom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Join/Create Room"
+                            app:cornerRadius="10dp" />
+
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/shareid"
                             android:layout_width="wrap_content"
-
+                            android:layout_marginStart="8dp"
                             android:layout_height="wrap_content"
                             android:text="Share Room"
                             app:cornerRadius="10dp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/joinRoom"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Join/Create Room"
-                            app:cornerRadius="10dp" />
+
                     </LinearLayout>
 
 
@@ -360,19 +358,21 @@
                         android:layout_height="wrap_content">
 
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/setDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Edit Start Day Of Month"
+                            app:cornerRadius="10dp" />
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/limit_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Edit Room"
+                            android:layout_marginStart="8dp"
                             app:cornerRadius="10dp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/setDate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Edit Start Day Of Month"
-                            app:cornerRadius="10dp" />
+
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton

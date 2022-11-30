@@ -1,25 +1,20 @@
 package com.subhamgupta.roomiesapp.activities
 
-
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.transition.ChangeBounds
-import android.transition.Explode
-import android.transition.Fade
 import android.transition.TransitionManager
 import android.util.Log
 import android.view.*
+import android.widget.FrameLayout
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
@@ -27,11 +22,11 @@ import androidx.viewpager.widget.ViewPager
 import androidx.work.*
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.chip.Chip
-import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.shape.CornerFamily
-import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -39,26 +34,19 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
-
-import com.subhamgupta.roomiesapp.utils.Worker
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
-
-import com.subhamgupta.roomiesapp.databinding.ActivityMainBinding
-import com.subhamgupta.roomiesapp.databinding.AlertPopupBinding
-import com.subhamgupta.roomiesapp.databinding.ChangeRoomCardBinding
-import com.subhamgupta.roomiesapp.databinding.PopupBinding
-
+import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.*
-
 import com.subhamgupta.roomiesapp.utils.FirebaseState
-import com.subhamgupta.roomiesapp.utils.Handler
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
+import com.subhamgupta.roomiesapp.utils.Worker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), HomeToMainLink {
@@ -67,7 +55,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
     private lateinit var diffUser: DiffUser
     private lateinit var roomRef: String
+    private lateinit var rationFragment: RationFragment
     private lateinit var settingDataStore: SettingDataStore
+    private var demoStarted: Boolean = true
+    private lateinit var loadingDialog: AlertDialog
 
     @Inject
     lateinit var databaseReference: DatabaseReference
@@ -76,23 +67,35 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+//        val i = Intent(this, MainActivity::class.java)
+//        i.putExtra("crash", true)
+//        i.flags.apply {
+//            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+//        }
+//        val pendingIntent = PendingIntent.getActivity(
+//            this,
+//            0,
+//            i,
+//            FLAG_IMMUTABLE
+//        )
+//        Thread.setDefaultUncaughtExceptionHandler(Handler(this, application, pendingIntent))
+        init()
+    }
+
+    private fun init() {
 //        viewModel.getData()
+        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        val view = LoadingPopupBinding.inflate(layoutInflater)
+        materialAlertDialogBuilder.setView(view.root)
+        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+        loadingDialog = materialAlertDialogBuilder.create()
+        loadingDialog.setCancelable(false)
         checkUser()
 //        viewModel.clearStorage()
         settingDataStore = viewModel.getDataStore()
         binding.tablayout.setupWithViewPager(binding.viewpager1)
-        val i = Intent(this, MainActivity::class.java)
-        i.putExtra("crash", true)
-        i.flags.apply {
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            i,
-            FLAG_IMMUTABLE
-        )
-        Thread.setDefaultUncaughtExceptionHandler(Handler(this, application, pendingIntent))
+
 
         if (intent.getBooleanExtra("crash", false)) {
             Toast.makeText(this, "Sorry for inconvenience.", Toast.LENGTH_LONG).show()
@@ -101,12 +104,29 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager, 0)
         diffUser = DiffUser()
-//        viewPagerAdapter.addFragments(MyNotesFragment(), "My Notes")
+        rationFragment = RationFragment()
         viewPagerAdapter.addFragments(HomeFragment(this@MainActivity), "Home")
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(Summary(), "All Expenses")
+
+        val badgeDrawable = BadgeDrawable.create(this)
+        badgeDrawable.isVisible = true
+        BadgeUtils.attachBadgeDrawable(badgeDrawable, binding.addItem)
+
+        lifecycleScope.launchWhenStarted {
+
+            viewModel.userData.buffer().collect{
+                if(it["ROLE"]!=null){
+                    val feature = it["ROLE"] as MutableMap<String, Any>
+                    if (feature["BETA_ENABLED"].toString().toBoolean()){
+                        viewPagerAdapter.addFragments(rationFragment, "Stored Items")
+                        viewPagerAdapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        }
 //        viewPagerAdapter.addFragments(AnalyticsFragment(), "Analytics")
-//        viewPagerAdapter.addFragments(RationFragment(), "Items")
+//        viewPagerAdapter.addFragments(MyNotesFragment(), "All Rooms")
         viewModel.addItem.observe(this) {
             if (it) {
                 showSnackBar("Item Added")
@@ -132,6 +152,13 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     runTransition(binding.tablayout, false)
                 } else {
                     runTransition(binding.tablayout, true)
+                    binding.extendedMenu.visibility = View.GONE
+                }
+                binding.addItem.setOnClickListener {
+                    if (position == 3)
+                        rationFragment.openSheet()
+                    else
+                        addItems()
                 }
             }
 
@@ -140,53 +167,66 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             }
 
         })
-        binding.addItem.setOnClickListener {
-            addItems()
-        }
-        viewModel.fetchAlert()
+//        binding.addItem.setOnClickListener {
+//            addItems()
+//        }
+
+        if (!loadingDialog.isShowing)
+            loadingDialog.show()
+
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.roomDetail.collectLatest {
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
-//                            binding.progress.visibility = View.VISIBLE
+                            Log.e("loading", "loading")
                         }
                         is FirebaseState.Failed -> {
                             binding.progress.visibility = View.GONE
+                            loadingDialog.dismiss()
+                            Log.e("loading", "failed")
                             showSnackBar("Something went wrong")
                         }
                         is FirebaseState.Success -> {
+                            loadingDialog.dismiss()
+                            Log.e("loading", "success")
                             binding.idText.text = it.data.ROOM_NAME.toString()
                             binding.progress.visibility = View.GONE
-                            lifecycleScope.launchWhenStarted {
-                                viewModel.alert.collectLatest { alert ->
-                                    if (alert.IS_COMPLETED == false) {
-                                        binding.alertLayout.visibility = View.VISIBLE
-                                        binding.alertText.text = alert.ALERT
-                                        binding.alertCancel.setOnClickListener {
-                                            binding.alertLayout.visibility = View.GONE
-                                        }
-                                    }
-
-                                }
+                            if (demoStarted and !settingDataStore.getDemo()) {
+                                showDemo()
+                                demoStarted = false
                             }
+//                            loadingDialog.dismiss()
                         }
-                        else -> Unit
+                        is FirebaseState.Empty ->{
+                            loadingDialog.dismiss()
+                        }
                     }
 
                 }
 
             }
         }
-        lifecycleScope.launch {
-            if (!settingDataStore.getDemo()) {
-                showDemo()
+        binding.alertCancel.setOnClickListener {
+            hideExtendMenu(false)
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.alert.buffer().collect { alert ->
+                Log.e("ALERT","$alert")
+                if (!alert.IS_COMPLETED) {
+                    hideExtendMenu(true)
+                    binding.alertText.text = alert.ALERT
+                }
             }
         }
 
 //        netStat()
         setupClickListener()
-        initializeWorker()
+//        initializeWorker()
+    }
+    private fun hideExtendMenu(isVisible: Boolean){
+        TransitionManager.beginDelayedTransition(binding.l, ChangeBounds())
+        binding.extendedMenu.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     private fun initializeWorker() {
@@ -195,7 +235,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<Worker>(1, TimeUnit.HOURS)
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<Worker>(6, TimeUnit.HOURS)
             .addTag("Periodic")
             .setConstraints(constraint)
             .build()
@@ -210,17 +250,20 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             viewModel.clearStorage()
+            loadingDialog.dismiss()
             startActivity(Intent(this, StartActivity::class.java))
             finish()
         } else {
-            viewModel.getData()
+            viewModel.initializeStore()
             lifecycleScope.launchWhenStarted {
                 viewModel.userData.collectLatest {
                     Log.e("CHECK USER", "$it")
                     if (it.isNotEmpty() && !it["IS_ROOM_JOINED"].toString().toBoolean()) {
                         withContext(Main) {
                             binding.mainLayout.visibility = View.GONE
+                            binding.l.visibility = View.GONE
                             binding.settingFragment.visibility = View.VISIBLE
+                            Log.e("loadingPopup", "${loadingDialog.dismiss()}")
                             supportFragmentManager.beginTransaction()
                                 .add(R.id.setting_fragment, RoomCreation())
                                 .commit()
@@ -246,14 +289,15 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .targetCircleColor(R.color.colorSecondary)
                     .tintTarget(false)
                     .textColor(R.color.colorOnPrimary),
-                TapTarget.forView(findViewById(R.id.logout), "Logout", "Logout.")
+                TapTarget.forView(findViewById(R.id.logout_btn), "Logout", "Logout.")
                     .dimColor(R.color.colorOnSecondary)
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
+                    .tintTarget(false)
                     .textColor(R.color.colorOnPrimary),
                 TapTarget.forView(
-                    findViewById(R.id.info),
+                    findViewById(R.id.setting_btn),
                     "Setting",
                     "Change app settings, join or create rooms etc."
                 )
@@ -261,9 +305,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
+                    .tintTarget(false)
                     .textColor(R.color.colorOnPrimary),
                 TapTarget.forView(
-                    findViewById(R.id.changeRoom),
+                    findViewById(R.id.change_room),
                     "Change room",
                     "Select from list of rooms to enter."
                 )
@@ -271,9 +316,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
+                    .tintTarget(false)
                     .textColor(R.color.colorOnPrimary),
                 TapTarget.forView(
-                    findViewById(R.id.alert),
+                    findViewById(R.id.alert_btn),
                     "Add announcement",
                     "Announce to all members of the room about things."
                 )
@@ -281,6 +327,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .titleTextSize(25)
                     .outerCircleColor(R.color.colorRed)
                     .targetCircleColor(R.color.colorSecondary)
+                    .tintTarget(false)
                     .textColor(R.color.colorOnPrimary)
             )
             .listener(object : TapTargetSequence.Listener {
@@ -319,7 +366,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         }
         lifecycleScope.launch {
 
-            val id = settingDataStore.getRoomKey().toString()
+            val id = settingDataStore.getRoomKey()
             materialAlertDialogBuilder.setPositiveButton("Logout") { _, _ ->
                 viewModel.logout()
                 FirebaseMessaging.getInstance()
@@ -331,11 +378,12 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         materialAlertDialogBuilder.show()
     }
+
     private fun showMenu(v: View) {
         val popup = PopupMenu(this, v)
         popup.menuInflater.inflate(R.menu.main_menu, popup.menu)
         popup.setOnMenuItemClickListener {
-            when(it.itemId) {
+            when (it.itemId) {
                 R.id.menu_alert -> {
                     newAlert()
                 }
@@ -359,9 +407,11 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
     private fun setupClickListener() {
         binding.logoutBtn.setOnClickListener {
+//            binding.extendedMenu.visibility = if (binding.extendedMenu.isVisible) View.GONE else View.VISIBLE
+//            TransitionManager.beginDelayedTransition(binding.extendedMenu, Fade())
             logOut()
         }
-        binding.settingBtn.setOnClickListener{
+        binding.settingBtn.setOnClickListener {
             startActivity(Intent(this@MainActivity, SettingActivity::class.java))
         }
         binding.changeRoom.setOnClickListener {
@@ -379,6 +429,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         binding.alertBtn.setOnClickListener {
             if (alert_et.toString() != "") {
                 viewModel.createAlert(alert_et.toString())
+                viewModel.fetchAlert()
             }
         }
         materialAlertDialogBuilder.setView(binding.root)
@@ -396,7 +447,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 dialogBinding.amountLayout.error =
-                    if (!TextUtils.isDigitsOnly(charSequence)) "Only numbers are allowed" else ""
+                    if (!isNumeric(charSequence.toString())) "Only numbers are allowed" else ""
             }
 
             override fun afterTextChanged(editable: Editable) {}
@@ -432,7 +483,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     .isEmpty()
             ) showSnackBar("Enter all details") else {
                 try {
-                    if (!TextUtils.isDigitsOnly(dialogBinding.amountPaid.text.toString())) {
+                    if (!isNumeric(dialogBinding.amountPaid.text.toString())) {
                         dialogBinding.amountLayout.error = "Only numbers are allowed"
                     } else {
                         dialogBinding.saveBtn.isEnabled = false
@@ -458,12 +509,12 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                             "bought $text for $amount",
                             "Go to app to see details"
                         )
-
                         dialogBinding.tags.removeAllViews()
                         dialogBinding.noteText.text = null
                         dialogBinding.amountPaid.text = null
                         dialogBinding.saveBtn.isEnabled = true
                         dialogBinding.itemBought.text = null
+                        dialogBinding.amountLayout.error = ""
                     }
                 } catch (e: Exception) {
                     Log.e("ERROR MAIN", "${e.message}")
@@ -477,6 +528,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         materialAlertDialogBuilder.show()
     }
 
+    fun isNumeric(toCheck: String): Boolean {
+        val regex = "-?[0-9]+(\\.[0-9]+)?".toRegex()
+        return toCheck.matches(regex)
+    }
 
     private fun changeRoom() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
@@ -515,7 +570,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                             lifecycleScope.launch {
                                 viewModel.getDataStore().setRoomRef(roomId)
                                 viewModel.getData()
-                                showSnackBar("Fetching selected room data...")
+//                                showSnackBar("Fetching selected room data...")
                                 viewModel.getLoading.collect {
                                     if (!it)
                                         dialog.dismiss()
@@ -530,10 +585,14 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
 
     private fun showSnackBar(msg: String) {
-        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(resources.getColor(R.color.colorSecondary))
+        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val view = snackBarView.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        view.layoutParams = params
+        snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
+        snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
             .setTextColor(resources.getColor(R.color.colorOnSecondary))
-            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
     }
 
@@ -558,6 +617,14 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         binding.viewpager1.setCurrentItem(1, true)
     }
 
+    private fun loadingDialog(){
+        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        val view = LoadingPopupBinding.inflate(layoutInflater)
+        materialAlertDialogBuilder.setView(view.root)
+        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+        loadingDialog = materialAlertDialogBuilder.show()
+        loadingDialog.setCancelable(false)
+    }
 
 }
 

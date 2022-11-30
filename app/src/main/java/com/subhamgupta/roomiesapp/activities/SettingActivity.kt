@@ -7,7 +7,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -24,6 +26,7 @@ import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -490,10 +493,14 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun showSnackBar(msg: String) {
-        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(resources.getColor(R.color.colorSecondary))
+        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val view = snackBarView.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        view.layoutParams = params
+        snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
+        snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
             .setTextColor(resources.getColor(R.color.colorOnSecondary))
-            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
     }
 

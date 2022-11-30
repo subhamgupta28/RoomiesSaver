@@ -9,5 +9,5 @@ data class Alerts(
     val DATE:String?=null,
     val TIME:String?=null,
     val TIME_STAMP:Long?=null,
-    val IS_COMPLETED:Boolean?=null
+    val IS_COMPLETED:Boolean = true
 ):Serializable

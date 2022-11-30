@@ -47,7 +47,7 @@ class PersonAdapter(
             val md = model["DATA"] as List<Detail>
             try {
                 adapter.setItems(md)
-                binding.userName.text = md[0].BOUGHT_BY.toString()
+                binding.userName.text = md[position].BOUGHT_BY.toString()
             }catch (e:Exception){
                 e.printStackTrace()
             }

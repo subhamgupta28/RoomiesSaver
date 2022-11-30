@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
 import com.google.android.material.color.DynamicColors
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.ktx.Firebase
 import com.subhamgupta.roomiesapp.utils.Constant
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.hilt.android.HiltAndroidApp
@@ -28,19 +31,14 @@ class MyApp : Application(), Configuration.Provider {
     @Inject
     lateinit var settingDataStore: SettingDataStore
 
+    override fun onTerminate() {
+        super.onTerminate()
+
+    }
 
     override fun onCreate() {
         super.onCreate()
-        GlobalScope.launch(Dispatchers.IO) {
-            val dynamicTheme = settingDataStore.getDarkMode()
-            if (dynamicTheme){
-                DynamicColors.applyToActivitiesIfAvailable(this@MyApp)
-            }
-//            if (dm)
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//            else
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+        DynamicColors.applyToActivitiesIfAvailable(this@MyApp)
         createChannel()
     }
 

@@ -52,11 +52,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/signup"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Material3.FloatingActionButton.Primary"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/message2"
             android:layout_marginStart="24dp"
+            android:textAllCaps="true"
             android:layout_marginTop="50dp"
             android:layout_marginEnd="24dp"
             android:text="New user! Sign up with Email"
@@ -65,14 +66,14 @@
         </com.google.android.material.button.MaterialButton>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/signin"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Material3.FloatingActionButton.Primary"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/signup"
             android:layout_marginStart="24dp"
             android:layout_marginTop="10dp"
             app:cornerRadius="10dp"
-
+            android:textAllCaps="true"
             android:layout_marginEnd="24dp"
             android:text="Already a User! Login">
 

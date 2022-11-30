@@ -64,6 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:id="@+id/save_btn"
+                app:cornerRadius="10dp"
                 android:text="Save" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
