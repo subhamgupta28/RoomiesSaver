@@ -26,11 +26,11 @@ class HomeAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: ArrayList<MutableMap<String, String>>?, amnt: String?){
+    fun setData(data: ArrayList<MutableMap<String, String>>?, amount: String?){
         this.data.clear()
         this.data.addAll(data!!)
-        if (amnt != null) {
-            this.amnt = amnt.toDouble()
+        if (amount != null) {
+            this.amnt = amount.toDouble()
         }
         notifyDataSetChanged()
     }
@@ -46,11 +46,12 @@ class HomeAdapter(
                val name = data["USER_NAME"].toString()
                val color = data["COLOR"]?.toLong()
 
+
                if (color != null) {
                    val hexColor = String.format("#%08X", 0xB3FFFFFF and color)
                    val newColor = Color.parseColor(hexColor)
-//                   binding.homeLayout.strokeWidth = 4
-//                   binding.homeLayout.strokeColor = (newColor)
+                   binding.homeLayout.strokeWidth = 3
+                   binding.homeLayout.strokeColor = (newColor)
                }
                val amount = data["AMOUNT"].toString().toInt()
                if (amnt<amount){

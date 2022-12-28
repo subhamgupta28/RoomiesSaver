@@ -28,7 +28,6 @@
 
         <activity
             android:name=".activities.MainActivity"
-            android:immersive="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,7 +57,6 @@
             android:exported="false" />
         <activity
             android:name=".activities.StartActivity"
-            android:immersive="true"
             android:windowSoftInputMode="adjustResize"
             android:exported="false">
 

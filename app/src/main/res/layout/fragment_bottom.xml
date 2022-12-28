@@ -116,7 +116,13 @@
                             android:text="Save" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btgallery"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    app:icon="@drawable/ic_outline_photo_camera"
+                    android:layout_height="wrap_content"
+                    android:text="Gallery" />
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>

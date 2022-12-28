@@ -37,6 +37,7 @@ import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.*
 import com.subhamgupta.roomiesapp.fragments.*
+import com.subhamgupta.roomiesapp.utils.AuthState
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.utils.Worker
@@ -58,10 +59,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var rationFragment: RationFragment
     private lateinit var settingDataStore: SettingDataStore
     private var demoStarted: Boolean = true
-    private lateinit var loadingDialog: AlertDialog
 
-    @Inject
-    lateinit var databaseReference: DatabaseReference
+
+//    @Inject
+//    lateinit var databaseReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,14 +86,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
     private fun init() {
 //        viewModel.getData()
-        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
-        val view = LoadingPopupBinding.inflate(layoutInflater)
-        materialAlertDialogBuilder.setView(view.root)
-        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-        loadingDialog = materialAlertDialogBuilder.create()
-        loadingDialog.setCancelable(false)
+
+
         checkUser()
-//        viewModel.clearStorage()
+
         settingDataStore = viewModel.getDataStore()
         binding.tablayout.setupWithViewPager(binding.viewpager1)
 
@@ -111,7 +108,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
         val badgeDrawable = BadgeDrawable.create(this)
         badgeDrawable.isVisible = true
-        BadgeUtils.attachBadgeDrawable(badgeDrawable, binding.addItem)
+//        BadgeUtils.attachBadgeDrawable(badgeDrawable, binding.addItem)
 
         lifecycleScope.launchWhenStarted {
 
@@ -131,8 +128,8 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
             if (it) {
                 showSnackBar("Item Added")
                 viewModel.getDiffData()
-                binding.viewpager1.setCurrentItem(1, true)
-                diffUser.goToUser(0, viewModel.getUser()?.uid!!)
+//                binding.viewpager1.setCurrentItem(1, true)
+//                diffUser.goToUser(0, viewModel.getUser()?.uid!!)
             }
         }
 
@@ -171,10 +168,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 //            addItems()
 //        }
 
-        if (!loadingDialog.isShowing)
-            loadingDialog.show()
+
 
         lifecycleScope.launch(Dispatchers.IO) {
+
             viewModel.roomDetail.collectLatest {
                 withContext(Main) {
                     when (it) {
@@ -183,12 +180,10 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         }
                         is FirebaseState.Failed -> {
                             binding.progress.visibility = View.GONE
-                            loadingDialog.dismiss()
                             Log.e("loading", "failed")
                             showSnackBar("Something went wrong")
                         }
                         is FirebaseState.Success -> {
-                            loadingDialog.dismiss()
                             Log.e("loading", "success")
                             binding.idText.text = it.data.ROOM_NAME.toString()
                             binding.progress.visibility = View.GONE
@@ -196,10 +191,8 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                                 showDemo()
                                 demoStarted = false
                             }
-//                            loadingDialog.dismiss()
                         }
                         is FirebaseState.Empty ->{
-                            loadingDialog.dismiss()
                         }
                     }
 
@@ -247,28 +240,49 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     }
 
     private fun checkUser() {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            viewModel.clearStorage()
-            loadingDialog.dismiss()
-            startActivity(Intent(this, StartActivity::class.java))
-            finish()
-        } else {
-            viewModel.initializeStore()
-            lifecycleScope.launchWhenStarted {
-                viewModel.userData.collectLatest {
-                    Log.e("CHECK USER", "$it")
-                    if (it.isNotEmpty() && !it["IS_ROOM_JOINED"].toString().toBoolean()) {
-                        withContext(Main) {
-                            binding.mainLayout.visibility = View.GONE
-                            binding.l.visibility = View.GONE
-                            binding.settingFragment.visibility = View.VISIBLE
-                            Log.e("loadingPopup", "${loadingDialog.dismiss()}")
-                            supportFragmentManager.beginTransaction()
-                                .add(R.id.setting_fragment, RoomCreation())
-                                .commit()
+        viewModel.initializeStore()
+        lifecycleScope.launchWhenStarted {
+            viewModel.authState.buffer().collect{
+                when(it){
+                    is AuthState.NoUserOrError -> {
+                        withContext(Main){
+                            showSnackBar(it.message.toString())
+                            viewModel.clearStorage()
+                            startActivity(Intent(this@MainActivity, StartActivity::class.java))
+                            finish()
                         }
-                        settingDataStore.setUpdate(true)
+                    }
+                    is AuthState.Loading -> {
+//                        loadingDialog.dismiss()
+
+                    }
+                    is AuthState.LoggedIn -> {
+//                        loadingDialog.dismiss()
+                        viewModel.userData.collectLatest {
+                            Log.e("CHECK USER", "$it")
+                            val fragment = RoomCreation()
+                            if (it.isNotEmpty() && !it["IS_ROOM_JOINED"].toString().toBoolean()) {
+                                Log.e("room", "true")
+                                withContext(Main) {
+                                    binding.mainLayout.visibility = View.GONE
+                                    binding.l.visibility = View.GONE
+                                    binding.settingFragment.visibility = View.VISIBLE
+                                    supportFragmentManager.beginTransaction()
+                                        .add(R.id.setting_fragment, fragment)
+                                        .commit()
+                                }
+                                settingDataStore.setUpdate(true)
+                            }else{
+                                Log.e("room", "false")
+                                withContext(Main) {
+                                    binding.mainLayout.visibility = View.VISIBLE
+                                    binding.l.visibility = View.VISIBLE
+                                    binding.settingFragment.visibility = View.GONE
+                                    supportFragmentManager.beginTransaction().remove(fragment)
+                                        .commit()
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -351,12 +365,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     }
 
 
-    private fun netStat() {
-        viewModel.getNetworkObserver().observe().onEach {
-            showSnackBar("Network ${it.name}")
 
-        }.launchIn(lifecycleScope)
-    }
 
     private fun logOut() {
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
@@ -617,14 +626,15 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         binding.viewpager1.setCurrentItem(1, true)
     }
 
-    private fun loadingDialog(){
-        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
-        val view = LoadingPopupBinding.inflate(layoutInflater)
-        materialAlertDialogBuilder.setView(view.root)
-        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
-        loadingDialog = materialAlertDialogBuilder.show()
-        loadingDialog.setCancelable(false)
-    }
+//    private fun loadingDialog(){
+//        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+//        val view = LoadingPopupBinding.inflate(layoutInflater)
+//        materialAlertDialogBuilder.setView(view.root)
+//        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+//        loadingDialog = materialAlertDialogBuilder.show()
+//        loadingDialog.setCancelable(false)
+//    }
+
 
 }
 

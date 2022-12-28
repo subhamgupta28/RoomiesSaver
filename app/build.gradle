@@ -16,8 +16,8 @@ android {
         applicationId "com.subhamgupta.roomiesapp"
         minSdk 26
         targetSdk 33
-        versionCode 19
-        versionName "4.1"
+        versionCode 20
+        versionName "4.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -45,7 +45,7 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation("com.google.android.material:material:1.8.0-alpha02")
+    implementation("com.google.android.material:material:1.7.0-rc01")
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     //Firebase

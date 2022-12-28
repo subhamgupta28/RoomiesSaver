@@ -3,6 +3,7 @@ package com.subhamgupta.roomiesapp.fragments
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -27,6 +28,8 @@ class BottomFragment : BottomSheetDialogFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentBottomBinding
+    private val imageList: Uri? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,6 +50,11 @@ class BottomFragment : BottomSheetDialogFragment() {
         binding.btcamera.setOnClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, 200)
+        }
+
+        binding.btgallery.setOnClickListener {
+
+
         }
 
         datePicker.addOnPositiveButtonClickListener{
@@ -76,6 +84,10 @@ class BottomFragment : BottomSheetDialogFragment() {
         }
 
         return binding.root
+    }
+
+    fun saveImage(){
+
     }
 
 //

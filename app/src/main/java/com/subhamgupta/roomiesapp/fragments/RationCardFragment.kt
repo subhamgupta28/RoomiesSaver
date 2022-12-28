@@ -1,17 +1,22 @@
 package com.subhamgupta.roomiesapp.fragments
 
+import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import com.bumptech.glide.Glide
 import com.subhamgupta.roomiesapp.R
+import com.subhamgupta.roomiesapp.databinding.FragmentRationCardBinding
 import com.subhamgupta.roomiesapp.databinding.RationCardBinding
 
 
 class RationCardFragment : DialogFragment() {
 
-    private lateinit var binding :RationCardBinding
+    private lateinit var binding: FragmentRationCardBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
@@ -23,7 +28,7 @@ class RationCardFragment : DialogFragment() {
         savedInstanceState: Bundle?
 
     ): View {
-       binding = RationCardBinding.inflate(layoutInflater)
+        binding = FragmentRationCardBinding.inflate(layoutInflater)
         return binding.root
     }
 
@@ -34,18 +39,15 @@ class RationCardFragment : DialogFragment() {
         toolbar.setNavigationOnClickListener {
             dismiss()
         }
-
-//        db = FirebaseFirestore.getInstance()
-//        settingsStorage = activity?.let { SettingsStorage(it.applicationContext) }!!
-//        roomId = settingsStorage.room_id
-//        roomRef = settingsStorage.roomRef.toString()
-//        storage = FirebaseStorage.getInstance().getReference("ration_images/"+roomId!!)
+        toolbar.title = "Stored Card"
 
     }
+
     override fun getTheme(): Int {
         return R.style.Theme_App_Dialog_FullScreen
     }
-//    fun delete(data: Map<String, Any?>?){
+
+    //    fun delete(data: Map<String, Any?>?){
 //        val name = data?.get("IMG_NAME").toString()
 //        val node = data?.get("TIME_STAMP").toString()
 //        db.collection(roomId+"_RATION").document(node).delete().addOnCompleteListener {
@@ -55,19 +57,19 @@ class RationCardFragment : DialogFragment() {
 //        }
 //
 //    }
-//    fun setUrl(url: String, context: Context, data: Map<String, Any?>?) {
-//
-//        try {
-//            Handler().postDelayed({
-//                Glide.with(context)
-//                    .load(url)
-//                    .into(imageView)
-//              Log.e("URL", url)
-//                var note = data!!["NOTE"].toString()
-//                val date = data["DATE"].toString()
-//                if (note.isEmpty())
-//                    note=""
-//
+    fun setUrl(url: String, context: Context, data: Map<String, Any?>?) {
+
+        try {
+            Handler().postDelayed({
+                Glide.with(context)
+                    .load(url)
+                    .into(binding.image)
+                Log.e("URL", url)
+                var note = data!!["NOTE"].toString()
+                val date = data["DATE"].toString()
+                if (note.isEmpty())
+                    note = ""
+
 //                deleteButton.setOnClickListener {
 //                    delete(data)
 //                }
@@ -76,13 +78,14 @@ class RationCardFragment : DialogFragment() {
 //                else
 //                    noteText.text = note
 //                dateText.text = date
-//
-//            }, 50)
-//        }catch (e: Exception){
-//            e.printStackTrace()
-//        }
+
+            }, 50)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 //
 //
 //
 //    }
+    }
 }

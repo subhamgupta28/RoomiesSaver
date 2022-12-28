@@ -30,6 +30,7 @@ class RoomViewModel @Inject constructor(
     fun createRoom(name: String, limit:Int, id: String, date :String) = viewModelScope.launch(Dispatchers.IO){
             repository.createRoom(name, limit, id, date, _createRoom)
     }
+
     fun joinRoom(room_id: String) = viewModelScope.launch(Dispatchers.IO){
         repository.joinRoom(room_id, _createRoom)
     }

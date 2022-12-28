@@ -3,15 +3,14 @@ package com.subhamgupta.roomiesapp.fragments
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.budiyev.android.codescanner.AutoFocusMode
 import com.budiyev.android.codescanner.CodeScanner
@@ -28,7 +27,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -116,13 +114,20 @@ class RoomCreation: Fragment() {
             val sdm = SimpleDateFormat(DATE_STRING, Locale.getDefault())
             return sdm.format(date)
         }
-
+    private fun removeSpecialCharacter(str: String):String {
+        Log.e("string before", str)
+        var s = str
+//        val re = Regex("[^A-Za-z0-9]")
+        s = str.filter { it.isLetterOrDigit() }
+//        s = re.replace(s, "")
+        Log.e("string after", s)
+        return s
+    }
     companion object {
         fun generateID(text: String): String {
-            var te = text.trim()
+            val te = text.filter { it.isLetterOrDigit() }.uppercase()
             val n = 10
             val t = System.currentTimeMillis().toString()
-            te = text.uppercase()
             val str = t + te + t + te + t + te
             val sb = StringBuilder(n)
             for (i in 0 until n) {

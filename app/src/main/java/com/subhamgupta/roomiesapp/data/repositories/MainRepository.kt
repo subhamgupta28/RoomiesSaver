@@ -82,7 +82,6 @@ class MainRepository @Inject constructor(
     var uuid: String? = user?.uid
     private var query: Query? = null
     init {
-
         deviceId =
             Settings.Secure.getString(application.contentResolver, Settings.Secure.ANDROID_ID)
         Log.e("ID Email uuid", "$uuid")
@@ -149,7 +148,7 @@ class MainRepository @Inject constructor(
             userDataLoading.value = false
             flag = false
         }
-        uuid = user?.uid
+        uuid = auth.currentUser?.uid
         databaseReference.child(uuid!!).addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -255,7 +254,6 @@ class MainRepository @Inject constructor(
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
                                 val result = it1.result.getValue(RoomDetail::class.java)
-
                                 cont.resumeWith(Result.success(result))
                             }
                             .addOnFailureListener{
@@ -267,17 +265,29 @@ class MainRepository @Inject constructor(
                     roomMapWithId[i.value.toString()] = result
                     // roomId to it's data
                 }
+                else
+                    continue
             }
             dataStore.setUpdate(false)
             saveDataToRemote(roomMapWithId)
-            update(userData.value, roomMapWithId, roomDataLoading)
-            dataStore.setLoggedIn(true)
-            try {
-                roomData.value = FirebaseState.success(roomMapWithId[dataStore.getRoomKey()]!!)
-            } catch (e: Exception) {
-                Log.e("fetchUserRoomData", "${e.message}")
+            supervisorScope {
+                launch {
+                    update(userData.value, roomMapWithId, roomDataLoading)
+                    dataStore.setLoggedIn(true)
+                }
+                launch {
+                    try {
+                        var room = roomMapWithId[roomMapWithId.keys.first()]
+                        if (roomMapWithId[dataStore.getRoomKey()]!=null)
+                            room = roomMapWithId[dataStore.getRoomKey()]
+                        Log.e("room vs id map","$room")
+                        if (roomMapWithId.isNotEmpty())
+                            roomData.value = FirebaseState.success(room!!)
+                    } catch (e: Exception) {
+                        Log.e("fetchUserRoomData error", "${e.message}")
+                    }
+                }
             }
-
         }
     }
 
@@ -291,16 +301,20 @@ class MainRepository @Inject constructor(
         val tempRoomMap = mutableMapOf<String, String>()
         val allRoom = ArrayList<RoomDetail>()
 
-        for (i in userData) {
-            if (i.key.contains("ROOM_ID")) {
-                val room = roomMapWithId[i.value.toString()]
+        val d = userData.filter {it.key.contains("ROOM_ID")}
+        d.forEach{
+            try {
+                val room = roomMapWithId[it.value.toString()]
                 val roomName = room?.ROOM_NAME.toString()
-                roomIDToRef[i.value.toString()] = i.key
-                val roomId = i.key
+                roomIDToRef[it.value.toString()] = it.key
+                val roomId = it.key
                 roomMap[roomName] = roomId
                 tempRoomMap[roomId] = roomName
                 allRoom.add(room!!)
+            }catch (e:Exception){
+                Log.e("update :: error", "$e")
             }
+
         }
         this.roomMap.postValue(roomMap)
         this.tempRoomMap.postValue(tempRoomMap)
@@ -326,7 +340,10 @@ class MainRepository @Inject constructor(
                 roomMates.postValue(room)
                 dataStore.setRoomSize(room.size)
                 roomDataLoading.value = false
+                Log.e( "update: room","$room" )
                 fetchDiffData(room)
+            }else{
+                Log.e( "update: else","empty" )
             }
         } catch (e: Exception) {
             Log.e("Update ERROR update", "${e.message}")
@@ -627,29 +644,29 @@ class MainRepository @Inject constructor(
 
         supervisorScope {
             var i = 0
+
             rmp?.forEach { roommates ->
                 uuidLink[roommates.UUID.toString()] = i
                 i++
-
-                    val job = suspendCoroutine<List<Detail>> {
-                        query.whereEqualTo("UUID", roommates.UUID.toString())
-                            .addSnapshotListener { value, _ ->
-                                if (value != null) {
-                                    try{
-                                        val v = value.toObjects(Detail::class.java)
-                                        it.resumeWith(Result.success(v))
-                                    }catch (e : Exception){
-                                        Log.e("fetchDiffData", "${e.message}")
-                                    }
+                val job = suspendCoroutine<List<Detail>> {
+                    query.whereEqualTo("UUID", roommates.UUID.toString())
+                        .addSnapshotListener { value, _ ->
+                            if (value != null) {
+                                try{
+                                    val v = value.toObjects(Detail::class.java)
+                                    it.resume(v)
+                                }catch (e : Exception){
+                                    Log.e("fetchDiffData", "${e.message}")
                                 }
                             }
-                    }
-                    detailMap.add(
-                        mutableMapOf(
-                            "UUID" to roommates.UUID.toString(),
-                            "DATA" to job
-                        )
+                        }
+                }
+                detailMap.add(
+                    mutableMapOf(
+                        "UUID" to roommates.UUID.toString(),
+                        "DATA" to job
                     )
+                )
             }
             Log.e("detailMap", "$detailMap")
             _diffData.postValue(detailMap)
@@ -842,6 +859,15 @@ class MainRepository @Inject constructor(
         }.addOnFailureListener{
             data.value = FirebaseState.failed(it.message)
         }
+
+
+    }
+
+    fun doPredictions(
+        summary: MutableStateFlow<FirebaseState<List<Detail?>>>,
+        predictions: MutableStateFlow<FirebaseState<List<String>>>
+    ) {
+        val data = summary.value
 
 
     }

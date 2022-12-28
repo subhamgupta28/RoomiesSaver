@@ -8,19 +8,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.rpc.context.AttributeContext.Auth
 import com.subhamgupta.roomiesapp.data.repositories.MainRepository
 import com.subhamgupta.roomiesapp.domain.model.Alerts
 import com.subhamgupta.roomiesapp.domain.model.Detail
 import com.subhamgupta.roomiesapp.domain.model.HomeData
 import com.subhamgupta.roomiesapp.domain.model.RoomDetail
-import com.subhamgupta.roomiesapp.domain.use_case.GetCountryCodes
+import com.subhamgupta.roomiesapp.utils.AuthState
 import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
+
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -39,14 +43,21 @@ class MainViewModel @Inject constructor(
     private val _sheetLoading = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val sheetLoading = _sheetLoading.asStateFlow()
 
+    private val _authState = MutableStateFlow<AuthState<FirebaseUser?>>(AuthState.loading())
+    val authState = _authState.asStateFlow()
+
     private val _editUser = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val editUser = _editUser.asStateFlow()
 
-    private val _storedCards = MutableStateFlow<FirebaseState<MutableList<MutableMap<String, Any>>>>(FirebaseState.empty())
+    private val _storedCards =
+        MutableStateFlow<FirebaseState<MutableList<MutableMap<String, Any>>>>(FirebaseState.empty())
     val storedCards = _storedCards.asStateFlow()
 
     private val _uploadStoreCard = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val uploadStoreCard = _uploadStoreCard.asStateFlow()
+
+    private val _predictions = MutableStateFlow<FirebaseState<List<String>>>(FirebaseState.empty())
+    val predictions = _predictions.asStateFlow()
 
     private val _alert = MutableStateFlow(Alerts())
     val alert = _alert.asStateFlow()
@@ -111,7 +122,7 @@ class MainViewModel @Inject constructor(
     fun getRoomMates() = repository.getRoomMates()
     val getLoading = _homeDataLoading
 
-    fun fetchAlert() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+    fun fetchAlert() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.fetchAlert(_alert)
     }
 
@@ -119,23 +130,32 @@ class MainViewModel @Inject constructor(
         repository.generateExcel(_sheetLoading)
     }
 
-    fun leaveRoom(key: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    fun leaveRoom(key: String) = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.leaveRoom(_leaveRoom, key)
     }
 
-    fun initializeStore() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
-        supervisorScope {
-            repository.getUser(_userData, _userDataLoading)
-            _userDataLoading.collectLatest {
-                if (!it) {
-                    getData()
-                    _userDataLoading.value = true
+    fun initializeStore(){
+        repository.auth.addAuthStateListener {
+            Log.e("auth state","${it.currentUser}")
+            if (it.currentUser!=null) {
+                _authState.value = AuthState.LoggedIn(it.currentUser)
+                viewModelScope.launch(supervisor + Dispatchers.IO) {
+                    repository.getUser(_userData, _userDataLoading)
+                    delay(1000)
+                    _userDataLoading.collectLatest {flag->
+                        if (!flag) {
+                            getData()
+                            _userDataLoading.value = true
+                        }
+                    }
                 }
+            }else{
+                _authState.value = AuthState.noUserOrError("No logged in user")
             }
         }
     }
 
-    fun getData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    fun getData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         fetchRoomData()
         setFCM()
         _roomDataLoading.collectLatest { it1 ->
@@ -150,16 +170,17 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun refreshData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    fun refreshData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.fetchUserRoomData(_userData, _roomDetails, _roomDataLoading)
     }
 
 
-    fun editUser(uri: Uri, userName: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
-        repository.uploadPic(uri, userName, _editUser)
-    }
+    fun editUser(uri: Uri, userName: String) =
+        viewModelScope.launch(supervisor + Dispatchers.IO) {
+            repository.uploadPic(uri, userName, _editUser)
+        }
 
-    private fun fetchRoomData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    private fun fetchRoomData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.forceInit()
         repository.prepareRoom(_userData, _roomDetails, _roomDataLoading)
     }
@@ -171,13 +192,14 @@ class MainViewModel @Inject constructor(
     fun getDataStore() = repository.getDataStore()
 
 
-    fun logout() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    fun logout() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.signOut()
     }
 
-    fun sendNotification(title: String, message: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
-        repository.sendNotify("${repository.getDataStore().getUserName()} $title", message)
-    }
+    fun sendNotification(title: String, message: String) =
+        viewModelScope.launch(supervisor + Dispatchers.IO) {
+            repository.sendNotify("${repository.getDataStore().getUserName()} $title", message)
+        }
 
     fun getRoomMap(): MutableLiveData<MutableMap<String, String>> {
         return repository.getRoomMaps()
@@ -190,10 +212,11 @@ class MainViewModel @Inject constructor(
         return repository.diffData
     }
 
-    fun modifyStartDate(timeStamp: Long) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
-        repository.modifyStartDate(timeStamp, _startDate)
-        getDataStore().setStartDate(timeStamp.toString())
-    }
+    fun modifyStartDate(timeStamp: Long) =
+        viewModelScope.launch(supervisor + Dispatchers.IO) {
+            repository.modifyStartDate(timeStamp, _startDate)
+            getDataStore().setStartDate(timeStamp.toString())
+        }
 
     fun getTempRoomMaps(): MutableLiveData<MutableMap<String, String>> {
         return repository.getTempRoomMaps()
@@ -206,13 +229,16 @@ class MainViewModel @Inject constructor(
     }
 
 
+
+
     fun getUser(): FirebaseUser? {
         return repository.user
     }
 
-    fun fetchSummary(currMonth: Boolean, category: String) = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
-        repository.fetchSummary(currMonth, category, _summary)
-    }
+    fun fetchSummary(currMonth: Boolean, category: String) =
+        viewModelScope.launch(supervisor + Dispatchers.IO) {
+            repository.fetchSummary(currMonth, category, _summary)
+        }
 
 
     fun updateItem(
@@ -223,7 +249,7 @@ class MainViewModel @Inject constructor(
         tags: List<String>,
         category: String
     ) =
-        viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+        viewModelScope.launch(supervisor + Dispatchers.IO) {
             repository.updateItem(item, amount, timeStamp, _addItem, note, tags, category)
         }
 
@@ -231,7 +257,7 @@ class MainViewModel @Inject constructor(
         return repository.getAllRoomDetail()
     }
 
-    private fun fetchHomeData() = viewModelScope.launch(supervisor+Dispatchers.IO+handler) {
+    private fun fetchHomeData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.fetchHomeData(_homeData, _homeDataLoading)
     }
 
@@ -244,15 +270,19 @@ class MainViewModel @Inject constructor(
         repository.createAlert(msg)
     }
 
-    fun getStoredCards() = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+    fun getStoredCards() = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.getStoredItemCards(_storedCards)
     }
 
     fun uploadCard(
         date: String,
         note: String,
-        byteArray: ByteArray) = viewModelScope.launch(supervisor+Dispatchers.IO+handler){
+        byteArray: ByteArray
+    ) = viewModelScope.launch(supervisor + Dispatchers.IO) {
         repository.uploadCard(_uploadStoreCard, date, note, byteArray)
     }
 
+    fun doPredictions() = viewModelScope.launch(supervisor + Dispatchers.IO) {
+        repository.doPredictions(_summary,_predictions)
+    }
 }

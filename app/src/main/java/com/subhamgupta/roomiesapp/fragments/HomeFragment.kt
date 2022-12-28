@@ -34,14 +34,20 @@ import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentHomeBinding
 import com.subhamgupta.roomiesapp.databinding.LoadingPopupBinding
+import com.subhamgupta.roomiesapp.utils.ConnectivityObserver
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.sql.Date
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -49,7 +55,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
 
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
-
+    private lateinit var loadingDialog: AlertDialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,22 +71,41 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
 
 
+        val localDate = LocalDateTime.now()
+        val today = localDate.dayOfYear
 
+//        val format = DateTimeFormatter.ofPattern("mm dd yyyy HH:mm:ss")
+//        val zDate = LocalDateTime.parse("12 22 2022 10:10:10", format)
+        Log.e("TIMES", " $today")
+        netStat()
         return binding.root
     }
 
+    private fun netStat() {
+        viewModel.getNetworkObserver().observe().onEach {
+//            if (it.name == "Lost")
+//            showSnackBar("Network ${it.name}")
+
+        }.launchIn(lifecycleScope)
+    }
 
 
     private fun isTablet(): Boolean {
-        val xlarge = (this.getResources()
-            .getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) === 4
-        val large = this.getResources()
-            .getConfiguration().screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK === Configuration.SCREENLAYOUT_SIZE_LARGE
+        val xlarge = (this.resources
+            .configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) == 4
+        val large = this.resources
+            .configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK == Configuration.SCREENLAYOUT_SIZE_LARGE
         return xlarge || large
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireActivity())
+        val loadingView = LoadingPopupBinding.inflate(layoutInflater)
+        materialAlertDialogBuilder.setView(loadingView.root)
+        materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
+        loadingDialog = materialAlertDialogBuilder.create()
+
         val homeAdapter = HomeAdapter(this)
         val adapter = SummaryAdapter()
         binding.pRecycle.adapter = homeAdapter
@@ -96,12 +121,14 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
-//                            binding.progress.visibility = View.VISIBLE
-
+                            if (!loadingDialog.isShowing)
+                                loadingDialog.show()
                         }
                         is FirebaseState.Empty -> {
+                            loadingDialog.dismiss()
                         }
                         is FirebaseState.Failed -> {
+                            loadingDialog.dismiss()
                             visible()
                         }
                         is FirebaseState.Success -> {
@@ -111,6 +138,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                             else gone()
 
                             try {
+                                loadingDialog.dismiss()
                                 binding.spark.visibility = View.VISIBLE
                                 val data = res.todayData
                                 adapter.setItems(data)

@@ -162,7 +162,14 @@
                                 android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 
                         </LinearLayout>
-
+                        <TextView
+                            android:id="@+id/net_status"
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
                     </LinearLayout>
 
                     <Button

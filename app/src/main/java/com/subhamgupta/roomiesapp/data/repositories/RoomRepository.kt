@@ -1,12 +1,10 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
-import com.subhamgupta.roomiesapp.MyApp
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.domain.model.CreateRoom
 import com.subhamgupta.roomiesapp.domain.model.ROOMMATES
@@ -16,7 +14,6 @@ import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -138,6 +135,7 @@ class RoomRepository @Inject constructor(
         Toast.makeText(application, msg, Toast.LENGTH_LONG).show()
     }
 
+
     suspend fun createRoom(
         name: String,
         limit: Int,
@@ -147,7 +145,7 @@ class RoomRepository @Inject constructor(
     ) = coroutineScope {
         val room = "ROOM"
         liveData.value = FirebaseState.loading()
-        val userData = suspendCoroutine<MutableMap<String, Any>> { cont ->
+        val userData = suspendCoroutine{ cont ->
             databaseReference.child(uuid!!).get().addOnCompleteListener {
                 if (it.isSuccessful) {
                     val mp = it.result.value as MutableMap<String, Any>

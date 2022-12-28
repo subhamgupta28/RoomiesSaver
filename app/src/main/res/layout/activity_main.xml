@@ -91,7 +91,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="22dp"
-            app:cardCornerRadius="10dp">
+            app:cardCornerRadius="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -198,13 +198,13 @@
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.FloatingActionButton.Tertiary"
+                    style="@style/Widget.Material3.Button.TonalButton.Icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ADD"
                     android:layout_marginEnd="2dp"
                     android:id="@+id/add_item"
-                    app:cornerRadius="10dp"
+
                     app:icon="@drawable/ic_outline_add" />
             </LinearLayout>
             </LinearLayout>

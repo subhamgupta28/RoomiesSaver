@@ -48,6 +48,7 @@ class RationFragment: Fragment() {
         }
 
         val adapter = StoredCardsAdapter()
+        adapter.setContext(requireActivity().supportFragmentManager)
         binding.rationRecycler.adapter = adapter
 
         lifecycleScope.launchWhenStarted {
