@@ -36,7 +36,7 @@ object AppModule {
     private val database = Firebase.database
     private val databaseReference = database.getReference("ROOMIES")
 
-    val settings = FirebaseFirestoreSettings.Builder()
+    private val settings = FirebaseFirestoreSettings.Builder()
         .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
         .build()
 

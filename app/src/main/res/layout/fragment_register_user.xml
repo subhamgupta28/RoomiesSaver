@@ -42,7 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
-                    android:text="We are so happy to see you. You can continue to login to Roomies App"
+                    android:text="We are so happy to see you. Register yourself"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
                 <com.google.android.material.textfield.TextInputLayout

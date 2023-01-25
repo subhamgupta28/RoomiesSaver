@@ -30,6 +30,7 @@ import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NotificationSender
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -517,6 +518,9 @@ class MainRepository @Inject constructor(
     suspend fun fetchHomeData(
         liveData: MutableStateFlow<FirebaseState<HomeData>>,
         loadingHome: MutableStateFlow<Boolean>,
+        homeUser: MutableStateFlow<HomeUserMap>,
+        homeDetail: MutableStateFlow<List<Detail>>,
+        homeDonut: MutableStateFlow<List<DonutSection>>,
     ) = coroutineScope {
         roomKey = dataStore.getRoomKey()
         loadingHome.value = true
@@ -535,6 +539,7 @@ class MainRepository @Inject constructor(
                     return@addSnapshotListener
                 }
                 if (query != null) {
+                    Log.e("home", "start")
                     var todayTotalAmount = 0
                     var monthTotalAmount = 0
                     val chartList = ArrayList<Int>()
@@ -598,17 +603,21 @@ class MainRepository @Inject constructor(
                     val home = HomeData(
                         todayTotalAmount,
                         monthTotalAmount,
-                        round,
-                        todayDetail,
-                        donutList,
-                        allUserAmount,
+//                        todayDetail,
+//                        donutList,
+//                        allUserAmount,
                         startDate,
                         updatedOn.toString(),
                         chartList,
                         homeDetails.isEmpty()
                     )
-                    loadingHome.value = false
                     liveData.value = FirebaseState.success(home)
+                    loadingHome.value = false
+                    homeDonut.value = donutList
+                    homeDetail.value = todayDetail
+                    homeUser.value = HomeUserMap(round, allUserAmount)
+                    Log.e("home", "end")
+
                 }
             }
     }

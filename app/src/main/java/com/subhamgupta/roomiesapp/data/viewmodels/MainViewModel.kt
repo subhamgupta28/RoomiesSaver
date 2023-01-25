@@ -6,23 +6,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.futured.donut.DonutSection
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.rpc.context.AttributeContext.Auth
 import com.subhamgupta.roomiesapp.data.repositories.MainRepository
-import com.subhamgupta.roomiesapp.domain.model.Alerts
-import com.subhamgupta.roomiesapp.domain.model.Detail
-import com.subhamgupta.roomiesapp.domain.model.HomeData
-import com.subhamgupta.roomiesapp.domain.model.RoomDetail
+import com.subhamgupta.roomiesapp.domain.model.*
 import com.subhamgupta.roomiesapp.utils.AuthState
 import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
@@ -39,6 +34,15 @@ class MainViewModel @Inject constructor(
 
     private val _leaveRoom = MutableLiveData<Boolean>()
     val leaveRoom: LiveData<Boolean> = _leaveRoom
+
+    private val _homeUser = MutableStateFlow(HomeUserMap())
+    val homeUserMap = _homeUser.asStateFlow()
+
+    private val _homeDonut = MutableStateFlow<List<DonutSection>>(emptyList())
+    val homeDonut = _homeDonut.asStateFlow()
+
+    private val _homeDetails = MutableStateFlow<List<Detail>>(emptyList())
+    val homeDetails = _homeDetails.asStateFlow()
 
     private val _sheetLoading = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val sheetLoading = _sheetLoading.asStateFlow()
@@ -167,7 +171,6 @@ class MainViewModel @Inject constructor(
                 getStoredCards()
             }
         }
-
     }
 
     fun refreshData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
@@ -258,7 +261,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun fetchHomeData() = viewModelScope.launch(supervisor + Dispatchers.IO) {
-        repository.fetchHomeData(_homeData, _homeDataLoading)
+        repository.fetchHomeData(_homeData, _homeDataLoading, _homeUser, _homeDetails, _homeDonut)
     }
 
     fun getTotalAmount(): MutableLiveData<Int> {

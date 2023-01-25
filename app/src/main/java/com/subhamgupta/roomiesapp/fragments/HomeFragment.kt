@@ -39,6 +39,7 @@ import com.subhamgupta.roomiesapp.utils.FirebaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -116,7 +117,27 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.swipe.setOnRefreshListener {
             viewModel.refreshData()
         }
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launchWhenStarted {
+            viewModel.homeDetails.buffer().collect {
+                Log.e("home1", "$it")
+                adapter.setItems(it)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.homeDonut.buffer().collect {
+                Log.e("home2", "$it")
+                binding.donutView.submitData(it)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.homeUserMap.buffer().collect {
+                Log.e("home3", "$it")
+                if (it.eachPersonAmount!=null && it.userMap!=null)
+                    homeAdapter.setData(it.userMap, it.eachPersonAmount)
+                binding.eachAmt.text = it.eachPersonAmount.toString()
+            }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.homeData.buffer().collect {
                 withContext(Main) {
                     when (it) {
@@ -132,20 +153,19 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                             visible()
                         }
                         is FirebaseState.Success -> {
+                            loadingDialog.dismiss()
                             val res = it.data
                             if (res.isEmpty)
                                 visible()
                             else gone()
 
                             try {
-                                loadingDialog.dismiss()
+
                                 binding.spark.visibility = View.VISIBLE
-                                val data = res.todayData
-                                adapter.setItems(data)
+//
                                 binding.swipe.isRefreshing = false
-                                homeAdapter.setData(res.userMap, res.eachPersonAmount)
-                                binding.donutView.submitData(res.donutList!!)
-                                binding.eachAmt.text = res.eachPersonAmount.toString()
+//
+
                                 "₹${res.todayTotal}".also { binding.todayAmount.text = it }
                                 "₹${res.allTotal}".also { binding.totalSpends.text = it }
                                 "Updated ${getTimeAgo(res.updatedOn!!)}".also {

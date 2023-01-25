@@ -26,7 +26,7 @@ class HomeAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: ArrayList<MutableMap<String, String>>?, amount: String?){
+    fun setData(data: List<MutableMap<String, String>>?, amount: String?){
         this.data.clear()
         this.data.addAll(data!!)
         if (amount != null) {

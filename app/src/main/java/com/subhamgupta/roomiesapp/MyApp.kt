@@ -33,7 +33,6 @@ class MyApp : Application(), Configuration.Provider {
 
     override fun onTerminate() {
         super.onTerminate()
-
     }
 
     override fun onCreate() {

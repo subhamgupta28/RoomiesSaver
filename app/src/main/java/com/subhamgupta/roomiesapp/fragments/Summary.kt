@@ -35,8 +35,9 @@ class Summary : Fragment() {
     }
 
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         binding.recycler.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
         viewModel.getTotalAmount().observe(viewLifecycleOwner) { it1 ->
             "₹$it1".also { binding.totalSpends.text = it }
