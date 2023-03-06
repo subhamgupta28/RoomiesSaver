@@ -58,57 +58,55 @@
                         app:icon="@drawable/ic_create" />
 
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
+
+                        <com.google.android.material.card.MaterialCardView
+                            style="@style/Widget.Material3.CardView.Filled"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_marginStart="16dp"
+                            app:cardCornerRadius="50dp"
+                            app:strokeColor="@color/colorDayPopup"
+                            app:strokeWidth="3dp">
+
+                            <ImageView
+                                android:id="@+id/profile_img"
+                                android:layout_width="match_parent"
+
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_horizontal"
+                                android:contentDescription="profile picture" />
+                        </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingTop="24dp"
-                            android:paddingBottom="14dp">
+                            android:layout_gravity="center_vertical"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.card.MaterialCardView
-                                style="@style/Widget.Material3.CardView.Filled"
-                                android:layout_width="100dp"
-                                android:layout_height="100dp"
-                                android:layout_marginStart="16dp"
-                                app:cardCornerRadius="50dp"
-                                app:strokeColor="@color/colorDayPopup"
-                                app:strokeWidth="3dp">
-
-                                <ImageView
-                                    android:id="@+id/profile_img"
-                                    android:layout_width="match_parent"
-
-                                    android:layout_height="match_parent"
-                                    android:layout_gravity="center_horizontal"
-                                    android:contentDescription="profile picture" />
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <LinearLayout
+                            <TextView
+                                android:id="@+id/name_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:orientation="vertical">
+                                android:layout_margin="6dp"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                                android:textColor="@color/colorPrimary"
+                                android:textStyle="bold" />
 
-                                <TextView
-                                    android:id="@+id/name_text"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_margin="6dp"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                                    android:textColor="@color/colorPrimary"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/email_text"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
-                            </LinearLayout>
+                            <TextView
+                                android:id="@+id/email_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
                         </LinearLayout>
-
+                    </LinearLayout>
 
 
                 </com.google.android.material.card.MaterialCardView>
@@ -286,10 +284,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/chips"
-                    android:visibility="gone"
                     android:orientation="vertical"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
+                    android:paddingEnd="16dp"
+                    android:visibility="gone">
 
 
                     <com.google.android.material.materialswitch.MaterialSwitch
@@ -344,8 +342,8 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/shareid"
                             android:layout_width="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
                             android:text="Share Room"
                             app:cornerRadius="10dp" />
 
@@ -364,12 +362,13 @@
 
                             android:text="Edit Start Day Of Month"
                             app:cornerRadius="10dp" />
+
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/limit_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Edit Room"
                             android:layout_marginStart="8dp"
+                            android:text="Edit Room"
                             app:cornerRadius="10dp" />
 
 
@@ -394,10 +393,16 @@
                         style="@style/Widget.Material3.FloatingActionButton.Tertiary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/setDate"
                         android:layout_gravity="end"
                         android:layout_marginStart="16dp"
                         android:text="Leave Room"
+                        app:cornerRadius="10dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/migrate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Schedule Migrate"
                         app:cornerRadius="10dp" />
 
                 </LinearLayout>

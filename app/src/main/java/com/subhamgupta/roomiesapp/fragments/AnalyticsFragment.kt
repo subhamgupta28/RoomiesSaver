@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentAnalyticsBinding
-import im.dacer.androidcharts.LineView
 
 
 class AnalyticsFragment : Fragment() {

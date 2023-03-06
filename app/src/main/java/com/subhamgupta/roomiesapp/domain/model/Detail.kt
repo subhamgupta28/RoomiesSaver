@@ -25,6 +25,7 @@ data class Detail(
     @SerializedName("CATEGORY")
     var CATEGORY: String? = null,
     @SerializedName("NOTE")
-    var NOTE: String? = null
-
+    var NOTE: String? = null,
+    @SerializedName("DELETED")
+    var DELETED: Boolean = false
 ) : Serializable

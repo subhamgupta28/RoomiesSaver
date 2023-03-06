@@ -14,6 +14,7 @@ import androidx.core.view.children
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.ViewPager2
@@ -28,6 +29,7 @@ import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentDiffUserBinding
 import com.subhamgupta.roomiesapp.databinding.PopupBinding
 import com.subhamgupta.roomiesapp.domain.model.Detail
+import com.subhamgupta.roomiesapp.domain.model.ROOMMATES
 import com.subhamgupta.roomiesapp.onClickPerson
 import kotlin.math.abs
 
@@ -54,20 +56,25 @@ class DiffUser: Fragment(), EditPopLink, onClickPerson {
         binding.viewpager.clipToPadding = false
         binding.viewpager.clipChildren = false
 
-        viewModel.getDiffData().observe(viewLifecycleOwner) {
-            adapter.setData(it)
-            binding.swipe.isRefreshing = false
+        lifecycleScope.launchWhenStarted {
+            viewModel.diffUserData.collect {
+                adapter.setData(it)
+                binding.swipe.isRefreshing = false
+            }
         }
         binding.swipe.setOnRefreshListener {
             viewModel.getDiffData()
         }
         val roomAdapter = RoomieAdapter(this)
-        viewModel.getRoomMates().observe(viewLifecycleOwner){
-            binding.personRecycler.adapter = roomAdapter
-            if (it != null) {
-                roomAdapter.setItem(it)
+        lifecycleScope.launchWhenStarted {
+            viewModel.getRoomMates().collect{
+                binding.personRecycler.adapter = roomAdapter
+                if (it != null) {
+                    roomAdapter.setItem(it as ArrayList<ROOMMATES>)
+                }
             }
         }
+
 
         val transformer = CompositePageTransformer()
         transformer.addTransformer { page: View, position: Float ->

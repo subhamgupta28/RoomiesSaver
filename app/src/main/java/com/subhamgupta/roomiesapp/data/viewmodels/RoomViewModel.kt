@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RoomViewModel @Inject constructor(
-    private val repository : RoomRepository
+    private val repository: RoomRepository
 ) : ViewModel() {
 
     private val _createRoom = MutableStateFlow<FirebaseState<CreateRoom>>(FirebaseState.empty())
@@ -26,12 +26,12 @@ class RoomViewModel @Inject constructor(
             repository.getUser()
         }
     }
-
-    fun createRoom(name: String, limit:Int, id: String, date :String) = viewModelScope.launch(Dispatchers.IO){
+    fun createRoom(name: String, limit: Int, id: String, date: String) =
+        viewModelScope.launch(Dispatchers.IO) {
             repository.createRoom(name, limit, id, date, _createRoom)
-    }
+        }
 
-    fun joinRoom(room_id: String) = viewModelScope.launch(Dispatchers.IO){
+    fun joinRoom(room_id: String) = viewModelScope.launch(Dispatchers.IO) {
         repository.joinRoom(room_id, _createRoom)
     }
 }

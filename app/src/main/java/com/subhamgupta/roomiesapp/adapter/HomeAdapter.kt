@@ -50,17 +50,20 @@ class HomeAdapter(
                if (color != null) {
                    val hexColor = String.format("#%08X", 0xB3FFFFFF and color)
                    val newColor = Color.parseColor(hexColor)
-                   binding.homeLayout.strokeWidth = 3
-                   binding.homeLayout.strokeColor = (newColor)
+//                   binding.homeLayout.strokeWidth = 3
+//                   binding.homeLayout.strokeColor = (newColor)
                }
                val amount = data["AMOUNT"].toString().toInt()
                if (amnt<amount){
                    (" ↑${String.format("%.1f", amount.toDouble()-amnt)}").also { binding.eachAmt.text = it }
                    binding.eachAmt.setTextColor(Color.parseColor("#0F9D58"))
+                   binding.amountBehavior.setImageResource(R.drawable.round_sentiment_happy)
+                   binding.amountBehavior
                }
                else{
                    (" ↓${String.format("%.1f", amnt-amount.toDouble())}").also { binding.eachAmt.text = it }
                    binding.eachAmt.setTextColor(Color.parseColor("#DB4437"))
+                   binding.amountBehavior.setImageResource(R.drawable.round_sentiment_sad)
                }
                ("₹$amount").also { binding.hamount.text = it }
                binding.root.setOnClickListener {

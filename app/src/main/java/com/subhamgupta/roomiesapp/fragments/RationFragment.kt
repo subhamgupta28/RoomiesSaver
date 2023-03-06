@@ -25,11 +25,6 @@ class RationFragment: Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var binding: FragmentRationBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,7 +47,7 @@ class RationFragment: Fragment() {
         binding.rationRecycler.adapter = adapter
 
         lifecycleScope.launchWhenStarted {
-            viewModel.storedCards.buffer().collect{
+            viewModel.storedCards.collect{
                 when (it) {
                     is FirebaseState.Loading -> {
                     }

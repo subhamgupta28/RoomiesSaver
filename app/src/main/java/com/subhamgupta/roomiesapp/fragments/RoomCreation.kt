@@ -4,9 +4,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,6 +18,7 @@ import com.budiyev.android.codescanner.AutoFocusMode
 import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ScanMode
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.activities.MainActivity
@@ -74,7 +77,7 @@ class RoomCreation: Fragment() {
             viewModel.createRoom.buffer().collect{
                 when (it){
                     is FirebaseState.Failed ->{
-
+                        showSnackBar(it.message.toString())
                     }
                     is FirebaseState.Loading ->{
 
@@ -191,10 +194,14 @@ class RoomCreation: Fragment() {
         }
     }
     private fun showSnackBar(msg: String) {
-        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
-            .setBackgroundTint(resources.getColor(R.color.colorSecondary))
+        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val view = snackBarView.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        view.layoutParams = params
+        snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
+        snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
             .setTextColor(resources.getColor(R.color.colorOnSecondary))
-            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
     }
 

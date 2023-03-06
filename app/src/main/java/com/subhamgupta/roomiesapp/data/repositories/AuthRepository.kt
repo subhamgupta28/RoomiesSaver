@@ -73,7 +73,7 @@ class AuthRepository @Inject constructor(
         }
         if (result.isComplete) {
             try {
-                val u = result.result.user
+                val u = result.result?.user
                 val user = UserAuth(false, u, true, u?.isEmailVerified)
                 if (u != null) {
                     saveUserToRDB(email, name, u, country)
@@ -126,7 +126,7 @@ class AuthRepository @Inject constructor(
         val result = suspendCoroutine<MutableMap<String, Any>> { cont ->
             databaseReference.child(uuid).get().addOnCompleteListener {
                 if (it.isSuccessful) {
-                    val mp = it.result.value as MutableMap<String, Any>
+                    val mp = it.result?.value as MutableMap<String, Any>
                     Log.e("AUTH", "$mp")
                     cont.resume(mp)
 

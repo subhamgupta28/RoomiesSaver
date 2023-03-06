@@ -23,23 +23,22 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
+import com.subhamgupta.roomiesapp.data.AndroidAlarmScheduler
 import com.subhamgupta.roomiesapp.domain.model.*
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NotificationSender
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import java.io.File
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
@@ -48,6 +47,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.system.measureTimeMillis
 
 
 @Singleton
@@ -73,7 +73,7 @@ class MainRepository @Inject constructor(
     private val tempRoomMap = MutableLiveData<MutableMap<String, String>>()
     private val roomIDToRef = HashMap<String, String>()
     private val uuidLink = mutableMapOf<String, Int>()
-    private val roomMates = MutableLiveData<ArrayList<ROOMMATES>?>()
+    private val roomMates = MutableStateFlow<MutableList<ROOMMATES>?>(mutableListOf())
     private var userName: String = ""
     private var deviceId: String = ""
 
@@ -82,11 +82,12 @@ class MainRepository @Inject constructor(
     var user: FirebaseUser? = auth.currentUser
     var uuid: String? = user?.uid
     private var query: Query? = null
+
     init {
         deviceId =
             Settings.Secure.getString(application.contentResolver, Settings.Secure.ANDROID_ID)
         Log.e("ID Email uuid", "$uuid")
-
+//        MyApp.uuid = uuid!!
     }
 
 
@@ -140,38 +141,41 @@ class MainRepository @Inject constructor(
         data: MutableStateFlow<MutableMap<String, Any>>,
         userDataLoading: MutableStateFlow<Boolean>
     ) {
-        Log.e( "getUser: ", "fired ${data.value} ${userDataLoading.value}")
+        Log.e("getUser: ", "fired ${data.value} ${userDataLoading.value}")
         var flag = true
         val offlineUserData = readUserDataFromRemote()
         if (!dataStore.isUpdate() && dataStore.isLoggedIn() && offlineUserData != null && offlineUserData.isNotEmpty()) {
             data.value = offlineUserData as MutableMap<String, Any>
             Log.e("getUser: OFFLINE", "$user")
-            userDataLoading.value = false
             flag = false
+            userDataLoading.value = false
         }
-        uuid = auth.currentUser?.uid
-        databaseReference.child(uuid!!).addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if(dataSnapshot.exists()) {
-                        val user = dataSnapshot.value as MutableMap<String, Any>
-                        Log.e( "getUser: ONLINE", "fired $user")
-                        val onlineUserData = user
-                        saveUserToLocal(onlineUserData)
-                        userData.value = onlineUserData
-                        Log.e("USER DATA cloud", "$user")
-                        data.value = onlineUserData
-                        if (flag) {
-                            userDataLoading.value = false
+        coroutineScope {
+            uuid = auth.currentUser?.uid
+            databaseReference.child(uuid!!).addValueEventListener(
+                object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            val user = dataSnapshot.value as MutableMap<String, Any>
+                            val onlineUserData = user
+                            saveUserToLocal(onlineUserData)
+                            userData.value = onlineUserData
+                            Log.e("USER DATA cloud", "$user")
+                            data.value = onlineUserData
+                            if (flag) {
+                                userDataLoading.value = false
+                            }
                         }
                     }
-                }
-                override fun onCancelled(databaseError: DatabaseError) {
 
+                    override fun onCancelled(databaseError: DatabaseError) {
+
+                    }
                 }
-            }
-        )
-        dataStore.setDeviceId(deviceId)
+            )
+        }
+
+//        dataStore.setDeviceId(deviceId)
 
     }
 
@@ -254,10 +258,10 @@ class MainRepository @Inject constructor(
                     val result = suspendCancellableCoroutine { cont ->
                         databaseReference.child("ROOM").child(i.value.toString()).get()
                             .addOnCompleteListener { it1 ->
-                                val result = it1.result.getValue(RoomDetail::class.java)
+                                val result = it1.result?.getValue(RoomDetail::class.java)
                                 cont.resumeWith(Result.success(result))
                             }
-                            .addOnFailureListener{
+                            .addOnFailureListener {
                                 Log.e("fetchUserRoomData", "$it")
                                 cont.resumeWith(Result.failure(it))
                             }
@@ -265,8 +269,7 @@ class MainRepository @Inject constructor(
                     Log.e("fetchUserRoomData", "$result")
                     roomMapWithId[i.value.toString()] = result
                     // roomId to it's data
-                }
-                else
+                } else
                     continue
             }
             dataStore.setUpdate(false)
@@ -279,9 +282,9 @@ class MainRepository @Inject constructor(
                 launch {
                     try {
                         var room = roomMapWithId[roomMapWithId.keys.first()]
-                        if (roomMapWithId[dataStore.getRoomKey()]!=null)
+                        if (roomMapWithId[dataStore.getRoomKey()] != null)
                             room = roomMapWithId[dataStore.getRoomKey()]
-                        Log.e("room vs id map","$room")
+                        Log.e("room vs id map", "$room")
                         if (roomMapWithId.isNotEmpty())
                             roomData.value = FirebaseState.success(room!!)
                     } catch (e: Exception) {
@@ -302,8 +305,8 @@ class MainRepository @Inject constructor(
         val tempRoomMap = mutableMapOf<String, String>()
         val allRoom = ArrayList<RoomDetail>()
 
-        val d = userData.filter {it.key.contains("ROOM_ID")}
-        d.forEach{
+        val d = userData.filter { it.key.contains("ROOM_ID") }
+        d.forEach {
             try {
                 val room = roomMapWithId[it.value.toString()]
                 val roomName = room?.ROOM_NAME.toString()
@@ -312,7 +315,7 @@ class MainRepository @Inject constructor(
                 roomMap[roomName] = roomId
                 tempRoomMap[roomId] = roomName
                 allRoom.add(room!!)
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Log.e("update :: error", "$e")
             }
 
@@ -338,13 +341,12 @@ class MainRepository @Inject constructor(
 
             val room = d?.ROOM_MATES
             if (room != null) {
-                roomMates.postValue(room)
+                roomMates.value = room
                 dataStore.setRoomSize(room.size)
                 roomDataLoading.value = false
-                Log.e( "update: room","$room" )
-                fetchDiffData(room)
-            }else{
-                Log.e( "update: else","empty" )
+                Log.e("update: room", "$room")
+            } else {
+                Log.e("update: else", "empty")
             }
         } catch (e: Exception) {
             Log.e("Update ERROR update", "${e.message}")
@@ -356,6 +358,7 @@ class MainRepository @Inject constructor(
         uuid = user?.uid
     }
 
+    private var room: RoomDetail? = null
     suspend fun prepareRoom(
         userData: MutableStateFlow<MutableMap<String, Any>>,
         roomData: MutableStateFlow<FirebaseState<RoomDetail>>,
@@ -364,7 +367,7 @@ class MainRepository @Inject constructor(
         roomData.value = FirebaseState.loading()
         val user = userData.value
         val roomDataLocal = readDataFromRemote()
-        Log.e("prepareRoom: ","$user \n $roomDataLocal")
+        Log.e("prepareRoom: ", "$user \n $roomDataLocal")
         if (!dataStore.isUpdate() && dataStore.isLoggedIn() && roomDataLocal != null && roomDataLocal.isNotEmpty()) {
             Log.e("IS", "OFFLINE")
             val roomMapWithId = mutableMapOf<String, RoomDetail?>()
@@ -377,9 +380,12 @@ class MainRepository @Inject constructor(
                     roomMapWithId[i.value.toString()] = d
                 }
             }
+
             update(user, roomMapWithId, roomDataLoading)
-            val room = roomMapWithId[roomKey]
+
             try {
+                room = roomMapWithId[roomKey]!!
+//                migrate()
                 roomData.value = FirebaseState.success(room!!)
             } catch (e: Exception) {
                 roomData.value = FirebaseState.failed("Something went wrong")
@@ -388,6 +394,26 @@ class MainRepository @Inject constructor(
         } else {
             fetchUserRoomData(userData, roomData, roomDataLoading)
         }
+    }
+
+    suspend fun getUsersRoom(
+        userData: MutableStateFlow<MutableMap<String, Any>>,
+        roomDataLoading: MutableStateFlow<Boolean>
+    ) {
+        val user = userData.value
+        val uuid = user["UUID"].toString()
+        val time = measureTimeMillis {
+            db.collection(uuid + "_MAP").get()
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val result = it.result?.toObjects(MapUserRoom::class.java)
+                        Log.e("rooms", "$result")
+                    }
+                }
+        }
+        Log.e("rooms", "$time")
+
+
     }
 
     suspend fun signOut() {
@@ -449,7 +475,7 @@ class MainRepository @Inject constructor(
     }
 
 
-    val time: String
+    private val time: String
         get() {
             val date = Date()
             val sdm = SimpleDateFormat(TIME_STRING, Locale.getDefault())
@@ -466,26 +492,36 @@ class MainRepository @Inject constructor(
         item: String?,
         amount: String,
         timeStamp: String,
-        liveData: MutableLiveData<Boolean>,
+        liveData: MutableStateFlow<Boolean>,
         note: String,
         tags: List<String>,
         category: String
     ) {
 //        Log.e("Update","$roomKey $item $amount $timeStamp")
         db.collection(roomKey).document(timeStamp).update("ITEM_BOUGHT", item)
+        db.collection(roomKey).document(timeStamp).update("DELETED", false)
         db.collection(roomKey).document(timeStamp).update("TAGS", tags)
         db.collection(roomKey).document(timeStamp).update("NOTE", note)
         db.collection(roomKey).document(timeStamp).update("CATEGORY", category)
         db.collection(roomKey).document(timeStamp).update("AMOUNT_PAID", amount.toInt())
             .addOnCompleteListener {
-                liveData.postValue(true)
+                liveData.value = true
             }
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("ITEM_BOUGHT", item)
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("DELETED", false)
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("TAGS", tags)
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("NOTE", note)
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("CATEGORY", category)
+        db.collection(roomKey + "_BACKUP").document(timeStamp).update("AMOUNT_PAID", amount.toInt())
+            .addOnCompleteListener {
+            }
+
     }
 
     fun addItem(
         item: String?,
         amount: String,
-        liveData: MutableLiveData<Boolean>,
+        liveData: MutableStateFlow<Boolean>,
         note: String,
         tags: List<String>,
         category: String
@@ -501,30 +537,39 @@ class MainRepository @Inject constructor(
             "BOUGHT_BY" to userName,
             "TAGS" to tags,
             "CATEGORY" to category,
-            "NOTE" to note
+            "NOTE" to note,
+            "DELETED" to false
         )
         db.collection(roomKey).document(ts.toString()).set(detail)
             .addOnFailureListener {
                 Toast.makeText(application, "Error occurred", Toast.LENGTH_LONG).show()
-                liveData.postValue(false)
+                liveData.value = false
             }
             .addOnSuccessListener {
-                liveData.postValue(true)
+                liveData.value = true
+
+            }
+        db.collection(roomKey + "_BACKUP").document(ts.toString()).set(detail)
+            .addOnFailureListener {
+
+            }
+            .addOnSuccessListener {
+
             }
 
     }
 
 
-    suspend fun fetchHomeData(
+    suspend fun generateHomeData(
         liveData: MutableStateFlow<FirebaseState<HomeData>>,
         loadingHome: MutableStateFlow<Boolean>,
         homeUser: MutableStateFlow<HomeUserMap>,
         homeDetail: MutableStateFlow<List<Detail>>,
         homeDonut: MutableStateFlow<List<DonutSection>>,
+        migrateCheck: MutableStateFlow<Int>,
     ) = coroutineScope {
-        roomKey = dataStore.getRoomKey()
-        loadingHome.value = true
         liveData.value = FirebaseState.loading()
+        roomKey = dataStore.getRoomKey()
         val startDate = dataStore.getStartDate()
         val roomSize = dataStore.getRoomSize()
         val som =
@@ -535,11 +580,9 @@ class MainRepository @Inject constructor(
             .whereGreaterThanOrEqualTo("TIME_STAMP", som)
             .addSnapshotListener { query, error ->
                 if (error != null) {
-                    liveData.value = FirebaseState.failed(error.message)
                     return@addSnapshotListener
                 }
                 if (query != null) {
-                    Log.e("home", "start")
                     var todayTotalAmount = 0
                     var monthTotalAmount = 0
                     val chartList = ArrayList<Int>()
@@ -547,8 +590,8 @@ class MainRepository @Inject constructor(
                     val todayDetail = ArrayList<Detail>()
                     val donutList = ArrayList<DonutSection>()
                     val userMap = mutableMapOf<String, HashMap<String, Any?>>()
-                    val homeDetails = query.toObjects(Detail::class.java)
-
+                    val homeDetails = query.toObjects(Detail::class.java).filter { !it.DELETED }
+                    migrateCheck.value = homeDetails.size
                     chartList.add(1)
                     homeDetails.forEach { detail ->
                         if (DateUtils.isToday(detail.TIME_STAMP ?: 0)) {
@@ -600,22 +643,30 @@ class MainRepository @Inject constructor(
                         if (todayDetail.size != 0) todayDetail[0].TIME_STAMP else System.currentTimeMillis()
                     totalAmount.postValue(monthTotalAmount)
                     todayAmount.postValue(todayTotalAmount)
+
                     val home = HomeData(
                         todayTotalAmount,
                         monthTotalAmount,
-//                        todayDetail,
-//                        donutList,
-//                        allUserAmount,
                         startDate,
                         updatedOn.toString(),
                         chartList,
                         homeDetails.isEmpty()
                     )
+                    val homeUserMap = HomeUserMap(round, allUserAmount)
+//                    saveHomeData(
+//                        home,
+//                        donutList,
+//                        todayDetail,
+//                        homeUserMap,
+//                        monthTotalAmount,
+//                        todayTotalAmount
+//                    )
+
                     liveData.value = FirebaseState.success(home)
-                    loadingHome.value = false
                     homeDonut.value = donutList
                     homeDetail.value = todayDetail
-                    homeUser.value = HomeUserMap(round, allUserAmount)
+                    homeUser.value = homeUserMap
+                    loadingHome.value = false
                     Log.e("home", "end")
 
                 }
@@ -632,6 +683,126 @@ class MainRepository @Inject constructor(
             }
     }
 
+    suspend fun migrate() = coroutineScope {
+        val details = ArrayList<Any>()
+        val uuidSet = ArrayList<String>()
+        Log.e("migrate", "$room")
+        if (room != null) {
+            val roomUser = room!!.ROOM_MATES
+            roomUser.forEach { mate ->
+                val uuid = mate.UUID
+                uuidSet.add(uuid!!)
+            }
+            Log.e("migrate", "$uuidSet")
+            val query = db.collection(roomKey).whereEqualTo("DELETED", false)
+            val result = suspendCoroutine { cont ->
+                query.get().addOnCompleteListener { value ->
+                    if (value.isSuccessful) {
+                        val res = value.result?.toObjects(Detail::class.java)
+                        cont.resume(res)
+                    }
+                }
+            }
+            result?.let {
+                if (it.isEmpty()) {
+                    val map = mutableMapOf<String, Long>()
+                    uuidSet.forEach { uuid ->
+                        val amount = result.filter { it!!.UUID == uuid }.sumOf { it.AMOUNT_PAID }
+                        map[uuid] = amount
+                    }
+                    Log.e("migrate", "$map")
+                    map.forEach { m ->
+                        val user = roomUser.filter { it.UUID == m.key }[0]
+                        val detail = mutableMapOf(
+                            "UUID" to m.key,
+                            "TIME" to time,
+                            "DATE" to date,
+                            "TIME_STAMP" to System.currentTimeMillis(),
+                            "AMOUNT_PAID" to m.value,
+                            "ITEM_BOUGHT" to "Migration",
+                            "BOUGHT_BY" to user.USER_NAME,
+                            "TAGS" to emptyList<String>(),
+                            "CATEGORY" to "All",
+                            "NOTE" to "Migration",
+                            "DELETED" to false
+                        )
+                        delay(200)
+                        details.add(detail)
+                    }
+                    Log.e("migrate", "$details")
+
+                    result.forEach { detail ->
+                        val migratedCreate = suspendCoroutine { cont ->
+                            db.collection(roomKey + "_MIGRATED")
+                                .document(detail.TIME_STAMP.toString())
+                                .set(detail)
+                                .addOnCompleteListener {
+                                    Log.e("migrate", "${it.isSuccessful}")
+                                    cont.resume(true)
+                                }.addOnFailureListener {
+                                    Log.e("migrate error", "${it.message}")
+                                }
+                        }
+                        Log.e("Migrate", "$detail")
+                        if (migratedCreate) {
+                            suspendCoroutine { con ->
+                                db.collection(roomKey)
+                                    .document(detail.TIME_STAMP.toString())
+                                    .update("DELETED", true)
+                                    .addOnCompleteListener {
+                                        con.resume(Unit)
+                                    }
+                            }
+                        }
+                    }
+                    Log.e("migrate done", "setting")
+                    details.parallelStream().forEach {
+                        val tempMap = it as Map<String, Any>
+                        Log.e("migrate", "$tempMap")
+                        db.collection(roomKey)
+                            .document(tempMap["TIME_STAMP"].toString())
+                            .set(tempMap)
+                            .addOnCompleteListener {
+                                Log.e("migrate", "completed $tempMap")
+                            }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun fetchDiffData(
+        data: List<Detail?>,
+        _diffUserData: MutableStateFlow<MutableList<MutableMap<String, Any>>>
+    ) = coroutineScope {
+        val result = mutableListOf<MutableMap<String, Any>>()
+        val uuidSet = ArrayList<String>()
+
+        try {
+            Log.e("ROOM2", "$room")
+            val roomUser = room!!.ROOM_MATES
+            roomUser.forEach { mate ->
+                val uuid = mate.UUID
+                uuidSet.add(uuid!!)
+            }
+            Log.e("ROOM2", "$uuidSet")
+
+            uuidSet.forEach { uuid ->
+                val map = mutableMapOf<String, Any>()
+                map["UUID"] = uuid
+                val list = data.filter { it!!.UUID == uuid }
+                list.sortedBy { it!!.TIME_STAMP }
+                map["DATA"] = list
+                result.add(map)
+            }
+            _diffUserData.value = result
+        } catch (e: Exception) {
+            Log.e("fetchDiffData error", "$e")
+        }
+    }
+
+
+    @Deprecated("new version made")
     suspend fun fetchDiffData(roomMates: ArrayList<ROOMMATES>) {
         roomKey = dataStore.getRoomKey()
         val detailMap = mutableListOf<MutableMap<String, Any>>()
@@ -661,10 +832,10 @@ class MainRepository @Inject constructor(
                     query.whereEqualTo("UUID", roommates.UUID.toString())
                         .addSnapshotListener { value, _ ->
                             if (value != null) {
-                                try{
+                                try {
                                     val v = value.toObjects(Detail::class.java)
                                     it.resume(v)
-                                }catch (e : Exception){
+                                } catch (e: Exception) {
                                     Log.e("fetchDiffData", "${e.message}")
                                 }
                             }
@@ -677,8 +848,8 @@ class MainRepository @Inject constructor(
                     )
                 )
             }
-            Log.e("detailMap", "$detailMap")
-            _diffData.postValue(detailMap)
+            Log.e("fetchDiffData", "$detailMap")
+//            _diffData.postValue(detailMap)
         }
 
     }
@@ -727,9 +898,9 @@ class MainRepository @Inject constructor(
         editUser.value = FirebaseState.loading()
         val ref = storage.getReference(uuid!! + "/profile_pic.jpg")
         ref.putFile(uri)
-            .addOnCompleteListener {
+            .addOnCompleteListener { it ->
                 if (it.isComplete) {
-                    it.result.storage.downloadUrl.addOnCompleteListener {
+                    it.result?.storage?.downloadUrl?.addOnCompleteListener {
                         databaseReference.child(uuid!!).child("USER_NAME").setValue(userName)
                         databaseReference.child(uuid!!).child("IMG_URL")
                             .setValue(it.result.toString())
@@ -745,22 +916,29 @@ class MainRepository @Inject constructor(
     suspend fun fetchSummary(
         isMonth: Boolean,
         category: String,
-        state: MutableStateFlow<FirebaseState<List<Detail?>>>
+        state: MutableStateFlow<FirebaseState<List<Detail?>>>,
+        summaryDataLoading: MutableStateFlow<Boolean>
     ) = coroutineScope {
         roomKey = dataStore.getRoomKey()
+        val pageSize = 50L
         var sdom = 0L
         query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
         val startDate = dataStore.getStartDate()
-        if (isMonth) {
-            sdom = if (startDate == "0") LocalDate.now().withDayOfMonth(1)
+        sdom = if (isMonth) {
+            if (startDate == "0") LocalDate.now().withDayOfMonth(1)
                 .atStartOfDay(
                     ZoneId.systemDefault()
                 ).toInstant().epochSecond * 1000
             else startDate.toLong()
+        } else {
+            LocalDate.now().withDayOfMonth(1)
+                .atStartOfDay(
+                    ZoneId.systemDefault()
+                ).toInstant().epochSecond * 1000
         }
         state.value = FirebaseState.loading()
         var query = db.collection(roomKey).orderBy("TIME_STAMP", Query.Direction.DESCENDING)
-            .whereGreaterThanOrEqualTo("TIME_STAMP", sdom)
+            .whereGreaterThanOrEqualTo("TIME_STAMP", sdom).limit(pageSize)
         if (category != "All")
             query = query.whereEqualTo("CATEGORY", category)
         query.addSnapshotListener { value, error ->
@@ -779,9 +957,10 @@ class MainRepository @Inject constructor(
                     } else {
                         val docs = snapshots.map {
                             it.toObject(Detail::class.java)
-                        }
+                        }.filter { it?.DELETED == false }
                         details.postValue(docs)
                         state.value = FirebaseState.success(docs)
+                        summaryDataLoading.value = true
                     }
                 }
             }
@@ -817,7 +996,7 @@ class MainRepository @Inject constructor(
                     for (ds in value) {
                         val d = ds.data as MutableMap<String, Any>
                         result.add(d)
-                        Log.e( "getStoredItemCards: ","$d" )
+                        Log.e("getStoredItemCards: ", "$d")
                     }
                     data.value = FirebaseState.success(result)
                 } else {
@@ -850,14 +1029,14 @@ class MainRepository @Inject constructor(
                     map["TIME_STAMP"] = ts
                     map["IMG_NAME"] = "$ts.jpg"
                     map["IMG_URL"] = Uri.parse(it.toString()).toString()
-                    db.collection(roomKey+"_RATION").document(ts.toString()).set(map)
+                    db.collection(roomKey + "_RATION").document(ts.toString()).set(map)
                         .addOnCompleteListener {
                             data.value = FirebaseState.success(true)
-                        }.addOnFailureListener{
-                            Log.e( "uploadCard: ","${it.message}" )
+                        }.addOnFailureListener {
+                            Log.e("uploadCard: ", "${it.message}")
                         }
                 }.addOnFailureListener {
-                    Log.e( "uploadCard: ", "${it.message}")
+                    Log.e("uploadCard: ", "${it.message}")
                 }
 
 
@@ -865,7 +1044,7 @@ class MainRepository @Inject constructor(
             val p: Double =
                 100.0 * it.bytesTransferred / it.totalByteCount
 
-        }.addOnFailureListener{
+        }.addOnFailureListener {
             data.value = FirebaseState.failed(it.message)
         }
 
@@ -879,5 +1058,118 @@ class MainRepository @Inject constructor(
         val data = summary.value
 
 
+    }
+
+    private fun saveHomeData(
+        home: HomeData,
+        donutList: ArrayList<DonutSection>,
+        todayDetail: ArrayList<Detail>,
+        homeUserMap: HomeUserMap,
+        monthTotalAmount: Int,
+        todayTotalAmount: Int
+    ) {
+        val data = SavedHomeData(
+            UUID = uuid,
+            home = home,
+            donutList = donutList,
+            homeUserMap = homeUserMap,
+            detailList = todayDetail,
+            monthTotalAmount = monthTotalAmount,
+            todayTotalAmount = todayTotalAmount
+        )
+        db.collection(roomKey + "_HOME")
+            .document("HOME")
+            .set(data)
+            .addOnSuccessListener {
+
+                Log.e("HOME", "Saved $data")
+            }.addOnFailureListener {
+                Log.e("HOME", "$it")
+            }
+    }
+
+    private fun saveHomeDataLocal(data: SavedHomeData) {
+        try {
+            val userFile = File(application.filesDir, "/$roomKey.json")
+            if (!userFile.exists())
+                userFile.createNewFile()
+            userFile.writeText(Gson().toJson(data))
+        } catch (e: Exception) {
+            Log.e("saveHomeDataLocal", "$e")
+        }
+    }
+
+    private fun readHomeDataLocal(): SavedHomeData? {
+        return try {
+            val file = File(application.filesDir, "/$roomKey.json")
+            if (file.exists()) {
+                val json = file.readText(Charset.defaultCharset())
+                val result = Gson().fromJson(json, SavedHomeData::class.java)
+                Log.e("savedLocalHomeData", "$result")
+                result
+            } else
+                null
+        } catch (e: Exception) {
+            Log.e("savedLocalHomeData", "$e")
+            null
+        }
+    }
+
+    suspend fun getSavedHomeData(
+        liveData: MutableStateFlow<FirebaseState<HomeData>>,
+        loadingHome: MutableStateFlow<Boolean>,
+        homeUser: MutableStateFlow<HomeUserMap>,
+        homeDetail: MutableStateFlow<List<Detail>>,
+        homeDonut: MutableStateFlow<List<DonutSection>>,
+    ) = coroutineScope {
+        loadingHome.value = true
+        liveData.value = FirebaseState.loading()
+        val query = db.collection(roomKey + "_HOME").document("HOME")
+        query.addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.e("HOME", "$error")
+            }
+            if (value == null) {
+
+            } else {
+                value.let { snapshot ->
+                    val result = snapshot.toObject(SavedHomeData::class.java)
+                    if (result != null) {
+                        Log.e("getSavedHomeData", "$result")
+                        liveData.value = FirebaseState.success(result!!.home!!)
+                        loadingHome.value = false
+                        if (result.home != null) {
+                            totalAmount.postValue(result.home!!.allTotal)
+                            todayAmount.postValue(result.home!!.todayTotal)
+                        }
+//                    homeDonut.value = result.donutList as List<DonutSection>
+                        homeDetail.value = result.detailList
+                        homeUser.value = result.homeUserMap!!
+//                        saveHomeDataLocal(result)
+                    } else {
+                        liveData.value = FirebaseState.empty()
+                    }
+                }
+            }
+        }
+    }
+
+    fun setMigrationSchedule(time: Instant, migrationSchedule: MutableStateFlow<Boolean>) {
+        val alarmScheduler = AndroidAlarmScheduler(application)
+        val localDateTime = LocalDateTime.ofInstant(time, ZoneId.systemDefault())
+        val map = mapOf(
+            "ROOM_ID" to roomKey,
+            "TIME" to time.epochSecond
+        )
+        databaseReference.child(uuid!!)
+            .child("IS_MIGRATE")
+            .setValue(map)
+            .addOnCompleteListener {
+
+//                alarmScheduler.schedule(
+//                    ScheduleItem(time = localDateTime, "Migration")
+//                )
+                migrationSchedule.value = true
+            }
     }
 }

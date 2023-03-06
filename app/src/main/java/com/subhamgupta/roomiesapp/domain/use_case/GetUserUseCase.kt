@@ -13,8 +13,8 @@ class GetUserUseCase {
     ):MutableMap<String, Any>{
         val userData = suspendCancellableCoroutine<MutableMap<String, Any>> { cont ->
             databaseReference.child(uuid).get().addOnCompleteListener {
-                if (it.isSuccessful && it.result.exists()) {
-                    val mp = it.result.value as MutableMap<String, Any>
+                if (it.isSuccessful && it.result!!.exists()) {
+                    val mp = it.result!!.value as MutableMap<String, Any>
                     cont.resume(mp)
                 }else{
                     Log.e("else","${it.exception}")

@@ -20,6 +20,7 @@ import com.subhamgupta.roomiesapp.data.repositories.MainRepository
 import com.subhamgupta.roomiesapp.data.repositories.RoomRepository
 import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import com.subhamgupta.roomiesapp.utils.SettingDataStore
+import com.subhamgupta.roomiesapp.utils.Worker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,6 +39,7 @@ object AppModule {
 
     private val settings = FirebaseFirestoreSettings.Builder()
         .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+        .setPersistenceEnabled(true)
         .build()
 
     @Singleton
@@ -106,10 +108,10 @@ object AppModule {
     fun provideRoomRepository(
         databaseReference: DatabaseReference,
         auth: FirebaseAuth,
-        settingDataStore: SettingDataStore,
+        db: FirebaseFirestore,
         application: Application
     ): RoomRepository = RoomRepository(
-        databaseReference, auth, settingDataStore, application
+        databaseReference, auth, db, application
     )
 
     @Singleton
@@ -123,7 +125,6 @@ object AppModule {
     fun provideNetworkObserver(
         application: Application
     ): NetworkObserver = NetworkObserver(application)
-
 
 
 }

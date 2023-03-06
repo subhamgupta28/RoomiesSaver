@@ -50,6 +50,7 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.abs
 
 
 class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragment(), HAdapToHFrag {
@@ -72,13 +73,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
 
 
-        val localDate = LocalDateTime.now()
-        val today = localDate.dayOfYear
-
-//        val format = DateTimeFormatter.ofPattern("mm dd yyyy HH:mm:ss")
-//        val zDate = LocalDateTime.parse("12 22 2022 10:10:10", format)
-        Log.e("TIMES", " $today")
-        netStat()
+//        netStat()
         return binding.root
     }
 
@@ -99,6 +94,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         return xlarge || large
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireActivity())
@@ -106,6 +102,18 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         materialAlertDialogBuilder.setView(loadingView.root)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         loadingDialog = materialAlertDialogBuilder.create()
+        if (!loadingDialog.isShowing)
+            loadingDialog.show()
+        lifecycleScope.launchWhenStarted {
+            viewModel.userData.collectLatest {
+                it["IS_ROOM_JOINED"]?.let { b ->
+                    if (!b.toString().toBoolean()) {
+                        if (loadingDialog.isShowing)
+                            loadingDialog.dismiss()
+                    }
+                }
+            }
+        }
 
         val homeAdapter = HomeAdapter(this)
         val adapter = SummaryAdapter()
@@ -126,13 +134,18 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         lifecycleScope.launchWhenStarted {
             viewModel.homeDonut.buffer().collect {
                 Log.e("home2", "$it")
-                binding.donutView.submitData(it)
+                try {
+                    binding.donutView.submitData(it)
+                } catch (e: Exception) {
+
+                }
+
             }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.homeUserMap.buffer().collect {
                 Log.e("home3", "$it")
-                if (it.eachPersonAmount!=null && it.userMap!=null)
+                if (it.eachPersonAmount != null && it.userMap != null)
                     homeAdapter.setData(it.userMap, it.eachPersonAmount)
                 binding.eachAmt.text = it.eachPersonAmount.toString()
             }
@@ -142,11 +155,11 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                 withContext(Main) {
                     when (it) {
                         is FirebaseState.Loading -> {
-                            if (!loadingDialog.isShowing)
-                                loadingDialog.show()
+
                         }
                         is FirebaseState.Empty -> {
                             loadingDialog.dismiss()
+                            visible()
                         }
                         is FirebaseState.Failed -> {
                             loadingDialog.dismiss()
@@ -168,7 +181,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
 
                                 "₹${res.todayTotal}".also { binding.todayAmount.text = it }
                                 "₹${res.allTotal}".also { binding.totalSpends.text = it }
-                                "Updated ${getTimeAgo(res.updatedOn!!)}".also {
+                                "Updated ${viewModel.getTimeAgo(res.updatedOn!!)}".also {
                                     binding.updatedOn.text = it
                                 }
                                 binding.spark.setData(mutableListOf(1, 0, 1) as ArrayList<Int>)
@@ -210,7 +223,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             try {
                 val barcodeEncoder = BarcodeEncoder()
                 val bitmap =
-                    barcodeEncoder.encodeBitmap(  roomKey+"ID", BarcodeFormat.QR_CODE, 700, 700)
+                    barcodeEncoder.encodeBitmap(roomKey + "ID", BarcodeFormat.QR_CODE, 700, 700)
                 binding.qrImage.setImageBitmap(bitmap)
             } catch (e: java.lang.Exception) {
             }
@@ -227,7 +240,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
     }
 
     private fun showSnackBar(msg: String) {
-        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val snackBarView = Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
         val view = snackBarView.view
         val params = view.layoutParams as FrameLayout.LayoutParams
         params.gravity = Gravity.TOP
@@ -238,20 +251,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             .show()
     }
 
-    private fun getTimeAgo(time: String): String {
-        var ago = ""
-        try {
-            ago = DateUtils.getRelativeTimeSpanString(
-                time.toLong(),
-                System.currentTimeMillis(),
-                DateUtils.SECOND_IN_MILLIS
-            ).toString()
 
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return ago
-    }
 
     override fun goToHome(position: Int, uuid: String) {
         homeToMainLink?.goToMain(position, uuid)

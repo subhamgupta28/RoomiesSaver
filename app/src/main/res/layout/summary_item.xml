@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         app:cardElevation="6dp"
         android:layout_margin="3dp"
-        app:cardCornerRadius="6dp">
+        app:cardCornerRadius="8dp">
         <View
             android:layout_width="3dp"
             android:background="@color/colorSecondaryVariant"

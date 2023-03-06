@@ -178,10 +178,10 @@
                     style="@style/Widget.Material3.CardView.Filled"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="8dp"
+                    android:visibility="gone"
                     app:cardCornerRadius="8dp">
 
                     <LinearLayout
@@ -189,6 +189,12 @@
                         android:layout_height="match_parent"
                         android:layout_margin="4dp"
                         android:orientation="horizontal">
+
+                        <com.google.android.material.search.SearchBar
+                            android:id="@+id/search_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Search" />
 
                         <ImageView
                             android:layout_width="wrap_content"

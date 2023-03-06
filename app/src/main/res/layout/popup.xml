@@ -9,6 +9,7 @@
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.Material3.CardView.Filled"
         android:layout_width="match_parent"
+        android:id="@+id/parent"
         android:layout_height="match_parent"
         app:cardCornerRadius="16dp">
 

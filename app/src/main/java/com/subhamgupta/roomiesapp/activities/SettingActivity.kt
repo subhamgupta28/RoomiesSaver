@@ -28,19 +28,22 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.subhamgupta.roomiesapp.BuildConfig
 import com.subhamgupta.roomiesapp.R
-import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.ActivitySettingBinding
 import com.subhamgupta.roomiesapp.databinding.EditDetailsBinding
 import com.subhamgupta.roomiesapp.databinding.EditUserPopupBinding
 import com.subhamgupta.roomiesapp.databinding.QrcodePopupBinding
 import com.subhamgupta.roomiesapp.fragments.RoomCreation
+import com.subhamgupta.roomiesapp.utils.Constant.Companion.DATE_STRING
 import com.subhamgupta.roomiesapp.utils.Constant.Companion.TIME_STRING
 import com.subhamgupta.roomiesapp.utils.FirebaseState
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -49,7 +52,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.sql.Date
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @AndroidEntryPoint
@@ -81,42 +90,61 @@ class SettingActivity : AppCompatActivity() {
                 showSnackBar("Start date of month changed")
 
         }
-        viewModel.getRoomMates().observe(this@SettingActivity) {
-            binding.chips.removeAllViews()
-            it?.forEach {
-                val chip = Chip(this@SettingActivity)
-                chip.text = it.USER_NAME.toString().uppercase()
-                chip.isCheckable = true
-                chip.isChecked = true
-                chip.isCheckedIconVisible = true
-                binding.chips.addView(chip)
+        lifecycleScope.launchWhenStarted {
+            viewModel.getRoomMates().collect {
+                binding.chips.removeAllViews()
+                it?.forEach {
+                    val chip = Chip(this@SettingActivity)
+                    chip.text = it.USER_NAME.toString().uppercase()
+                    chip.isCheckable = true
+                    chip.isChecked = true
+                    chip.isCheckedIconVisible = true
+                    binding.chips.addView(chip)
+                }
             }
         }
-        binding.dynamicTheme.setOnCheckedChangeListener { compoundButton, b ->
+
+        binding.dynamicTheme.setOnCheckedChangeListener { _, b ->
             lifecycleScope.launch {
                 settingDataStore.setDynamicTheme(b)
             }
         }
         lifecycleScope.launchWhenStarted {
 
-            val dt = settingDataStore.isDynamicTheme()
-            binding.dynamicTheme.isChecked = dt
+//            val dt = settingDataStore.isDynamicTheme()
+//            binding.dynamicTheme.isChecked = dt
 
-            val it = viewModel.getRoomDataFromLocal()?.get(settingDataStore.getRoomKey()) as MutableMap<*,*>
+            val it = viewModel.getRoomDataFromLocal()
+                ?.get(settingDataStore.getRoomKey()) as MutableMap<*, *>
             name = it["ROOM_NAME"].toString()
             limit = it["LIMIT"].toString()
             roomKey = it["ROOM_ID"].toString()
             binding.rId.text = roomKey
             binding.rName.text = name
-            binding.cDate.text = it["CREATED_ON"].toString()
             binding.limit.text = limit
+            val sdf = SimpleDateFormat(TIME_STRING, Locale.getDefault())
+            val df = DateTimeFormatter.ofPattern(DATE_STRING)
             try {
-                val sdf = SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
-                val netDate = Date(it["START_DATE_MONTH"].toString().toLong())
-                val date = sdf.format(netDate)
-                binding.setDText.text = date
+                val createDate = LocalDateTime.parse(it["CREATED_ON"].toString(), df)
+                binding.cDate.text =
+                    sdf.format(Date(createDate.toInstant(ZoneOffset.UTC).epochSecond))
             } catch (e: Exception) {
+                Log.e("setting error1", "$e")
+            }
 
+            try {//1656854430128
+                val startDate = it["START_DATE_MONTH"].toString()
+                val da = NumberFormat.getInstance()
+                val out = da.parse(startDate)?.toLong()
+                Log.e("setting2", "$out")
+                out?.let { it1 ->
+                    val netDate = Date(it1)
+                    val date = sdf.format(netDate)
+                    binding.setDText.text = date
+                }
+
+            } catch (e: Exception) {
+                Log.e("setting error", "$e")
             }
         }
 
@@ -164,6 +192,7 @@ class SettingActivity : AppCompatActivity() {
         binding.showQr.setOnClickListener {
             generateQR()
         }
+
         binding.limitBtn.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.getDataStore().setUpdate(true)
@@ -183,7 +212,7 @@ class SettingActivity : AppCompatActivity() {
             if (it)
                 viewModel.refreshData()
         }
-
+        migratePopup()
         lifecycleScope.launch {
             if (!viewModel.getDataStore().getDemo2()) {
                 showDemo()
@@ -223,6 +252,64 @@ class SettingActivity : AppCompatActivity() {
 
         }
 
+
+    }
+
+    private fun migratePopup() {
+        materialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        val dateTime = ZonedDateTime.now()
+        val picker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(dateTime.hour)
+                .setMinute(dateTime.minute)
+                .setTitleText("Schedule a time")
+                .build()
+        materialAlertDialogBuilder.setTitle("Max limit!")
+        materialAlertDialogBuilder.setIcon(R.drawable.baseline_warning)
+        picker.addOnPositiveButtonClickListener {
+            val calendar = Calendar.getInstance()
+            calendar[Calendar.MINUTE] = picker.minute
+            calendar[Calendar.HOUR] = picker.hour
+            viewModel.setMigrationSchedule(calendar.toInstant())
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.migrationSchedule.collect {
+                if (it)
+                    showSnackBar("Migration will automatically start at scheduled time")
+            }
+        }
+        val message = """
+            You reached max limit of purchased items. 
+            Migrate now to
+            1.improve loading time
+            2.reduce memory usage
+            Or schedule for later
+        """.trimIndent()
+        materialAlertDialogBuilder.setMessage(message)
+        materialAlertDialogBuilder.setNegativeButton("Cancel") { _, _ ->
+
+        }
+        materialAlertDialogBuilder.setPositiveButton("Migrate Now") { _, _ ->
+            viewModel.setMigrationSchedule(Instant.MAX)
+        }
+        materialAlertDialogBuilder.setNeutralButton("Schedule") { _, _ ->
+            supportFragmentManager.let { it1 ->
+                picker.show(it1, "time")
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.migratePopup.collect {
+                if (it)
+                    materialAlertDialogBuilder.show()
+            }
+        }
+        binding.migrate.setOnClickListener {
+            supportFragmentManager.let { it1 ->
+                picker.show(it1, "time")
+            }
+        }
 
     }
 
@@ -493,7 +580,7 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun showSnackBar(msg: String) {
-        val snackBarView = Snackbar.make(binding.root, msg , Snackbar.LENGTH_LONG)
+        val snackBarView = Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG)
         val view = snackBarView.view
         val params = view.layoutParams as FrameLayout.LayoutParams
         params.gravity = Gravity.TOP
@@ -511,7 +598,7 @@ class SettingActivity : AppCompatActivity() {
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .setDuration(10000)
             .setAction("Leave") {
-                viewModel.leaveRoom(roomKey)
+//                viewModel.leaveRoom(roomKey)
             }
             .show()
     }

@@ -19,7 +19,7 @@ class RationCardFragment : DialogFragment() {
     private lateinit var binding: FragmentRationCardBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
+//        setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
     }
 
 
@@ -83,9 +83,6 @@ class RationCardFragment : DialogFragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-//
-//
-//
-//    }
+
     }
 }

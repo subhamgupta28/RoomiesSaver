@@ -1,0 +1,16 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.RoomiesSaver.AppWidget.Container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Theme.RoomiesSaver.AppWidgetContainer">
+
+
+    <Button
+        android:layout_width="wrap_content"
+        style="?attr/materialIconButtonFilledStyle"
+        android:layout_centerInParent="true"
+        app:icon="@drawable/ic_outline_alert"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>
