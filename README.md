@@ -1,7 +1,5 @@
 # Roomies App
 
-
-## 📸 ScreenShots
 <br>
 <br>
 It's an app which lets you manage the thing you bought.
