@@ -4,15 +4,8 @@
 ## 📸 ScreenShots
 <br>
 <br>
+It's an app which lets you manage the thing you bought.
+It keep a record of the items and gives the monthly expenditure.
+It helps in managing the item bought for a group of people hence the name Roomies!
 
-<img src="images/1.png" width="200">|
-<img src="images/2.png" width="200">|
-<img src="images/3.png" width="200">|
-<img src="images/4.png" width="200">|
-<img src="images/5.png" width="200">|
-<img src="images/6.png" width="200">|
-<img src="images/7.png" width="200">|
-<img src="images/8.png" width="200">|
-<img src="images/9.png" width="200">|
-<img src="images/10.png" width="200">|
-<img src="images/11.png" width="200">|
+
