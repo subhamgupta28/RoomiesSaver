@@ -298,6 +298,11 @@ class SettingActivity : AppCompatActivity() {
                 picker.show(it1, "time")
             }
         }
+        binding.splitExpense.setOnClickListener {
+            viewModel.enableFeature("FEAT_SPLIT_EXPENSE").invokeOnCompletion {
+                showSnackBar("Restart the app to see the new tab called 'Split Expense'")
+            }
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.migratePopup.collect {

@@ -16,8 +16,8 @@ android {
         applicationId "com.subhamgupta.roomiesapp"
         minSdk 26
         targetSdk 33
-        versionCode 24
-        versionName "4.3"
+        versionCode 25
+        versionName "4.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -93,7 +93,6 @@ dependencies {
 
     //others
     implementation 'com.airbnb.android:lottie:5.2.0'
-    implementation('app.futured.donut:donut:2.2.2')
     implementation 'com.github.majorkik:SparkLineLayout:1.0.1'
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
@@ -114,4 +113,7 @@ dependencies {
     implementation 'com.google.dagger:hilt-android:2.44'
     kapt 'com.google.dagger:hilt-compiler:2.44'
     implementation 'androidx.hilt:hilt-work:1.0.0'
+
+    //payment
+    implementation 'dev.shreyaspatil.EasyUpiPayment:EasyUpiPayment:3.0.3'
 }

@@ -70,13 +70,14 @@ class RoomRepository @Inject constructor(
                         }
                     }
             }
+            userName = userData["USER_NAME"].toString()
             val count = result?.JOINED_PERSON ?: 0
             val limit = result?.LIMIT ?: 0
             val name = result?.ROOM_NAME
             if (result != null && count <= limit) {
                 val mate = ROOMMATES(
                     KEY = room_id,
-                    MONEY_PAID = 0,
+                    MONEY_PAID = 0.0,
                     UUID = uuid,
                     USER_NAME = userName
                 )
