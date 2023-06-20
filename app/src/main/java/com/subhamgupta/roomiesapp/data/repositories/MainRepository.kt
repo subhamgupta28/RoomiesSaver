@@ -1,6 +1,7 @@
 package com.subhamgupta.roomiesapp.data.repositories
 
 
+//import app.futured.donut.DonutSection
 import android.app.Application
 import android.graphics.Color
 import android.net.Uri
@@ -10,7 +11,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import app.futured.donut.DonutSection
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
@@ -36,17 +36,15 @@ import org.json.JSONObject
 import java.io.File
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
+import java.util.stream.Collectors
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
 
@@ -139,15 +137,28 @@ class MainRepository @Inject constructor(
 
     suspend fun getUser(
         data: MutableStateFlow<MutableMap<String, Any>>,
-        userDataLoading: MutableStateFlow<Boolean>
+        userDataLoading: MutableStateFlow<Boolean>,
+        accountFeature: MutableStateFlow<MutableMap<String, Boolean>>
     ) {
         Log.e("getUser: ", "fired ${data.value} ${userDataLoading.value}")
         var flag = true
+        fun setFeature(u: MutableMap<String, Any>) {
+            val feature = mutableMapOf<String, Boolean>()
+            u.forEach {
+                if (it.key.contains("FEAT")) {
+                    feature[it.key] = it.value as Boolean
+                }
+            }
+            accountFeature.value = feature
+        }
+
         val offlineUserData = readUserDataFromRemote()
         if (!dataStore.isUpdate() && dataStore.isLoggedIn() && offlineUserData != null && offlineUserData.isNotEmpty()) {
-            data.value = offlineUserData as MutableMap<String, Any>
+            val u = offlineUserData as MutableMap<String, Any>
+            data.value = u
             Log.e("getUser: OFFLINE", "$user")
             flag = false
+            setFeature(u)
             userDataLoading.value = false
         }
         coroutineScope {
@@ -158,10 +169,11 @@ class MainRepository @Inject constructor(
                         if (dataSnapshot.exists()) {
                             val user = dataSnapshot.value as MutableMap<String, Any>
                             val onlineUserData = user
+                            data.value = onlineUserData
                             saveUserToLocal(onlineUserData)
+                            setFeature(onlineUserData)
                             userData.value = onlineUserData
                             Log.e("USER DATA cloud", "$user")
-                            data.value = onlineUserData
                             if (flag) {
                                 userDataLoading.value = false
                             }
@@ -565,8 +577,9 @@ class MainRepository @Inject constructor(
         loadingHome: MutableStateFlow<Boolean>,
         homeUser: MutableStateFlow<HomeUserMap>,
         homeDetail: MutableStateFlow<List<Detail>>,
-        homeDonut: MutableStateFlow<List<DonutSection>>,
+        homeDonut: MutableStateFlow<List<String>>,
         migrateCheck: MutableStateFlow<Int>,
+        totalData: MutableStateFlow<List<Detail>>,
     ) = coroutineScope {
         liveData.value = FirebaseState.loading()
         roomKey = dataStore.getRoomKey()
@@ -588,9 +601,10 @@ class MainRepository @Inject constructor(
                     val chartList = ArrayList<Int>()
                     val allUserAmount = ArrayList<MutableMap<String, String>>()
                     val todayDetail = ArrayList<Detail>()
-                    val donutList = ArrayList<DonutSection>()
+//                    val donutList = ArrayList<DonutSection>()
                     val userMap = mutableMapOf<String, HashMap<String, Any?>>()
                     val homeDetails = query.toObjects(Detail::class.java).filter { !it.DELETED }
+                    totalData.value = homeDetails
                     migrateCheck.value = homeDetails.size
                     chartList.add(1)
                     homeDetails.forEach { detail ->
@@ -625,12 +639,12 @@ class MainRepository @Inject constructor(
                             "COLOR" to color.toString()
                         )
                         try {
-                            val section1 = DonutSection(
-                                name = mj["USER"].toString(),
-                                color = color,
-                                amount = mj["AMOUNT"].toString().toFloat()
-                            )
-                            donutList.add(section1)
+//                            val section1 = DonutSection(
+//                                name = mj["USER"].toString(),
+//                                color = color,
+//                                amount = mj["AMOUNT"].toString().toFloat()
+//                            )
+//                            donutList.add(section1)
                         } catch (e: Exception) {
                             Log.e("HOME_ERROR", "$e")
                         }
@@ -645,13 +659,18 @@ class MainRepository @Inject constructor(
                     todayAmount.postValue(todayTotalAmount)
 
                     val home = HomeData(
-                        todayTotalAmount,
-                        monthTotalAmount,
-                        startDate,
-                        updatedOn.toString(),
-                        chartList,
-                        homeDetails.isEmpty()
+                        todayTotal = todayTotalAmount,
+                        allTotal = monthTotalAmount,
+                        startDate = startDate,
+                        updatedOn = updatedOn.toString(),
+                        chartData = chartList,
+                        isEmpty = homeDetails.isEmpty(),
+                        count = homeDetails.size,
+                        roomSize = roomSize,
+                        eachPersonAmount = round
                     )
+
+
                     val homeUserMap = HomeUserMap(round, allUserAmount)
 //                    saveHomeData(
 //                        home,
@@ -663,7 +682,7 @@ class MainRepository @Inject constructor(
 //                    )
 
                     liveData.value = FirebaseState.success(home)
-                    homeDonut.value = donutList
+//                    homeDonut.value = donutList
                     homeDetail.value = todayDetail
                     homeUser.value = homeUserMap
                     loadingHome.value = false
@@ -671,6 +690,53 @@ class MainRepository @Inject constructor(
 
                 }
             }
+    }
+
+    suspend fun monthlyDataCal(
+        homeDetails: MutableStateFlow<List<Detail>>,
+        monthlyData: MutableStateFlow<LinkedList<MutableMap<String, Any>>>,
+        isMine: Boolean
+    ) {
+        homeDetails.collect {
+            val monthVsStamp = LinkedHashMap<Long, Month>()
+            val out = if (isMine) {
+                it.filter { it.UUID == uuid }
+            } else it
+            val group = out.parallelStream()
+                .collect(Collectors.groupingBy {
+                    val calendar = Calendar.Builder().setInstant(it.TIME_STAMP!!)
+                        .setLocale(Locale.getDefault()).build()
+                    calendar.set(
+                        Calendar.DAY_OF_MONTH,
+                        calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+                    );
+                    calendar.time
+                    val localDate =
+                        LocalDate.of(
+                            calendar[Calendar.YEAR],
+                            calendar[Calendar.MONTH] + 1,
+                            1
+                        )
+                    val timeStamp =
+                        localDate.atStartOfDay(ZoneId.systemDefault())
+                            .toInstant().epochSecond
+                    monthVsStamp[timeStamp] = localDate.month
+                    timeStamp
+                }).toSortedMap(compareByDescending { it })
+            val result = LinkedList<MutableMap<String, Any>>()
+            group.forEach {
+                val amount = it.value.sumOf { d -> d.AMOUNT_PAID }
+                result.add(
+                    mutableMapOf(
+                        "AMOUNT" to amount,
+                        "MONTH" to monthVsStamp[it.key].toString()
+                    )
+                )
+            }
+//                        val s = soundex("dd")
+            Log.e("group start", "$result")
+            monthlyData.value = result
+        }
     }
 
     fun modifyStartDate(timeStamp: Long, liveData: MutableLiveData<Boolean>) {
@@ -1052,17 +1118,25 @@ class MainRepository @Inject constructor(
     }
 
     fun doPredictions(
-        summary: MutableStateFlow<FirebaseState<List<Detail?>>>,
-        predictions: MutableStateFlow<FirebaseState<List<String>>>
+        monthlyData: LinkedList<MutableMap<String, Any>>,
+        predictions: MutableStateFlow<List<String>>
     ) {
-        val data = summary.value
-
-
+        val data = ArrayList<String>()
+        if(monthlyData.isNotEmpty()) {
+            val month1 = monthlyData[0]["AMOUNT"] as Long
+            val month2 = monthlyData[1]["AMOUNT"] as Long
+            Log.e("predictions", "$monthlyData")
+            val out = month1 - month2
+            val ab = abs(out)
+            val str = "${if (out > 0) "Increased by $ab" else "Decreased by $ab"} from past month!"
+            data.add(str)
+            predictions.value = data
+        }
     }
 
     private fun saveHomeData(
         home: HomeData,
-        donutList: ArrayList<DonutSection>,
+//        donutList: ArrayList<DonutSection>,
         todayDetail: ArrayList<Detail>,
         homeUserMap: HomeUserMap,
         monthTotalAmount: Int,
@@ -1071,7 +1145,7 @@ class MainRepository @Inject constructor(
         val data = SavedHomeData(
             UUID = uuid,
             home = home,
-            donutList = donutList,
+//            donutList = donutList,
             homeUserMap = homeUserMap,
             detailList = todayDetail,
             monthTotalAmount = monthTotalAmount,
@@ -1120,7 +1194,7 @@ class MainRepository @Inject constructor(
         loadingHome: MutableStateFlow<Boolean>,
         homeUser: MutableStateFlow<HomeUserMap>,
         homeDetail: MutableStateFlow<List<Detail>>,
-        homeDonut: MutableStateFlow<List<DonutSection>>,
+//        homeDonut: MutableStateFlow<List<DonutSection>>,
     ) = coroutineScope {
         loadingHome.value = true
         liveData.value = FirebaseState.loading()
@@ -1171,5 +1245,111 @@ class MainRepository @Inject constructor(
 //                )
                 migrationSchedule.value = true
             }
+    }
+
+    suspend fun saveVPA(vpa: String): Boolean {
+        val job = suspendCoroutine<Boolean> { cont ->
+            databaseReference.child(uuid!!)
+                .child("VPA")
+                .setValue(vpa)
+                .addOnCompleteListener {
+                    Log.e("vpa", "saved ${it.isSuccessful}")
+                    cont.resume(true)
+                }
+        }
+        return job
+    }
+
+    suspend fun splitExpense(
+        amount: String,
+        splitFor: String?,
+        roomieData: MutableMap<String, Any>,
+        splitExpenseSuccess: MutableStateFlow<Boolean>
+    ) {
+        val split2 = mutableMapOf<String, Any>()
+        val timeStamp = System.currentTimeMillis()
+        split2["UUID"] = user?.uid.toString()
+        split2["BY_NAME"] = userName
+        split2["TOTAL_AMOUNT"] = amount.toDouble()
+        split2["ITEM"] = splitFor.toString()
+        split2["NOTE"] = ""
+        split2["TIME_STAMP"] = timeStamp
+        split2["DATE"] = date
+        split2["TIME"] = time
+        split2["COMPLETED"] = false
+        split2["DELETED"] = false
+        val listData = mutableListOf<MutableMap<String, Any>>()
+        roomieData.filter { it.value != 0.0 }.forEach {
+            listData.add(mutableMapOf("UUID" to it.key, "AMOUNT" to it.value))
+        }
+
+        split2["FOR"] = listData
+        roomKey = dataStore.getRoomKey()
+        db.collection(roomKey + "_SPLIT").document(timeStamp.toString()).set(split2)
+            .addOnCompleteListener {
+                Log.e("splitExpense", "${it.isSuccessful}")
+                splitExpenseSuccess.value = it.isSuccessful
+            }.addOnFailureListener {
+                Log.e("splitExpense error", "$it")
+                splitExpenseSuccess.value = false
+            }
+    }
+
+    fun getSplitData(
+        splitData: MutableStateFlow<List<SplitData?>>,
+        splitExpenseOwed: MutableStateFlow<OwedSplit>
+    ) {
+        val query =
+            db.collection(roomKey + "_SPLIT").orderBy("TIME_STAMP", Query.Direction.DESCENDING)
+        query.addSnapshotListener { value, error ->
+            Log.e("splitExpense", "$value $error")
+            if (error != null) {
+                Log.e("Split ERROR", "$error")
+            }
+            if (value == null) {
+
+            } else {
+                value.documents.let { snapshots ->
+                    if (snapshots.isEmpty()) {
+
+                    } else {
+                        val docs = snapshots.map {
+                            it.toObject(SplitData::class.java)
+                        }.filter { it?.DELETED == false && it.FOR.any { it["UUID"] == uuid } }
+
+                        Log.e("splitExpense", "$docs")
+                        var owedByYou = 0.0
+                        var owedToYou = 0.0
+                        docs.forEach {
+                            val FOR = it?.FOR as MutableList<MutableMap<String, Any>>
+                            if (it.UUID != uuid) {
+                                owedByYou += FOR.filter {
+                                    it["UUID"] == uuid
+                                }.sumOf { it["AMOUNT"] as Double }
+                            } else {
+                                owedToYou += FOR.filter {
+                                    it["UUID"] != uuid
+                                }.sumOf { it["AMOUNT"] as Double }
+                            }
+                        }
+                        splitExpenseOwed.value = OwedSplit(owedByYou, owedToYou)
+                        splitData.value = docs
+                    }
+                }
+            }
+        }
+    }
+
+    private val featureMap: MutableList<String> =
+        mutableListOf("FEAT_SPLIT_EXPENSE", "FEAT_ANALYTICS")
+
+    fun enableFeature(featureKey: String) {
+        val uid = user?.uid
+        if (featureMap.contains(featureKey)) {
+            databaseReference.child(uid!!).child(featureKey).setValue(true).addOnCompleteListener {
+
+            }
+        }
+
     }
 }

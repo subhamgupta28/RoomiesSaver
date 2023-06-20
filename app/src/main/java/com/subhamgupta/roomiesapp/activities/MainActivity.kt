@@ -9,7 +9,9 @@ import android.text.TextWatcher
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -18,39 +20,50 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.ViewPagerAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
-import com.subhamgupta.roomiesapp.databinding.*
-import com.subhamgupta.roomiesapp.fragments.*
-import com.subhamgupta.roomiesapp.utils.*
+import com.subhamgupta.roomiesapp.databinding.ActivityMainBinding
+import com.subhamgupta.roomiesapp.databinding.AlertPopupBinding
+import com.subhamgupta.roomiesapp.databinding.ChangeRoomCardBinding
+import com.subhamgupta.roomiesapp.databinding.PopupBinding
+import com.subhamgupta.roomiesapp.fragments.AnalyticsFragment
+import com.subhamgupta.roomiesapp.fragments.DiffUser
+import com.subhamgupta.roomiesapp.fragments.HomeFragment
+import com.subhamgupta.roomiesapp.fragments.RationFragment
+import com.subhamgupta.roomiesapp.fragments.RoomCreation
+import com.subhamgupta.roomiesapp.fragments.SplitViewFragment
+import com.subhamgupta.roomiesapp.fragments.Summary
+import com.subhamgupta.roomiesapp.utils.AuthState
+import com.subhamgupta.roomiesapp.utils.FirebaseState
+import com.subhamgupta.roomiesapp.utils.SettingDataStore
+import com.subhamgupta.roomiesapp.utils.SplitObserver
 import com.subhamgupta.roomiesapp.utils.Worker
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.flow.*
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.util.*
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), HomeToMainLink {
+class MainActivity : AppCompatActivity(), HomeToMainLink, SplitObserver {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
@@ -59,6 +72,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     private lateinit var rationFragment: RationFragment
     private lateinit var settingDataStore: SettingDataStore
     private var demoStarted: Boolean = true
+    private lateinit var feature: MutableMap<String, Boolean>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +120,8 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
         viewPagerAdapter.addFragments(diffUser, "Roomie Expenses")
         viewPagerAdapter.addFragments(Summary(), "Summary")
 //        viewPagerAdapter.addFragments(rationFragment, "Stored Items")
-//        viewPagerAdapter.addFragments(AnalyticsFragment(), "Analytics")
+        val analyticsFragment = AnalyticsFragment(this)
+
 //        viewPagerAdapter.addFragments(MyNotesFragment(), "All Rooms")
 
 
@@ -120,6 +135,17 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 //                }
 //            }
 //        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.accountFeature.collect {
+                feature = it
+                if (it["FEAT_SPLIT_EXPENSE"] == true) {
+//                    viewPagerAdapter.getPageTitle(3)
+                    viewPagerAdapter.addFragments(analyticsFragment, "Split Expense")
+                    viewPagerAdapter.notifyDataSetChanged()
+                }
+            }
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.addItem.collect {
@@ -148,11 +174,21 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                     runTransition(binding.tablayout, true)
                     binding.extendedMenu.visibility = View.GONE
                 }
+                binding.addItem.text = if (position == 3)
+                    "Split"
+                else
+                    "Add"
+
                 binding.addItem.setOnClickListener {
-                    if (position == 3)
-                        rationFragment.openSheet()
-                    else
+                    if (position == 3) {
+                        analyticsFragment.openSheet()
+                        binding.addItem.text = "Split"
+
+                    } else {
+                        binding.addItem.text = "Add"
+//                        pay()
                         addItems()
+                    }
                 }
             }
 
@@ -174,11 +210,13 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                         is FirebaseState.Loading -> {
                             Log.e("loading", "loading")
                         }
+
                         is FirebaseState.Failed -> {
 //                            binding.progress.visibility = View.GONE
                             Log.e("loading", "failed")
                             showSnackBar("Something went wrong")
                         }
+
                         is FirebaseState.Success -> {
                             Log.e("loading", "success")
                             binding.idText.text = it.data.ROOM_NAME.toString()
@@ -188,6 +226,7 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                                 demoStarted = false
                             }
                         }
+
                         is FirebaseState.Empty -> {
                         }
                     }
@@ -249,10 +288,12 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                             finish()
                         }
                     }
+
                     is AuthState.Loading -> {
 //                        loadingDialog.dismiss()
 
                     }
+
                     is AuthState.LoggedIn -> {
 //                        loadingDialog.dismiss()
                         viewModel.userData.collectLatest {
@@ -284,6 +325,24 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                 }
             }
         }
+    }
+
+    private val splitViewFragment = SplitViewFragment(this)
+    override fun click() {
+        binding.mainLayout.visibility = View.GONE
+        binding.l.visibility = View.GONE
+        binding.settingFragment.visibility = View.VISIBLE
+        supportFragmentManager.beginTransaction()
+            .add(R.id.setting_fragment, splitViewFragment)
+            .commit()
+    }
+
+    override fun close() {
+        binding.mainLayout.visibility = View.VISIBLE
+        binding.l.visibility = View.VISIBLE
+        binding.settingFragment.visibility = View.GONE
+        supportFragmentManager.beginTransaction().remove(splitViewFragment)
+            .commit()
     }
 
     private fun showDemo() {
@@ -388,12 +447,15 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
                 R.id.menu_alert -> {
                     newAlert()
                 }
+
                 R.id.menu_logout -> {
                     logOut()
                 }
+
                 R.id.menu_setting -> {
                     startActivity(Intent(this@MainActivity, SettingActivity::class.java))
                 }
+
                 R.id.menu_change_room -> {
                     changeRoom()
                 }
@@ -453,6 +515,16 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
 
             override fun afterTextChanged(editable: Editable) {}
         })
+        if (feature["FEAT_SPLIT_EXPENSE"] == true) {
+            dialogBinding.orM.visibility = View.VISIBLE
+            dialogBinding.splitExpense.visibility = View.VISIBLE
+        } else {
+            dialogBinding.orM.visibility = View.GONE
+            dialogBinding.splitExpense.visibility = View.GONE
+        }
+        dialogBinding.splitExpense.setOnClickListener {
+            binding.viewpager1.setCurrentItem(3, true)
+        }
         dialogBinding.itemBought.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
@@ -616,7 +688,6 @@ class MainActivity : AppCompatActivity(), HomeToMainLink {
     override fun goToDiffUser() {
         binding.viewpager1.setCurrentItem(1, true)
     }
-
 
 
 }

@@ -1,5 +1,6 @@
 package com.subhamgupta.roomiesapp.data.viewmodels
 
+//import app.futured.donut.DonutSection
 import android.net.Uri
 import android.text.format.DateUtils
 import android.util.Log
@@ -7,20 +8,32 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.futured.donut.DonutSection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
 import com.subhamgupta.roomiesapp.data.repositories.MainRepository
-import com.subhamgupta.roomiesapp.domain.model.*
+import com.subhamgupta.roomiesapp.domain.model.Alerts
+import com.subhamgupta.roomiesapp.domain.model.Detail
+import com.subhamgupta.roomiesapp.domain.model.HomeData
+import com.subhamgupta.roomiesapp.domain.model.HomeUserMap
+import com.subhamgupta.roomiesapp.domain.model.OwedSplit
+import com.subhamgupta.roomiesapp.domain.model.RoomDetail
+import com.subhamgupta.roomiesapp.domain.model.SavedHomeData
+import com.subhamgupta.roomiesapp.domain.model.SplitData
 import com.subhamgupta.roomiesapp.utils.AuthState
 import com.subhamgupta.roomiesapp.utils.FirebaseService
 import com.subhamgupta.roomiesapp.utils.FirebaseState
 import com.subhamgupta.roomiesapp.utils.NetworkObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.time.Instant
+import java.util.LinkedList
 import javax.inject.Inject
 
 //Roomies@pass12345
@@ -44,7 +57,7 @@ class MainViewModel @Inject constructor(
     private val _homeUser = MutableStateFlow(HomeUserMap())
     val homeUserMap = _homeUser.asStateFlow()
 
-    private val _homeDonut = MutableStateFlow<List<DonutSection>>(emptyList())
+    private val _homeDonut = MutableStateFlow<List<String>>(emptyList())
     val homeDonut = _homeDonut.asStateFlow()
 
     private val _homeDetails = MutableStateFlow<List<Detail>>(emptyList())
@@ -66,7 +79,7 @@ class MainViewModel @Inject constructor(
     private val _uploadStoreCard = MutableStateFlow<FirebaseState<Boolean>>(FirebaseState.empty())
     val uploadStoreCard = _uploadStoreCard.asStateFlow()
 
-    private val _predictions = MutableStateFlow<FirebaseState<List<String>>>(FirebaseState.empty())
+    private val _predictions = MutableStateFlow<List<String>>(ArrayList())
     val predictions = _predictions.asStateFlow()
 
     private val _savedHomeData = MutableStateFlow<SavedHomeData?>(null)
@@ -106,6 +119,25 @@ class MainViewModel @Inject constructor(
 
     private val _addItem = MutableStateFlow(false)
     val addItem = _addItem.asStateFlow()
+
+    private val _totalData = MutableStateFlow<List<Detail>>(LinkedList())
+    val totalData = _totalData.asStateFlow()
+
+    private val _monthlyData = MutableStateFlow<LinkedList<MutableMap<String, Any>>>(LinkedList())
+    val monthlyData = _monthlyData.asStateFlow()
+
+    private val _splitData = MutableStateFlow<List<SplitData?>>(ArrayList())
+    val splitData = _splitData.asStateFlow()
+    private val _splitExpenseSuccess = MutableStateFlow<Boolean>(false)
+    val splitExpenseSuccess = _splitExpenseSuccess.asStateFlow()
+
+    private val _splitExpenseOwed = MutableStateFlow<OwedSplit>(OwedSplit())
+    val splitExpenseOwed = _splitExpenseOwed.asStateFlow()
+
+    val splitDataTemp = MutableStateFlow<SplitData?>(null)
+
+    private val _accountFeature = MutableStateFlow<MutableMap<String, Boolean>>(mutableMapOf())
+    val accountFeature = _accountFeature.asStateFlow()
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         Log.e("MainViewModel", "$throwable")
@@ -155,7 +187,7 @@ class MainViewModel @Inject constructor(
     fun initializeStore() {
         if (auth.currentUser != null) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.getUser(_userData, _userDataLoading)
+                repository.getUser(_userData, _userDataLoading, _accountFeature)
                 _userDataLoading.collect {
                     if (!it) {
                         getData()
@@ -176,18 +208,31 @@ class MainViewModel @Inject constructor(
 
     fun getData() = viewModelScope.launch(Dispatchers.IO) {
         fetchRoomData()
-        _roomDataLoading.collectLatest { it1 ->
+        _roomDataLoading.buffer().collectLatest { it1 ->
             if (!it1) {
                 fetchHomeData()
                 fetchSummary(true, "All")
                 fetchAlert()
                 getStoredCards()
                 getDiffData()
+                toggleMonthlyData(true)
+                getSplitData()
 //                repository.migrate()
                 _roomDataLoading.value = true
             }
         }
+
+
         setFCM()
+    }
+
+    fun toggleMonthlyData(isMine: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        _totalData.collect {
+            Log.e("toggleMonthlyData", "$isMine")
+            if (it.isNotEmpty()) {
+                repository.monthlyDataCal(_totalData, _monthlyData, isMine)
+            }
+        }
     }
 
     fun refreshData() = viewModelScope.launch(Dispatchers.IO) {
@@ -233,6 +278,7 @@ class MainViewModel @Inject constructor(
                     is FirebaseState.Success -> {
                         repository.fetchDiffData(it.data, _diffUserData)
                     }
+
                     else -> {
 
                     }
@@ -288,10 +334,12 @@ class MainViewModel @Inject constructor(
             _homeUser,
             _homeDetails,
             _homeDonut,
-            _migrateCheck
+            _migrateCheck,
+            _totalData
         )
         launch {
             checkMigrate()
+            doPredictions()
         }
 //        repository.getSavedHomeData(
 //            _homeData,
@@ -331,7 +379,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun doPredictions() = viewModelScope.launch(Dispatchers.IO) {
-        repository.doPredictions(_summary, _predictions)
+        _monthlyData.collect{
+            repository.doPredictions(it, _predictions)
+        }
+
     }
 
     private val _migrationSchedule = MutableStateFlow(false)
@@ -355,5 +406,24 @@ class MainViewModel @Inject constructor(
             e.printStackTrace()
         }
         return ago
+    }
+
+    fun splitExpense(amount: String, splitFor: String?, roomieData: MutableMap<String, Any>) =
+        viewModelScope.launch {
+            repository.splitExpense(amount, splitFor, roomieData, _splitExpenseSuccess)
+        }
+
+    fun saveVPA(vpa: String) = viewModelScope.launch {
+        val res = repository.saveVPA(vpa)
+        if (res)
+            repository.getUser(_userData, _userDataLoading, _accountFeature)
+    }
+
+    private fun getSplitData() = viewModelScope.launch {
+        repository.getSplitData(_splitData, _splitExpenseOwed)
+    }
+
+    fun enableFeature(featureKey:String) = viewModelScope.launch{
+        repository.enableFeature(featureKey)
     }
 }

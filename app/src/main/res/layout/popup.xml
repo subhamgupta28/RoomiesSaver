@@ -173,12 +173,30 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/save_btn"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="4dp"
                     android:text="Save"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    android:textAllCaps="true"
+                    app:cornerRadius="10dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:text="OR"
+                    android:id="@+id/or_m"
+                    android:textAlignment="center"
+                    android:layout_margin="4dp"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_height="wrap_content"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/split_expense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="Split Expense instead!"
+                    android:textAllCaps="true"
                     app:cornerRadius="10dp" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

@@ -33,6 +33,7 @@ class SettingDataStore @Inject constructor(
     demo2
     deviceId
     dynamicTheme
+    upiId
     */
     private val Context.dataStore by preferencesDataStore(name = "settings")
     private suspend fun save(key: String, value: String) {
@@ -116,6 +117,13 @@ class SettingDataStore @Inject constructor(
 
     suspend fun setDeviceId(str: String) {
         save("device-id", str)
+    }
+    suspend fun getUPI(): String {
+        return read("upi-id") ?:""
+    }
+
+    suspend fun setUPI(str: String) {
+        save("upi-id", str)
     }
 
     suspend fun getRoomCount(): Int {

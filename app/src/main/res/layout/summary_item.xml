@@ -12,9 +12,8 @@
         style="@style/Widget.Material3.CardView.Elevated"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardElevation="6dp"
-        android:layout_margin="3dp"
-        app:cardCornerRadius="8dp">
+        android:layout_margin="4dp"
+        app:cardCornerRadius="6dp">
         <View
             android:layout_width="3dp"
             android:background="@color/colorSecondaryVariant"

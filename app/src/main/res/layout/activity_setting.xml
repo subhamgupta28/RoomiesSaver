@@ -402,7 +402,14 @@
                         android:id="@+id/migrate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         android:text="Schedule Migrate"
+                        app:cornerRadius="10dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/split_expense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Try Split Expense"
                         app:cornerRadius="10dp" />
 
                 </LinearLayout>

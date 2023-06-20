@@ -2,12 +2,8 @@ package com.subhamgupta.roomiesapp.fragments
 
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.text.TextPaint
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -30,27 +26,21 @@ import com.subhamgupta.roomiesapp.HAdapToHFrag
 import com.subhamgupta.roomiesapp.HomeToMainLink
 import com.subhamgupta.roomiesapp.R
 import com.subhamgupta.roomiesapp.adapter.HomeAdapter
+import com.subhamgupta.roomiesapp.adapter.MonthlyAdapter
 import com.subhamgupta.roomiesapp.adapter.SummaryAdapter
 import com.subhamgupta.roomiesapp.data.viewmodels.MainViewModel
 import com.subhamgupta.roomiesapp.databinding.FragmentHomeBinding
 import com.subhamgupta.roomiesapp.databinding.LoadingPopupBinding
-import com.subhamgupta.roomiesapp.utils.ConnectivityObserver
 import com.subhamgupta.roomiesapp.utils.FirebaseState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.sql.Date
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.math.abs
+import java.util.Locale
 
 
 class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragment(), HAdapToHFrag {
@@ -60,17 +50,17 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
     private lateinit var loadingDialog: AlertDialog
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(layoutInflater)
         binding.viewModel = viewModel
         binding.pRecycle.setHasFixedSize(true)
         binding.itemRecycle.layoutManager = StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
-        binding.pRecycle.layoutManager = if (!isTablet())
+        binding.pRecycle.layoutManager =
+            if (!isTablet()) LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            else StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
+        binding.monthRecycler.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        else
-            StaggeredGridLayoutManager(2, LinearLayout.VERTICAL)
 
 
 //        netStat()
@@ -87,10 +77,10 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
 
 
     private fun isTablet(): Boolean {
-        val xlarge = (this.resources
-            .configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) == 4
-        val large = this.resources
-            .configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK == Configuration.SCREENLAYOUT_SIZE_LARGE
+        val xlarge =
+            (this.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) == 4
+        val large =
+            this.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK == Configuration.SCREENLAYOUT_SIZE_LARGE
         return xlarge || large
     }
 
@@ -102,14 +92,12 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         materialAlertDialogBuilder.setView(loadingView.root)
         materialAlertDialogBuilder.background = ColorDrawable(Color.TRANSPARENT)
         loadingDialog = materialAlertDialogBuilder.create()
-        if (!loadingDialog.isShowing)
-            loadingDialog.show()
+        if (!loadingDialog.isShowing) loadingDialog.show()
         lifecycleScope.launchWhenStarted {
             viewModel.userData.collectLatest {
                 it["IS_ROOM_JOINED"]?.let { b ->
                     if (!b.toString().toBoolean()) {
-                        if (loadingDialog.isShowing)
-                            loadingDialog.dismiss()
+                        if (loadingDialog.isShowing) loadingDialog.dismiss()
                     }
                 }
             }
@@ -135,7 +123,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             viewModel.homeDonut.buffer().collect {
                 Log.e("home2", "$it")
                 try {
-                    binding.donutView.submitData(it)
+//                    binding.donutView.submitData(it)
                 } catch (e: Exception) {
 
                 }
@@ -143,11 +131,37 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
             }
         }
         lifecycleScope.launchWhenStarted {
+            viewModel.predictions.collect {
+                if (it.isNotEmpty())
+                    binding.predictions.text = it[0]
+            }
+        }
+        val monthAdapter = MonthlyAdapter()
+        binding.monthRecycler.adapter = monthAdapter
+        lifecycleScope.launchWhenStarted {
+            viewModel.monthlyData.buffer().collect { data ->
+                data.let {
+                    binding.monthRecycler.visibility = View.VISIBLE
+                    monthAdapter.setData(it)
+                    Log.e("group start", "$it")
+                }
+            }
+        }
+        binding.monthSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleMonthlyData(isChecked)
+            binding.monthSwitch.text = if (isChecked) {
+                "Your's  "
+            } else "All  "
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.homeUserMap.buffer().collect {
                 Log.e("home3", "$it")
-                if (it.eachPersonAmount != null && it.userMap != null)
-                    homeAdapter.setData(it.userMap, it.eachPersonAmount)
-                binding.eachAmt.text = it.eachPersonAmount.toString()
+                if (it.eachPersonAmount != null && it.userMap != null) homeAdapter.setData(
+                    it.userMap,
+                    it.eachPersonAmount
+                )
+//                binding.totalSpends.text = "${binding.totalSpends.text}/"
+//                binding.eachAmt.text = it.eachPersonAmount.toString()
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -157,30 +171,30 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
                         is FirebaseState.Loading -> {
 
                         }
+
                         is FirebaseState.Empty -> {
                             loadingDialog.dismiss()
                             visible()
                         }
+
                         is FirebaseState.Failed -> {
                             loadingDialog.dismiss()
                             visible()
                         }
+
                         is FirebaseState.Success -> {
                             loadingDialog.dismiss()
                             val res = it.data
-                            if (res.isEmpty)
-                                visible()
+                            if (res.isEmpty) visible()
                             else gone()
 
                             try {
 
                                 binding.spark.visibility = View.VISIBLE
-//
                                 binding.swipe.isRefreshing = false
-//
-
                                 "₹${res.todayTotal}".also { binding.todayAmount.text = it }
                                 "₹${res.allTotal}".also { binding.totalSpends.text = it }
+                                "₹${res.eachPersonAmount}".also { binding.eachAmt.text = it }
                                 "Updated ${viewModel.getTimeAgo(res.updatedOn!!)}".also {
                                     binding.updatedOn.text = it
                                 }
@@ -218,6 +232,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.line1.visibility = View.GONE
         binding.k.visibility = View.GONE
         binding.kt.visibility = View.GONE
+        binding.mm.visibility = View.GONE
         lifecycleScope.launchWhenStarted {
             val roomKey = viewModel.getDataStore().getRoomKey()
             try {
@@ -237,6 +252,7 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         binding.line1.visibility = View.VISIBLE
         binding.k.visibility = View.VISIBLE
         binding.kt.visibility = View.VISIBLE
+        binding.mm.visibility = View.VISIBLE
     }
 
     private fun showSnackBar(msg: String) {
@@ -247,10 +263,8 @@ class HomeFragment(private val homeToMainLink: HomeToMainLink? = null) : Fragmen
         view.layoutParams = params
         snackBarView.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
         snackBarView.setBackgroundTint(resources.getColor(R.color.colorSecondary))
-            .setTextColor(resources.getColor(R.color.colorOnSecondary))
-            .show()
+            .setTextColor(resources.getColor(R.color.colorOnSecondary)).show()
     }
-
 
 
     override fun goToHome(position: Int, uuid: String) {

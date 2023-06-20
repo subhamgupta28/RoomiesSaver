@@ -4,24 +4,13 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.provider.Settings
 import android.util.Log
-import android.widget.NumberPicker
-import android.widget.NumberPicker.OnValueChangeListener
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.*
+import androidx.work.Configuration
 import com.google.android.material.color.DynamicColors
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.google.firebase.ktx.Firebase
-import com.subhamgupta.roomiesapp.domain.use_case.GetUserUseCase
 import com.subhamgupta.roomiesapp.utils.Constant
-import com.subhamgupta.roomiesapp.utils.SettingDataStore
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.*
 import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 
 @HiltAndroidApp
 class MyApp : Application(), Configuration.Provider {
